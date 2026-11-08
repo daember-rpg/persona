@@ -1,4 +1,5 @@
-<div class="persona-row {{#if isOpen}}is-open{{/if}}" data-id="{{id}}">
+<div class="persona-row {{#if isOpen}}is-open{{/if}} {{#if canArrange}}is-draggable{{/if}}" data-id="{{id}}" {{#if canArrange}}draggable="true" data-drag-entry="{{id}}" data-folder="{{folder}}"{{/if}}>
+    {{#if canArrange}}<span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>{{/if}}
     <button type="button" class="persona-row__img" data-action="openCard" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Card.Open"}}"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></button>
     <div class="persona-row__main">
         <div class="persona-row__name"><span>{{name}}</span>{{#if status}} <em class="persona-status-tag is-{{status}}">{{statusLabel}}</em>{{/if}}{{#if title}} <small>{{title}}</small>{{/if}}</div>

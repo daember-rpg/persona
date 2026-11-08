@@ -236,6 +236,10 @@
         "betrayed": "Betrayed"
       },
       "GMEditing": "Editing {name}'s wheel — the player sees your changes"
+    },
+    "Arrange": {
+      "Moved": "{name} moved to {group}",
+      "Hint": "Drag to reorder or move to another folder"
     }
   }
 }

@@ -124,14 +124,23 @@ export function normalizeEntry(raw = {}) {
         focusY: Number.isFinite(Number(raw.focusY)) ? Math.min(100, Math.max(0, Number(raw.focusY))) : 20,
         zoom: Number.isFinite(Number(raw.zoom)) ? Math.min(3, Math.max(1, Number(raw.zoom))) : 1,
         reveal: Object.fromEntries(LAYERS.map(layer => [layer, Array.isArray(raw.reveal?.[layer]) ? [...raw.reveal[layer]] : []])),
-        sort: Number.isFinite(raw.sort) ? raw.sort : Date.now()
+        sort: Number.isFinite(raw.sort) ? raw.sort : Date.now(),
+        // Manual position set by the GM's drag and drop; null = not arranged yet (alphabetical, after arranged ones).
+        order: Number.isFinite(raw.order) ? raw.order : null
     };
+}
+
+/** GM's manual order first, then by name. Players see the same order. */
+export function compareEntries(a, b) {
+    const ao = a.order ?? Infinity, bo = b.order ?? Infinity;
+    if (ao !== bo) return ao - bo;
+    return a.name.localeCompare(b.name);
 }
 
 export function getEntries() {
     return Object.values(getSetting("entries") ?? {})
         .map(normalizeEntry)
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort(compareEntries);
 }
 
 export function getEntry(id) {
@@ -201,6 +210,54 @@ export async function createGroup(label, icon = "fa-solid fa-bookmark") {
         return groups;
     });
     return id;
+}
+
+/**
+ * GM drag and drop: moves an entry just before `beforeId` (or to the end of `toGroup`'s entries),
+ * and from folder `fromGroup` into folder `toGroup` when they differ.
+ * Folder ids: a group id, "_none" (No group), or null to leave the groups as they are.
+ * Every entry gets a fresh `order`, so the arrangement is stable from then on.
+ */
+export function moveEntry(id, { fromGroup = null, toGroup = null, beforeId = null } = {}) {
+    return updateSetting("entries", all => {
+        if (!all[id]) return all;
+        const list = Object.values(all).map(normalizeEntry).sort(compareEntries);
+        const entry = list.find(e => e.id === id);
+        const rest = list.filter(e => e.id !== id);
+
+        if (toGroup !== null && toGroup !== fromGroup) {
+            const groups = new Set(entry.groups);
+            if (fromGroup && fromGroup !== "_none") groups.delete(fromGroup);
+            if (toGroup === "_none") groups.clear();
+            else groups.add(toGroup);
+            entry.groups = [...groups];
+        }
+
+        let at = beforeId ? rest.findIndex(e => e.id === beforeId) : -1;
+        if (at < 0) {
+            // End of the target folder: right after its last entry, else the very end.
+            const inFolder = e => toGroup === "_none" ? !e.groups.length : toGroup ? e.groups.includes(toGroup) : true;
+            const last = rest.map(inFolder).lastIndexOf(true);
+            at = last >= 0 ? last + 1 : rest.length;
+        }
+        rest.splice(at, 0, entry);
+        rest.forEach((e, i) => { all[e.id] = normalizeEntry({ ...all[e.id], groups: e.id === id ? entry.groups : all[e.id].groups, order: i }); });
+        return all;
+    });
+}
+
+/** GM drag and drop: moves a folder just before another (or to the end). */
+export function moveGroup(id, beforeId = null) {
+    return updateSetting("groups", groups => {
+        const list = Object.values(groups).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.label.localeCompare(b.label));
+        const moving = list.find(g => g.id === id);
+        if (!moving || id === beforeId) return groups;
+        const rest = list.filter(g => g.id !== id);
+        const at = beforeId ? rest.findIndex(g => g.id === beforeId) : -1;
+        rest.splice(at < 0 ? rest.length : at, 0, moving);
+        rest.forEach((g, i) => { groups[g.id] = { ...groups[g.id], order: i }; });
+        return groups;
+    });
 }
 
 export async function deleteGroup(id) {

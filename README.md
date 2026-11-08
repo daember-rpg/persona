@@ -17,6 +17,7 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 ## GM: the Director
 - **Add** people and places by dragging an **Actor** (name + portrait), a **Journal entry or page** (name + text + first image page) or a **Scene** (place) onto the panel, or with **+**.
 - **Reveal in layers**: Face → Name → Story → Secret. Each row shows the state of every layer (green = everyone, gold with a count = some players, crossed eye = hidden). Click it to open the **reveal grid**: one eye per layer and player, plus an *Everyone* column, and *Show everything to everyone* / *Hide from everyone*. Showing a layer also shows the ones above it; hiding one hides the ones below.
+- **Arrange by drag and drop**: drag a row to reorder it, onto another row in a different folder to move it there, or onto a folder header to drop it in that folder (*No group* takes it out of the folder it came from). Drag folder headers to reorder folders. Players see the same order. (Off while searching.)
 - Everything starts **hidden**. Once revealed, it stays in that player's gallery.
 - **Folders**: groups (Khaledyn's elves, the champions of Kurdrax, a city, a chapter…) with an icon, created in the editor. With no filter, the panel shows one collapsible folder per group, then *No group*. Players see the same folders with what they know.
 - **People and places**: link a person to the places where they live or appear (or, from a place, pick its people). The place's card shows *People here*; a person's card lists their places. Players only see the links to what they know.

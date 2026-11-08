@@ -7,7 +7,7 @@
         {{#if section.flat}}
             <div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Panel.Cast"}}</span><span>{{section.items.length}}</span></div>
         {{else}}
-            <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}}" data-action="toggleFolder" data-folder="{{section.id}}" aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
+            <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}}" data-action="toggleFolder" data-folder="{{section.id}}" data-drop-folder="{{section.id}}" {{#if ../canArrange}}{{#unless section.isLoose}}draggable="true" data-drag-group="{{section.id}}"{{/unless}}{{/if}} aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
                 <i class="{{section.icon}}" inert></i>
                 <span class="persona-folder__label">{{section.label}}</span>
@@ -15,8 +15,8 @@
             </button>
         {{/if}}
         {{#unless section.collapsed}}
-            <div class="persona-rows">
-                {{#each section.items as |row|}}{{> persona-row row}}{{else}}<p class="persona-empty-line">{{localize "PERSONA.Panel.NothingFilter"}}</p>{{/each}}
+            <div class="persona-rows" data-drop-rows="{{section.id}}">
+                {{#each section.items as |row|}}{{> persona-row row folder=section.id canArrange=../../canArrange}}{{else}}<p class="persona-empty-line">{{localize "PERSONA.Panel.NothingFilter"}}</p>{{/each}}
             </div>
         {{/unless}}
     </section>

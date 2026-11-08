@@ -2550,3 +2550,64 @@
     .bonds-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 150px; }
     .bonds-drawer { border-left: 0; border-top: 1px solid var(--dp-line); }
 }
+
+/* ==========================================================================
+   Director: arrange by drag and drop (GM)
+   ========================================================================== */
+
+.persona-row.is-draggable { position: relative; cursor: grab; }
+.persona-row.is-draggable:active { cursor: grabbing; }
+
+.persona-row__grip {
+    position: absolute;
+    top: 24px;
+    left: -15px;
+    width: 12px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.persona-row.is-draggable:hover .persona-row__grip { opacity: 1; }
+
+.persona-row.is-dragging,
+.persona-section.is-dragging { opacity: 0.35; }
+
+.persona-row.is-drop-before,
+.persona-row.is-drop-after,
+.persona .persona-folder.is-drop-before,
+.persona .persona-folder.is-drop-after { position: relative; }
+
+.persona-row.is-drop-before::before,
+.persona-row.is-drop-after::after,
+.persona .persona-folder.is-drop-before::before,
+.persona .persona-folder.is-drop-after::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--dp-clay-light);
+    box-shadow: 0 0 8px var(--dp-clay);
+    pointer-events: none;
+}
+
+.persona-row.is-drop-before::before { top: -9px; }
+.persona-row.is-drop-after::after { bottom: 7px; }
+.persona .persona-folder.is-drop-before::before { top: -4px; }
+.persona .persona-folder.is-drop-after::after { bottom: -4px; }
+
+.persona .persona-folder.is-drop-into {
+    background: var(--dp-clay-soft);
+    border-bottom-color: var(--dp-clay-light);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-folder[draggable="true"] { cursor: grab; }
+
+/* The button reset above (all: unset) also clears the browser's drag behaviour. */
+.persona [draggable="true"] { -webkit-user-drag: element; }

@@ -18,6 +18,8 @@ export class PanelView {
     /** Rows showing the "show to" buttons (GM). */
     sharing = new Set();
     #hosts = new Set();
+    /** The row or folder being dragged to rearrange the Director (GM). */
+    #arranging = null;
     #pending = null;
     #searchTimer = null;
 
@@ -35,6 +37,8 @@ export class PanelView {
         host.classList.add("persona");
         host.addEventListener("click", this.#onClick);
         host.addEventListener("input", this.#onInput);
+        host.addEventListener("dragstart", this.#onDragStart);
+        host.addEventListener("dragend", this.#onDragEnd);
         host.addEventListener("dragover", this.#onDragOver);
         host.addEventListener("dragleave", this.#onDragLeave);
         host.addEventListener("drop", this.#onDrop);
@@ -45,6 +49,8 @@ export class PanelView {
         if (!this.#hosts.delete(host)) return;
         host.removeEventListener("click", this.#onClick);
         host.removeEventListener("input", this.#onInput);
+        host.removeEventListener("dragstart", this.#onDragStart);
+        host.removeEventListener("dragend", this.#onDragEnd);
         host.removeEventListener("dragover", this.#onDragOver);
         host.removeEventListener("dragleave", this.#onDragLeave);
         host.removeEventListener("drop", this.#onDrop);
@@ -63,6 +69,8 @@ export class PanelView {
 
     async render() {
         if (!this.#hosts.size) return;
+        // Don't pull the rows out from under a drag; render once it ends.
+        if (this.#arranging) { this.#arranging.stale = true; return; }
         const context = buildPanelContext({
             filter: this.filter,
             search: this.search,
@@ -152,21 +160,124 @@ export class PanelView {
         this.#searchTimer = setTimeout(() => this.requestRender(), 120);
     };
 
+    /* -------------------------------------------- */
+    /*  Arranging the Director (GM drag and drop)   */
+    /* -------------------------------------------- */
+
+    /** A folder id from the panel ("flat" = the filtered list: the filter's group, if it is one). */
+    #folderOf(id) {
+        if (id !== "flat") return id;
+        const groupFilter = this.filter && !["all", "places"].includes(this.filter);
+        return groupFilter ? this.filter : null;
+    }
+
+    #onDragStart = event => {
+        if (!game.user.isGM) return;
+        const row = event.target.closest?.("[data-drag-entry]");
+        const folder = event.target.closest?.("[data-drag-group]");
+        if (!row && !folder) return;
+        this.#arranging = row
+            ? { kind: "entry", id: row.dataset.dragEntry, from: this.#folderOf(row.dataset.folder), el: row }
+            : { kind: "group", id: folder.dataset.dragGroup, el: folder.closest(".persona-section") };
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", `persona:${this.#arranging.kind}:${this.#arranging.id}`);
+        requestAnimationFrame(() => this.#arranging?.el.classList.add("is-dragging"));
+    };
+
+    #onDragEnd = () => {
+        const drag = this.#arranging;
+        this.#arranging = null;
+        drag?.el.classList.remove("is-dragging");
+        this.#clearMarks();
+        if (drag?.stale) this.requestRender();
+    };
+
+    #clearMarks() {
+        for (const host of this.#hosts) {
+            host.querySelectorAll(".is-drop-before, .is-drop-after, .is-drop-into").forEach(el => el.classList.remove("is-drop-before", "is-drop-after", "is-drop-into"));
+        }
+    }
+
+    /** Where the dragged row or folder would land under the pointer. */
+    #arrangeTarget(event) {
+        const drag = this.#arranging;
+        if (drag.kind === "group") {
+            const header = event.target.closest("[data-drag-group]");
+            if (!header || header.dataset.dragGroup === drag.id) return null;
+            const rect = header.getBoundingClientRect();
+            const after = event.clientY > rect.top + rect.height / 2;
+            return { el: header, mark: after ? "is-drop-after" : "is-drop-before", groupId: header.dataset.dragGroup, after };
+        }
+        const row = event.target.closest("[data-drag-entry]");
+        if (row) {
+            if (row.dataset.dragEntry === drag.id) return null;
+            const rect = row.getBoundingClientRect();
+            const after = event.clientY > rect.top + rect.height / 2;
+            return { el: row, mark: after ? "is-drop-after" : "is-drop-before", folder: this.#folderOf(row.dataset.folder), rowId: row.dataset.dragEntry, after };
+        }
+        const folder = event.target.closest("[data-drop-folder]");
+        if (folder) return { el: folder, mark: "is-drop-into", folder: this.#folderOf(folder.dataset.dropFolder), rowId: null };
+        return null;
+    }
+
+    async #arrangeDrop(event) {
+        const drag = this.#arranging;
+        const target = this.#arrangeTarget(event);
+        this.#clearMarks();
+        if (!target) return;
+        if (drag.kind === "group") {
+            const groups = Store.getGroups().map(g => g.id);
+            const next = target.after ? groups[groups.indexOf(target.groupId) + 1] ?? null : target.groupId;
+            return Store.moveGroup(drag.id, next === drag.id ? groups[groups.indexOf(drag.id) + 1] ?? null : next);
+        }
+        let beforeId = target.rowId;
+        if (target.rowId && target.after) {
+            // "After this row" = before the next row in the same list.
+            const rows = [...target.el.parentElement.querySelectorAll("[data-drag-entry]")].map(r => r.dataset.dragEntry).filter(id => id !== drag.id);
+            beforeId = rows[rows.indexOf(target.rowId) + 1] ?? null;
+        }
+        const toGroup = target.folder;
+        await Store.moveEntry(drag.id, { fromGroup: drag.from, toGroup, beforeId });
+        const group = Store.getGroups().find(g => g.id === toGroup);
+        if (toGroup && toGroup !== drag.from) {
+            const label = toGroup === "_none" ? game.i18n.localize("PERSONA.Group.Ungrouped") : group?.label;
+            if (label) ui.notifications.info(game.i18n.format("PERSONA.Arrange.Moved", { name: Store.getEntry(drag.id)?.name ?? "", group: label }));
+        }
+    }
+
     /* Drop an Actor, Journal entry or Journal page on the panel to add it (GM). */
     #onDragOver = event => {
         if (!game.user.isGM) return;
         event.preventDefault();
+        if (this.#arranging) {
+            event.dataTransfer.dropEffect = "move";
+            const target = this.#arrangeTarget(event);
+            this.#clearMarks();
+            target?.el.classList.add(target.mark);
+            return;
+        }
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.add("is-over");
     };
 
     #onDragLeave = event => {
         if (event.currentTarget.contains(event.relatedTarget)) return;
+        this.#clearMarks();
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.remove("is-over");
     };
 
     #onDrop = async event => {
         if (!game.user.isGM) return;
         event.preventDefault();
+        if (this.#arranging) {
+            const drag = this.#arranging;
+            try { await this.#arrangeDrop(event); }
+            finally {
+                drag.el.classList.remove("is-dragging");
+                this.#arranging = null;
+                this.requestRender();
+            }
+            return;
+        }
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.remove("is-over");
         const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
         const entry = await createFromDrop(data);

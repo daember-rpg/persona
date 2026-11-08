@@ -236,6 +236,10 @@
         "betrayed": "Traiu"
       },
       "GMEditing": "Editando a roda de {name} — o jogador vê suas mudanças"
+    },
+    "Arrange": {
+      "Moved": "{name} foi para {group}",
+      "Hint": "Arraste para reordenar ou mover para outra pasta"
     }
   }
 }

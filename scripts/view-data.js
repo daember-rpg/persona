@@ -203,8 +203,10 @@ function buildDirector(list, { filter, search, expanded, collapsed, sharing }) {
     };
 
     return {
-        sections: buildSections(list, { filter, search, collapsed, item: row }),
-        hasPlayers: roster.length > 0
+        sections: buildSections(list, { filter, search, collapsed, item: row }).map(s => ({ ...s, isLoose: s.id === UNGROUPED })),
+        hasPlayers: roster.length > 0,
+        // Drag and drop to arrange: not while searching (the list is partial).
+        canArrange: !search
     };
 }
 
