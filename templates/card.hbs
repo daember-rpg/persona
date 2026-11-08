@@ -1,0 +1,111 @@
+<article class="persona-card persona-card--{{kind}}" role="dialog" aria-label="{{#if name}}{{name}}{{else}}???{{/if}}">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="{{localize "PERSONA.Close"}}"><i class="fa-solid fa-xmark" inert></i></button>
+    <div class="persona-card__art" style="--art: url('{{img}}')">
+        <div class="persona-card__frame"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false"></div>
+        {{#if hasVideo}}
+            <button type="button" class="persona-button persona-card__play" data-action="replayVideo"><i class="fa-solid fa-play" inert></i> {{#if isGM}}{{localize "PERSONA.Video.Preview"}}{{else}}{{localize "PERSONA.Video.Replay"}}{{/if}}</button>
+        {{/if}}
+    </div>
+    <div class="persona-card__body">
+        <span class="persona-eyebrow">{{kindLabel}}</span>
+        {{#if named}}
+            <h3>{{name}}</h3>
+            {{#if title}}<p class="persona-card__title">{{title}}</p>{{/if}}
+        {{else}}
+            <h3 class="is-unknown">???</h3>
+        {{/if}}
+        {{#if groups.length}}
+            <div class="persona-chips">
+                {{#each groups as |group|}}<span class="persona-chip is-static"><i class="{{group.icon}}" inert></i><span>{{group.label}}</span></span>{{/each}}
+            </div>
+        {{/if}}
+
+        {{#if summary}}
+            <div class="persona-card__summary">{{{summary}}}</div>
+        {{else}}
+            <p class="persona-locked"><i class="fa-solid fa-lock" inert></i> {{#if named}}{{localize "PERSONA.Card.LittleKnown"}}{{else}}{{localize "PERSONA.Card.Unknown"}}{{/if}}</p>
+        {{/if}}
+
+        {{#if secret}}
+            <div class="persona-secret">
+                <span class="persona-eyebrow">{{localize "PERSONA.Card.Secret"}}</span>
+                <div>{{{secret}}}</div>
+            </div>
+        {{/if}}
+
+        {{#if people.length}}
+            <section class="persona-links">
+                <span class="persona-eyebrow">{{localize "PERSONA.Card.PeopleHere"}}</span>
+                <div class="persona-links__grid">
+                    {{#each people as |p|}}
+                        <button type="button" class="persona-link {{#if p.hidden}}is-hidden{{/if}}" data-action="openLinked" data-id="{{p.id}}">
+                            <img class="persona-fit" src="{{p.img}}" style="{{p.frame}}" alt="" draggable="false"><span>{{p.name}}</span>{{#if p.isNew}}<b>{{localize "PERSONA.New"}}</b>{{/if}}
+                        </button>
+                    {{/each}}
+                </div>
+            </section>
+        {{/if}}
+        {{#if places.length}}
+            <section class="persona-links">
+                <span class="persona-eyebrow">{{localize "PERSONA.Card.SeenAt"}}</span>
+                <div class="persona-chips">
+                    {{#each places as |p|}}
+                        <button type="button" class="persona-chip" data-action="openLinked" data-id="{{p.id}}"><i class="fa-solid fa-location-dot" inert></i><span>{{p.name}}</span></button>
+                    {{/each}}
+                </div>
+            </section>
+        {{/if}}
+
+        {{#if shareTargets}}
+            <div class="persona-share persona-share--card">
+                <span class="persona-eyebrow">{{localize "PERSONA.Handout.ShowTo"}}</span>
+                <div class="persona-chips">
+                    {{#each shareTargets as |target|}}
+                        <button type="button" class="persona-chip" data-action="showHandout" data-who="{{target.id}}"><i class="{{target.icon}}" inert></i><span>{{target.label}}</span></button>
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+        {{#if isGM}}
+            <div class="persona-audit">
+                <span class="persona-eyebrow">{{localize "PERSONA.Card.WhoKnows"}}</span>
+                <div class="persona-status persona-status--static">
+                    {{#each audit as |layer|}}
+                        <span class="persona-status__layer is-{{layer.state}} {{#if layer.disabled}}is-disabled{{/if}}" data-tooltip="{{layer.tooltip}}"><i class="{{layer.icon}}" inert></i><span>{{layer.label}}</span>{{#if layer.count}}<b>{{layer.count}}</b>{{/if}}</span>
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+
+        <section class="persona-notes">
+            <div class="persona-tabs" role="tablist">
+                {{#unless isGM}}
+                    <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="{{#if showPrivate}}true{{else}}false{{/if}}">{{localize "PERSONA.Notes.Mine"}}</button>
+                {{/unless}}
+                <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="{{#if showPrivate}}false{{else}}true{{/if}}">{{localize "PERSONA.Notes.Party"}} · {{notes.length}}</button>
+            </div>
+            {{#if showPrivate}}
+                <textarea name="privateNote" rows="4" placeholder="{{localize "PERSONA.Notes.MinePlaceholder"}}">{{privateNote}}</textarea>
+                <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> {{localize "PERSONA.Notes.MineHint"}}</p>
+            {{else}}
+                {{#each notes as |note|}}
+                    <div class="persona-note">
+                        <span class="persona-note__who" style="--who: {{note.color}}">{{note.initial}}</span>
+                        <div class="persona-note__text"><p>{{note.text}}</p><span>{{note.author}}</span></div>
+                        {{#if note.canDelete}}<button type="button" class="persona-note__delete" data-action="deleteNote" data-note="{{note.id}}" aria-label="{{localize "PERSONA.Notes.Delete"}}" data-tooltip="{{localize "PERSONA.Notes.Delete"}}"><i class="fa-solid fa-trash" inert></i></button>{{/if}}
+                    </div>
+                {{else}}
+                    <p class="persona-empty-line">{{localize "PERSONA.Notes.None"}}</p>
+                {{/each}}
+                {{#if canWriteShared}}
+                    <form class="persona-note-form" data-note-form>
+                        <input type="text" name="sharedNote" maxlength="2000" placeholder="{{localize "PERSONA.Notes.PartyPlaceholder"}}" autocomplete="off">
+                        <button type="submit" class="persona-button">{{localize "PERSONA.Notes.Send"}}</button>
+                    </form>
+                {{else}}
+                    <p class="persona-hint"><i class="fa-solid fa-plug-circle-xmark" inert></i> {{localize "PERSONA.Warn.NoRelay"}}</p>
+                {{/if}}
+            {{/if}}
+        </section>
+    </div>
+</article>

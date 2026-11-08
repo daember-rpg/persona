@@ -1,0 +1,29 @@
+{{#if isEmpty}}
+    <div class="persona-empty">
+        <i class="fa-solid fa-masks-theater" inert></i>
+        <p>{{#if total}}{{localize "PERSONA.Panel.NothingHere"}}{{else}}{{localize "PERSONA.Panel.NobodyYet"}}{{/if}}</p>
+    </div>
+{{else}}
+    {{#each sections as |section|}}
+        <section class="persona-section">
+            {{#unless section.flat}}
+                <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}}" data-action="toggleFolder" data-folder="{{section.id}}" aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
+                    <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
+                    <i class="{{section.icon}}" inert></i>
+                    <span class="persona-folder__label">{{section.label}}</span>
+                    <span class="persona-folder__count">{{section.count}}</span>
+                </button>
+            {{/unless}}
+            {{#unless section.collapsed}}
+                {{#if section.people.length}}
+                    {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.people"}}</span><span>{{section.people.length}}</span></div>{{/if}}
+                    <div class="persona-gallery">{{#each section.people as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                {{/if}}
+                {{#if section.places.length}}
+                    {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.places"}}</span><span>{{section.places.length}}</span></div>{{/if}}
+                    <div class="persona-gallery persona-gallery--places">{{#each section.places as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                {{/if}}
+            {{/unless}}
+        </section>
+    {{/each}}
+{{/if}}

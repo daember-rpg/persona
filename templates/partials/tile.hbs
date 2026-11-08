@@ -1,0 +1,10 @@
+<button type="button" class="persona-tile persona-tile--{{kind}}" data-action="openCard" data-id="{{id}}">
+    <span class="persona-tile__img"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></span>
+    {{#if isNew}}<span class="persona-tile__new">{{localize "PERSONA.New"}}</span>{{/if}}
+    {{#if isPrivate}}<span class="persona-tile__private" data-tooltip="{{localize "PERSONA.OnlyYou"}}"><i class="fa-solid fa-eye" inert></i></span>{{/if}}
+    {{#if name}}
+        <span class="persona-tile__name" data-tooltip="{{name}}{{#if title}} — {{title}}{{/if}}">{{name}}</span>
+    {{else}}
+        <span class="persona-tile__name is-unknown">???</span>
+    {{/if}}
+</button>

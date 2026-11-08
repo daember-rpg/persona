@@ -1,0 +1,173 @@
+{
+  "PERSONA": {
+    "Title": "Persona",
+    "Close": "Close",
+    "GM": "GM",
+    "New": "New",
+    "OnlyYou": "Only you know this one",
+    "Unnamed": "Unnamed",
+    "Controls": {
+      "Toggle": "Persona"
+    },
+    "Keybindings": {
+      "Toggle": "Open or close Persona"
+    },
+    "Panel": {
+      "Director": "Director",
+      "Known": "People and places",
+      "Search": "Search by name",
+      "Cast": "Cast",
+      "DropHint": "Drag Actors, Journal entries, Journal pages or Scenes here to add them",
+      "NobodyYet": "Nobody yet. The GM reveals people and places as the story unfolds.",
+      "NothingHere": "Nothing in this group yet.",
+      "NothingFilter": "Nothing matches this filter."
+    },
+    "Filter": {
+      "All": "Everyone",
+      "Places": "Places"
+    },
+    "Kind": {
+      "npc": "Person",
+      "place": "Place",
+      "people": "People",
+      "places": "Places"
+    },
+    "Layer": {
+      "face": "Face",
+      "name": "Name",
+      "summary": "Story",
+      "secret": "Secret"
+    },
+    "Reveal": {
+      "All": "Everyone",
+      "Everyone": "Every player",
+      "Nobody": "Hidden from everyone",
+      "NoPlayers": "There are no player accounts in this world yet, so there is nobody to reveal to.",
+      "Edit": "Choose who sees what",
+      "Layer": "Layer",
+      "GridHint": "Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.",
+      "ShowAll": "Show everything to everyone",
+      "HideAll": "Hide from everyone"
+    },
+    "Card": {
+      "Open": "Open card",
+      "Secret": "Secret uncovered",
+      "LittleKnown": "You don't know much about them yet.",
+      "Unknown": "You don't know who this is yet.",
+      "PeopleHere": "People here",
+      "SeenAt": "Places",
+      "WhoKnows": "What players know"
+    },
+    "Notes": {
+      "Mine": "My notes",
+      "Party": "Party notes",
+      "MinePlaceholder": "Only you can see this.",
+      "MineHint": "Private to you. Saved as you type.",
+      "PartyPlaceholder": "Write to the party",
+      "Send": "Send",
+      "None": "No party notes yet.",
+      "Delete": "Delete note"
+    },
+    "Video": {
+      "PlayAll": "Play for everyone",
+      "Short": "Video",
+      "PlayFile": "Play a video file for everyone",
+      "Preview": "Watch video",
+      "Replay": "Watch again",
+      "Pause": "Pause",
+      "Resume": "Resume",
+      "Restart": "From the start",
+      "Stop": "Stop for everyone",
+      "Mute": "Mute",
+      "Unmute": "Unmute",
+      "ForEveryone": "Playing for everyone",
+      "JustYou": "Just for you",
+      "ClickToPlay": "Click to play with sound"
+    },
+    "Toast": {
+      "Face": "Someone new",
+      "Name": "Name revealed",
+      "Summary": "You learned more",
+      "Secret": "Secret uncovered"
+    },
+    "Entry": {
+      "New": "New person or place",
+      "Edit": "Edit",
+      "EditTitle": "Edit: {name}",
+      "Added": "{name} added to Persona.",
+      "Kind": "Type",
+      "Name": "Name",
+      "TitleField": "Title",
+      "TitlePlaceholder": "Blacksmith, Lord of Ashford…",
+      "PickImage": "Choose image",
+      "Journal": "Journal page",
+      "JournalDrop": "Drag a Journal entry or page here to link it",
+      "PullJournal": "Copy text again",
+      "Unlink": "Unlink",
+      "SyncJournal": "Update the story when the Journal page changes",
+      "OpenJournal": "Open in Journal",
+      "Summary": "Story",
+      "SummaryHint": "what players read once revealed (HTML allowed)",
+      "SecretHint": "revealed separately",
+      "Groups": "Groups",
+      "Video": "Video",
+      "VideoHint": "mp4 or webm, played in full screen",
+      "Browse": "Browse",
+      "ClearVideo": "Remove video",
+      "Save": "Save",
+      "Delete": "Delete",
+      "DeleteConfirm": "Delete {name}? Notes about them are deleted too.",
+      "SummaryFromJournal": "from the Journal page; turn off updating above to edit it here",
+      "Places": "Places",
+      "PlacesHint": "where this person lives or appears",
+      "NoPlaces": "No places yet. Create one with the Place type.",
+      "People": "People here",
+      "PeopleHint": "shown on this place's card",
+      "NoPeople": "No people yet.",
+      "FrameHint": "Drag the picture to choose what players see; zoom with the slider",
+      "Drag": "Drag to frame",
+      "Zoom": "Zoom",
+      "ResetFrame": "Reset framing"
+    },
+    "Group": {
+      "Add": "Add",
+      "Delete": "Delete group",
+      "DeleteConfirm": "Delete the group \"{name}\"? People and places stay; they just leave this group.",
+      "NewPlaceholder": "New group: Ashford, Smiths' Guild, Chapter 2…",
+      "Icon": "Group icon",
+      "None": "No groups yet.",
+      "Ungrouped": "No group",
+      "AddedTo": "{name} added to {group}."
+    },
+    "Settings": {
+      "dockInTriad": {
+        "Name": "Show as a Triad tab",
+        "Hint": "With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."
+      },
+      "videoVolume": {
+        "Name": "Video volume",
+        "Hint": "Volume of videos played by the GM, on this computer."
+      },
+      "revealToasts": {
+        "Name": "Reveal notices",
+        "Hint": "Show a notice when the GM reveals someone or something new to you."
+      }
+    },
+    "Warn": {
+      "NoRelay": "Party notes need the socketlib module and a GM online.",
+      "NoSocketlib": "Persona: install socketlib so players can write party notes.",
+      "ActionFailed": "That didn't work. The console (F12) has the details.",
+      "JournalMissing": "The linked Journal page no longer exists.",
+      "DropType": "Drop an Actor, Journal entry, Journal page or Scene.",
+      "DropJournal": "Drop a Journal entry or Journal page.",
+      "NameRequired": "Give it a name first."
+    },
+    "Handout": {
+      "Show": "Show",
+      "Hint": "Open this card on players' screens, like a handout",
+      "ShowTo": "Show to",
+      "RevealNote": "Their face and name are revealed to them, so the card stays in their gallery.",
+      "Shown": "{name} shown to {who}."
+    }
+  }
+}

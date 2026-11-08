@@ -1,0 +1,35 @@
+<div class="persona-panel {{#if isGM}}is-gm{{/if}}">
+    <header class="persona-head">
+        <div class="persona-head__title">
+            <div>
+                <span class="persona-eyebrow">{{#if isGM}}{{localize "PERSONA.Panel.Director"}}{{else}}{{localize "PERSONA.Panel.Known"}}{{/if}}</span>
+                <h2>{{localize "PERSONA.Title"}}</h2>
+            </div>
+            {{#if isGM}}
+                <div class="persona-head__tools">
+                    <button type="button" class="persona-icon-btn" data-action="playFile" data-tooltip="{{localize "PERSONA.Video.PlayFile"}}" aria-label="{{localize "PERSONA.Video.PlayFile"}}"><i class="fa-solid fa-film" inert></i></button>
+                    <button type="button" class="persona-icon-btn persona-icon-btn--accent" data-action="newEntry" data-tooltip="{{localize "PERSONA.Entry.New"}}" aria-label="{{localize "PERSONA.Entry.New"}}"><i class="fa-solid fa-plus" inert></i></button>
+                </div>
+            {{/if}}
+        </div>
+        <label class="persona-search">
+            <i class="fa-solid fa-magnifying-glass" inert></i>
+            <input type="search" name="search" value="{{search}}" placeholder="{{localize "PERSONA.Panel.Search"}}" autocomplete="off">
+        </label>
+        <div class="persona-chips">
+            {{#each chips as |chip|}}
+                <button type="button" class="persona-chip {{#if chip.active}}is-active{{/if}}" data-action="filter" data-filter="{{chip.id}}" aria-pressed="{{#if chip.active}}true{{else}}false{{/if}}">
+                    <i class="{{chip.icon}}" inert></i><span>{{chip.label}}</span><span class="persona-chip__count">{{chip.count}}</span>
+                </button>
+            {{/each}}
+        </div>
+    </header>
+
+    <div class="persona-body">
+        {{#if isGM}}
+            {{> persona-director this}}
+        {{else}}
+            {{> persona-gallery this}}
+        {{/if}}
+    </div>
+</div>

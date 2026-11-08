@@ -1,0 +1,49 @@
+{
+  "id": "persona",
+  "title": "Persona",
+  "description": "The people and places of your story, revealed when you choose: a player gallery with cards and notes, cards shown to players like handouts, and full-screen videos for everyone.",
+  "version": "0.4.0-alpha",
+  "authors": [
+    {
+      "name": "Hello Melo Design"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "relationships": {
+    "recommends": [
+      {
+        "id": "socketlib",
+        "type": "module",
+        "reason": "Lets players write party notes through the GM."
+      },
+      {
+        "id": "triad",
+        "type": "module",
+        "reason": "Persona opens as a tab in Triad's tray."
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/persona.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    }
+  ],
+  "socket": true,
+  "flags": {}
+}

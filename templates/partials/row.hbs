@@ -1,0 +1,78 @@
+<div class="persona-row {{#if isOpen}}is-open{{/if}}" data-id="{{id}}">
+    <button type="button" class="persona-row__img" data-action="openCard" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Card.Open"}}"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></button>
+    <div class="persona-row__main">
+        <div class="persona-row__name"><span>{{name}}</span>{{#if title}} <small>{{title}}</small>{{/if}}</div>
+        <div class="persona-row__actions">
+            <button type="button" class="persona-mini {{#if isSharing}}is-on{{/if}}" data-action="toggleShare" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Handout.Hint"}}"><i class="fa-solid fa-share-from-square" inert></i><span>{{localize "PERSONA.Handout.Show"}}</span></button>
+            {{#if hasVideo}}<button type="button" class="persona-mini persona-mini--icon" data-action="playVideo" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Video.PlayAll"}}" aria-label="{{localize "PERSONA.Video.PlayAll"}}"><i class="fa-solid fa-film" inert></i></button>{{/if}}
+            <span class="persona-row__spacer"></span>
+            {{#if hasJournal}}<button type="button" class="persona-mini persona-mini--icon" data-action="openJournal" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Entry.OpenJournal"}}" aria-label="{{localize "PERSONA.Entry.OpenJournal"}}"><i class="fa-solid fa-book" inert></i></button>{{/if}}
+            <button type="button" class="persona-mini persona-mini--icon" data-action="edit" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Entry.Edit"}}" aria-label="{{localize "PERSONA.Entry.Edit"}}"><i class="fa-solid fa-pen" inert></i></button>
+        </div>
+    </div>
+
+    <button type="button" class="persona-status" data-action="toggleReveal" data-id="{{id}}" aria-expanded="{{#if isOpen}}true{{else}}false{{/if}}" data-tooltip="{{localize "PERSONA.Reveal.Edit"}}">
+        {{#each layers as |layer|}}
+            <span class="persona-status__layer is-{{layer.state}} {{#if layer.disabled}}is-disabled{{/if}}" data-tooltip="{{layer.tooltip}}">
+                <i class="{{layer.icon}}" inert></i><span>{{layer.label}}</span>{{#if layer.count}}<b>{{layer.count}}</b>{{/if}}
+            </span>
+        {{/each}}
+        <i class="fa-solid fa-chevron-down persona-status__chevron" inert></i>
+    </button>
+
+    {{#if shareTargets}}
+        <div class="persona-share">
+            <span class="persona-eyebrow">{{localize "PERSONA.Handout.ShowTo"}}</span>
+            <div class="persona-chips">
+                {{#each shareTargets as |target|}}
+                    <button type="button" class="persona-chip" data-action="showHandout" data-id="{{../id}}" data-who="{{target.id}}"><i class="{{target.icon}}" inert></i><span>{{target.label}}</span></button>
+                {{/each}}
+            </div>
+            <p class="persona-hint">{{localize "PERSONA.Handout.RevealNote"}}</p>
+        </div>
+    {{/if}}
+
+    {{#if grid}}
+        <div class="persona-reveal">
+            <div class="persona-reveal__scroll">
+                <table class="persona-reveal__grid">
+                    <thead>
+                        <tr>
+                            <th scope="col"><span class="persona-sr">{{localize "PERSONA.Reveal.Layer"}}</span></th>
+                            <th scope="col" class="persona-reveal__all">{{localize "PERSONA.Reveal.All"}}</th>
+                            {{#each grid.players as |p|}}
+                                <th scope="col"><span class="persona-avatar" style="--who: {{p.color}}" data-tooltip="{{p.name}}" aria-label="{{p.name}}">{{p.initial}}</span></th>
+                            {{/each}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each grid.rows as |r|}}
+                            <tr class="{{#if r.disabled}}is-disabled{{/if}}">
+                                <th scope="row">{{r.label}}</th>
+                                <td class="persona-reveal__all">
+                                    <button type="button" class="persona-cell {{#if r.all}}is-on{{else if r.some}}is-some{{/if}}" data-action="revealCell" data-id="{{../id}}" data-layer="{{r.key}}" data-who="all" data-on="{{#if r.all}}1{{else}}0{{/if}}" {{#if r.disabled}}disabled{{/if}}
+                                            aria-label="{{r.label}} · {{localize "PERSONA.Reveal.All"}}" aria-pressed="{{#if r.all}}true{{else}}false{{/if}}">
+                                        <i class="fa-solid {{#if r.all}}fa-eye{{else}}fa-eye-slash{{/if}}" inert></i>
+                                    </button>
+                                </td>
+                                {{#each r.cells as |c|}}
+                                    <td>
+                                        <button type="button" class="persona-cell {{#if c.on}}is-on{{/if}}" data-action="revealCell" data-id="{{../../id}}" data-layer="{{r.key}}" data-who="{{c.userId}}" data-on="{{#if c.on}}1{{else}}0{{/if}}" {{#if r.disabled}}disabled{{/if}}
+                                                data-tooltip="{{c.name}}" aria-label="{{r.label}} · {{c.name}}" aria-pressed="{{#if c.on}}true{{else}}false{{/if}}">
+                                            <i class="fa-solid {{#if c.on}}fa-eye{{else}}fa-eye-slash{{/if}}" inert></i>
+                                        </button>
+                                    </td>
+                                {{/each}}
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            <p class="persona-hint">{{localize "PERSONA.Reveal.GridHint"}}</p>
+            <div class="persona-reveal__quick">
+                <button type="button" class="persona-mini" data-action="revealAll" data-id="{{id}}"><i class="fa-solid fa-eye" inert></i><span>{{localize "PERSONA.Reveal.ShowAll"}}</span></button>
+                <button type="button" class="persona-mini" data-action="hideAll" data-id="{{id}}" {{#if hiddenFromAll}}disabled{{/if}}><i class="fa-solid fa-eye-slash" inert></i><span>{{localize "PERSONA.Reveal.HideAll"}}</span></button>
+            </div>
+        </div>
+    {{/if}}
+</div>

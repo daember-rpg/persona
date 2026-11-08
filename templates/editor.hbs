@@ -1,0 +1,142 @@
+<div class="persona persona-editor__root">
+<div class="persona-editor__body">
+    <div class="persona-editor__top">
+        <div class="persona-editor__framing">
+            <div class="persona-framer {{#if isPerson}}is-person{{else}}is-place{{/if}}" data-framer data-tooltip="{{localize "PERSONA.Entry.FrameHint"}}">
+                <img class="persona-fit" src="{{preview}}" style="{{frame}}" alt="" draggable="false">
+                <span class="persona-framer__hint"><i class="fa-solid fa-up-down-left-right" inert></i> {{localize "PERSONA.Entry.Drag"}}</span>
+            </div>
+            <label class="persona-zoom">
+                <i class="fa-solid fa-magnifying-glass-minus" inert></i>
+                <input type="range" name="zoom" min="1" max="3" step="0.05" value="{{entry.zoom}}" aria-label="{{localize "PERSONA.Entry.Zoom"}}">
+                <i class="fa-solid fa-magnifying-glass-plus" inert></i>
+            </label>
+            <div class="persona-inline">
+                <button type="button" class="persona-mini" data-action="pickImage"><i class="fa-solid fa-image" inert></i><span>{{localize "PERSONA.Entry.PickImage"}}</span></button>
+                <button type="button" class="persona-mini persona-mini--icon" data-action="resetFrame" data-tooltip="{{localize "PERSONA.Entry.ResetFrame"}}" aria-label="{{localize "PERSONA.Entry.ResetFrame"}}"><i class="fa-solid fa-arrows-rotate" inert></i></button>
+            </div>
+            <input type="hidden" name="focusX" value="{{entry.focusX}}">
+            <input type="hidden" name="focusY" value="{{entry.focusY}}">
+        </div>
+        <div class="persona-editor__identity">
+            <div class="persona-field">
+                <span class="persona-label">{{localize "PERSONA.Entry.Kind"}}</span>
+                <div class="persona-radio">
+                    <label><input type="radio" name="kind" value="npc" {{#if isPerson}}checked{{/if}}> <i class="fa-solid fa-user" inert></i> {{localize "PERSONA.Kind.npc"}}</label>
+                    <label><input type="radio" name="kind" value="place" {{#unless isPerson}}checked{{/unless}}> <i class="fa-solid fa-map-location-dot" inert></i> {{localize "PERSONA.Kind.place"}}</label>
+                </div>
+            </div>
+            <label class="persona-field">
+                <span class="persona-label">{{localize "PERSONA.Entry.Name"}}</span>
+                <input type="text" name="name" value="{{entry.name}}" required autocomplete="off">
+            </label>
+            <label class="persona-field">
+                <span class="persona-label">{{localize "PERSONA.Entry.TitleField"}}</span>
+                <input type="text" name="title" value="{{entry.title}}" placeholder="{{localize "PERSONA.Entry.TitlePlaceholder"}}" autocomplete="off">
+            </label>
+            <input type="hidden" name="img" value="{{entry.img}}">
+        </div>
+    </div>
+
+    <div class="persona-field">
+        <span class="persona-label">{{localize "PERSONA.Entry.Journal"}}</span>
+        {{#if entry.journalUuid}}
+            <div class="persona-linked">
+                <i class="fa-solid fa-book" inert></i>
+                <span class="persona-linked__name">{{journalName}}</span>
+                <button type="button" class="persona-mini" data-action="pullJournal"><i class="fa-solid fa-rotate" inert></i> {{localize "PERSONA.Entry.PullJournal"}}</button>
+                <button type="button" class="persona-mini persona-mini--icon" data-action="unlinkJournal" data-tooltip="{{localize "PERSONA.Entry.Unlink"}}" aria-label="{{localize "PERSONA.Entry.Unlink"}}"><i class="fa-solid fa-link-slash" inert></i></button>
+            </div>
+            <label class="persona-check"><input type="checkbox" name="syncJournal" {{#if entry.syncJournal}}checked{{/if}}> {{localize "PERSONA.Entry.SyncJournal"}}</label>
+        {{else}}
+            <div class="persona-drop" data-journal-drop>
+                <i class="fa-solid fa-book" inert></i>
+                <span>{{localize "PERSONA.Entry.JournalDrop"}}</span>
+            </div>
+            <input type="checkbox" name="syncJournal" checked hidden>
+        {{/if}}
+    </div>
+
+    {{#if summaryLocked}}
+        <div class="persona-field">
+            <span class="persona-label">{{localize "PERSONA.Entry.Summary"}} <small>{{localize "PERSONA.Entry.SummaryFromJournal"}}</small></span>
+            <div class="persona-editor__summary">{{{summaryPreview}}}</div>
+            <input type="hidden" name="summary" value="{{entry.summary}}">
+        </div>
+    {{else}}
+        <label class="persona-field">
+            <span class="persona-label">{{localize "PERSONA.Entry.Summary"}} <small>{{localize "PERSONA.Entry.SummaryHint"}}</small></span>
+            <textarea name="summary" rows="5">{{entry.summary}}</textarea>
+        </label>
+    {{/if}}
+
+    <label class="persona-field">
+        <span class="persona-label">{{localize "PERSONA.Layer.secret"}} <small>{{localize "PERSONA.Entry.SecretHint"}}</small></span>
+        <textarea name="secret" rows="2">{{entry.secret}}</textarea>
+    </label>
+
+    <div class="persona-field">
+        <span class="persona-label">{{localize "PERSONA.Entry.Groups"}}</span>
+        <div class="persona-chips">
+            {{#each groups as |group|}}
+                <span class="persona-chip-wrap">
+                    <button type="button" class="persona-chip {{#if group.selected}}is-active{{/if}}" data-action="toggleGroup" data-group="{{group.id}}" aria-pressed="{{#if group.selected}}true{{else}}false{{/if}}">
+                        <i class="{{group.icon}}" inert></i><span>{{group.label}}</span>
+                    </button>
+                    <button type="button" class="persona-chip-remove" data-action="removeGroup" data-group="{{group.id}}" aria-label="{{localize "PERSONA.Group.Delete"}}" data-tooltip="{{localize "PERSONA.Group.Delete"}}"><i class="fa-solid fa-xmark" inert></i></button>
+                </span>
+            {{else}}
+                <span class="persona-hint">{{localize "PERSONA.Group.None"}}</span>
+            {{/each}}
+        </div>
+        <div class="persona-inline">
+            <input type="text" name="newGroup" placeholder="{{localize "PERSONA.Group.NewPlaceholder"}}" autocomplete="off">
+            <button type="button" class="persona-mini" data-action="addGroup"><i class="fa-solid fa-plus" inert></i> {{localize "PERSONA.Group.Add"}}</button>
+        </div>
+        <div class="persona-icons" role="radiogroup" aria-label="{{localize "PERSONA.Group.Icon"}}">
+            {{#each icons as |icon index|}}
+                <label class="persona-icons__option"><input type="radio" name="newGroupIcon" value="{{icon}}" {{#unless index}}checked{{/unless}}><i class="{{icon}}" inert></i></label>
+            {{/each}}
+        </div>
+    </div>
+
+    {{#if isPerson}}
+        <div class="persona-field">
+            <span class="persona-label">{{localize "PERSONA.Entry.Places"}} <small>{{localize "PERSONA.Entry.PlacesHint"}}</small></span>
+            <div class="persona-chips">
+                {{#each placeOptions as |p|}}
+                    <button type="button" class="persona-chip {{#if p.selected}}is-active{{/if}}" data-action="togglePlace" data-place="{{p.id}}" aria-pressed="{{#if p.selected}}true{{else}}false{{/if}}"><i class="fa-solid fa-location-dot" inert></i><span>{{p.name}}</span></button>
+                {{else}}
+                    <span class="persona-hint">{{localize "PERSONA.Entry.NoPlaces"}}</span>
+                {{/each}}
+            </div>
+        </div>
+    {{else}}
+        <div class="persona-field">
+            <span class="persona-label">{{localize "PERSONA.Entry.People"}} <small>{{localize "PERSONA.Entry.PeopleHint"}}</small></span>
+            <div class="persona-chips">
+                {{#each peopleOptions as |p|}}
+                    <button type="button" class="persona-chip {{#if p.selected}}is-active{{/if}}" data-action="togglePerson" data-person="{{p.id}}" aria-pressed="{{#if p.selected}}true{{else}}false{{/if}}"><i class="fa-solid fa-user" inert></i><span>{{p.name}}</span></button>
+                {{else}}
+                    <span class="persona-hint">{{localize "PERSONA.Entry.NoPeople"}}</span>
+                {{/each}}
+            </div>
+        </div>
+    {{/if}}
+
+    <div class="persona-field">
+        <span class="persona-label">{{localize "PERSONA.Entry.Video"}} <small>{{localize "PERSONA.Entry.VideoHint"}}</small></span>
+        <div class="persona-inline">
+            <input type="text" name="video" value="{{entry.video}}" placeholder="worlds/…/intro.mp4" autocomplete="off">
+            <button type="button" class="persona-mini" data-action="pickVideo"><i class="fa-solid fa-folder-open" inert></i> {{localize "PERSONA.Entry.Browse"}}</button>
+            {{#if entry.video}}<button type="button" class="persona-mini persona-mini--icon" data-action="clearVideo" aria-label="{{localize "PERSONA.Entry.ClearVideo"}}"><i class="fa-solid fa-xmark" inert></i></button>{{/if}}
+        </div>
+    </div>
+</div>
+
+<footer class="persona-editor__footer">
+    {{#unless isNew}}<button type="button" class="persona-button persona-button--danger" data-action="deleteEntry"><i class="fa-solid fa-trash" inert></i> {{localize "PERSONA.Entry.Delete"}}</button>{{/unless}}
+    <span class="persona-row__spacer"></span>
+    <button type="submit" class="persona-button"><i class="fa-solid fa-floppy-disk" inert></i> {{localize "PERSONA.Entry.Save"}}</button>
+</footer>
+</div>
