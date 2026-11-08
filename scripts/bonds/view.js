@@ -8,14 +8,15 @@
  * }
  * getModel() → {
  *   editable, isGM, owner: { id, name }, self: { name, img }, party: [{ id, name, img }],
- *   entries: [{ id, name, title, img, frame, status, isNew }], bonds, folders: [{ label, entryIds }],
+ *   entries: [{ id, name, title, img, frame, status, isNew, tag }], bonds,
+ *   tags: [{ key, label, color }] (Persona folders, in the GM's order — the default slices),
  *   players: [{ id, name }], moments: [{ id, label, ts }], momentId
  * }
  */
 import {
     GEOMETRY, LINK_TYPES, SECTOR_COLORS, RINGS, SELF,
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
-    addSector, updateSector, moveSector, removeSector, place, unplace, setLink, removeLink, fromFolders
+    createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG
 } from "./model.js";
 
 const G = GEOMETRY;
@@ -30,6 +31,7 @@ export class BondsView {
     #bonds = null;
     #laid = null;
     #visible = new Set();
+    #tagOf = new Map();
     #linkMode = false;
     #linkFrom = null;
     #gesture = null;
@@ -85,7 +87,8 @@ export class BondsView {
         const m = this.#model;
         const entries = this.#entryMap();
         this.#visible = new Set(entries.keys());
-        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id));
+        this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
+        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
         const loose = m.entries.filter(e => !placed.has(e.id));
         const pop = this.host.querySelector(".bonds-pop");
@@ -133,7 +136,6 @@ export class BondsView {
         const tools = [];
         if (m.editable) {
             tools.push(`<button type="button" class="persona-button bonds-tool ${this.#linkMode ? "is-on" : ""}" data-action="linkMode" aria-pressed="${this.#linkMode}" title="${esc(this.t("LinkHint"))}"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("Link"))}</span></button>`);
-            tools.push(`<button type="button" class="persona-button bonds-tool" data-action="newSector"><i class="fa-solid fa-chart-pie" inert></i><span>${esc(this.t("AddSector"))}</span></button>`);
         }
         if (m.isGM && m.players.length) {
             tools.push(`<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`);
@@ -189,7 +191,7 @@ export class BondsView {
             const arc = arcPath(G.labelRadius, s.start, s.end);
             const label = s.label || this.t("Unnamed");
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
-            parts.push(`<text class="bonds-sector-label" ${m.editable ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
+            parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
         }
         if (!laid.sectors.length) {
             parts.push(`<circle class="bonds-empty-ring" cx="${C}" cy="${C}" r="${(inner + outer) / 2}"/>`);
@@ -237,11 +239,11 @@ export class BondsView {
         const picked = id => (this.#linkFrom === id ? "is-picked" : "");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
-            <img src="${esc(m.self.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
+            <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
             out.push(`<button type="button" class="bonds-node bonds-node--party ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
-                <img src="${esc(p.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(p.name)}</span></button>`);
+                <span class="bonds-node__img"><img src="${esc(p.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(p.name)}</span></button>`);
         }
         for (const placement of this.#bonds.placements) {
             const entry = entries.get(placement.id);
@@ -260,7 +262,7 @@ export class BondsView {
         const name = entry.name ?? "???";
         const statusText = entry.status && entry.status !== "alive" ? this.adapter.t(`PERSONA.Status.${entry.status}`) : "";
         return `<button type="button" class="bonds-node bonds-node--entry ${status} ${entry.isNew ? "is-new" : ""} ${extra}" data-node="${esc(entry.id)}" data-entry="${esc(entry.id)}" style="${style}" aria-label="${esc(name)}">
-            <img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false">${mark}
+            <span class="bonds-node__img"><img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false"></span>${mark}
             <span class="bonds-node__name">${esc(name)}${entry.title ? `<small>${esc(entry.title)}</small>` : ""}${statusText ? `<small class="bonds-node__status">${esc(statusText)}</small>` : ""}</span></button>`;
     }
 
@@ -317,12 +319,19 @@ export class BondsView {
                     <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
                 </div>`).join("")}</div>`;
         }
-        const start = m.editable && !this.#bonds.sectors.length && m.folders.length
-            ? `<button type="button" class="persona-button bonds-drawer__start" data-action="fromFolders"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("FromFolders"))}</span></button>`
+        const start = m.editable && loose.length > 1
+            ? `<button type="button" class="persona-button bonds-drawer__start" data-action="placeAll"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("PlaceAll"))}</span></button>`
             : "";
-        const hint = m.editable && loose.length
-            ? `<p class="bonds-drawer__tip">${esc(this.#bonds.sectors.length ? this.t("DragHint") : this.t("SectorFirst"))}</p>` : "";
+        const hint = m.editable && loose.length ? `<p class="bonds-drawer__tip">${esc(this.t("DragHint"))}</p>` : "";
+        // Shown while dragging a portrait: drop here to start a category of your own.
+        const newCat = m.editable
+            ? `<div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>`
+            : "";
+        const out = m.editable
+            ? `<div class="bonds-takeoff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOffDrop"))}</span></div>`
+            : "";
         return `<aside class="bonds-drawer" data-drawer>
+            ${newCat}${out}
             <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
             ${start}${hint}${body}
         </aside>`;
@@ -440,15 +449,17 @@ export class BondsView {
         if (!g) return;
         if (g.kind === "pan") return;
         if (!g.dragging) return; // a plain click: handled by #onClick
+        // Read the target while the drop zones are still shown.
+        const target = this.#dropTarget(event, g.id);
         g.ghost?.remove();
         g.source.classList.remove("is-lifted");
         this.host.querySelector(".bonds")?.classList.remove("is-dragging");
         this.#highlight(null);
         this.#suppressClick = true;
         setTimeout(() => { this.#suppressClick = false; }, 0);
-        const target = this.#dropTarget(event, g.id);
-        if (target.kind === "cell") this.#commit(place(this.#bonds, g.id, target.sector, target.ring, target.before));
+        if (target.kind === "cell") this.#commit(place(this.#bonds, g.id, target.category, target.ring, target.before));
         else if (target.kind === "out") this.#commit(unplace(this.#bonds, g.id));
+        else if (target.kind === "new") this.#sectorPop(null, this.host.querySelector(".bonds-drawer__head"), g.id);
         else if (g.stale) this.refresh();
     };
 
@@ -491,25 +502,39 @@ export class BondsView {
         return ghost;
     }
 
-    /** Over the drawer → unplace; over the wheel → hit test; elsewhere → nothing. */
+    /**
+     * Over "new category" → create one; over the drawer → take off the wheel; over the wheel →
+     * a ring and slice. Dropping on another folder's slice keeps the person in their own folder's
+     * slice (folders are the GM's tags); a category of the player's own takes anyone.
+     */
     #dropTarget(event, id) {
-        const drawer = this.host.querySelector("[data-drawer]")?.getBoundingClientRect();
-        const inside = r => r && event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
-        if (inside(drawer)) return { kind: "out", drawer: true };
-        const viewport = this.host.querySelector("[data-viewport]")?.getBoundingClientRect();
-        if (!inside(viewport)) return { kind: "none" };
+        const inside = el => {
+            const r = el?.getBoundingClientRect();
+            return r && r.width && event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+        };
+        const placed = this.#bonds.placements.some(p => p.id === id);
+        if (inside(this.host.querySelector("[data-new-sector]"))) return { kind: "new" };
+        if (inside(this.host.querySelector("[data-drawer]"))) return placed ? { kind: "out" } : { kind: "none" };
+        if (!inside(this.host.querySelector("[data-viewport]"))) return { kind: "none" };
         const { x, y } = this.#toStage(event.clientX, event.clientY);
-        const hit = hitTest(x, y, this.#laid, this.#bonds, this.#visible, id);
-        // Dropping a not-yet-placed person past the rim does nothing.
-        if (hit.kind === "out" && !this.#bonds.placements.some(p => p.id === id)) return { kind: "none" };
-        return hit;
+        const hit = hitTest(x, y, this.#laid, id);
+        if (hit.kind === "out") return placed ? hit : { kind: "none" };
+        if (hit.kind !== "cell") return hit;
+        const custom = hit.sector && this.#bonds.sectors.some(s => s.id === hit.sector);
+        const own = this.#tagOf.get(id) ?? NO_TAG;
+        const dest = custom ? hit.sector : own;
+        // `before` only counts inside the slice the person really lands in.
+        return { ...hit, category: custom ? hit.sector : null, dest, before: dest === hit.sector ? hit.before : null };
     }
 
     #highlight(target) {
         this.host.querySelectorAll(".bonds-cell.is-target").forEach(el => el.classList.remove("is-target"));
         this.host.querySelector("[data-drawer]")?.classList.toggle("is-target", target?.kind === "out");
+        this.host.querySelector("[data-new-sector]")?.classList.toggle("is-target", target?.kind === "new");
         if (target?.kind === "cell") {
-            this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.sector}|${target.ring}`)}"]`)?.classList.add("is-target");
+            const cell = this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.dest}|${target.ring}`)}"]`)
+                ?? this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.sector}|${target.ring}`)}"]`);
+            cell?.classList.add("is-target");
         }
     }
 
@@ -527,7 +552,7 @@ export class BondsView {
         const node = event.target.closest("[data-node]");
         const loose = event.target.closest("[data-loose]");
 
-        if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"], [data-action="newSector"]')) {
+        if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"]')) {
             this.#closePop();
             if (!node) return;
         }
@@ -562,21 +587,18 @@ export class BondsView {
             this.#linkFrom = null;
             this.#render();
         },
-        newSector: el => this.#sectorPop(null, el),
         editSector: (el, id) => this.#sectorPop(id, el),
         editLink: (el, id) => this.#linkPop(id, el),
-        fromFolders: () => this.#commit(fromFolders(this.#bonds, this.#model.folders)),
+        placeAll: () => {
+            const placed = new Set(this.#bonds.placements.map(p => p.id));
+            this.#commit(placeAll(this.#bonds, this.#model.entries.filter(e => !placed.has(e.id)).map(e => e.id), 3));
+        },
         // Popover actions
         popClose: () => this.#closePop(),
         swatch: el => {
             el.closest(".bonds-pop").querySelectorAll(".bonds-swatch").forEach(s => s.classList.toggle("is-on", s === el));
             const input = el.closest("form")?.querySelector('[name="color"]');
             if (input) input.value = el.dataset.color;
-        },
-        sectorMove: el => {
-            const id = el.closest("[data-sector-form]").dataset.sector;
-            this.#commit(moveSector(this.#bonds, id, Number(el.dataset.step)));
-            this.#closePop();
         },
         sectorDelete: el => {
             const id = el.closest("[data-sector-form]").dataset.sector;
@@ -652,21 +674,20 @@ export class BondsView {
         pop.innerHTML = "";
     }
 
-    #sectorPop(id, anchor) {
+    /** Name and colour of a category: a new one (for `entryId`, just dropped) or an existing one. */
+    #sectorPop(id, anchor, entryId = null) {
         const sector = id ? this.#bonds.sectors.find(s => s.id === id) : null;
-        const color = sector?.color ?? SECTOR_COLORS[this.#bonds.sectors.length % SECTOR_COLORS.length];
-        const index = sector ? this.#bonds.sectors.indexOf(sector) : -1;
+        const color = sector?.color ?? SECTOR_COLORS[(this.#bonds.sectors.length + 4) % SECTOR_COLORS.length];
+        const who = entryId ? this.#model.entries.find(e => e.id === entryId)?.name ?? "???" : "";
         const html = `
-        <form class="bonds-form" data-sector-form data-sector="${esc(id ?? "")}">
-            <span class="persona-eyebrow">${esc(sector ? this.t("EditSector") : this.t("NewSector"))}</span>
+        <form class="bonds-form" data-sector-form data-sector="${esc(id ?? "")}" data-entry="${esc(entryId ?? "")}">
+            <span class="persona-eyebrow">${esc(sector ? this.t("EditSector") : this.t("NewSector"))}${who ? ` · ${esc(who)}` : ""}</span>
             <input type="text" name="label" maxlength="60" value="${esc(sector?.label ?? "")}" placeholder="${esc(this.t("SectorPlaceholder"))}" autocomplete="off">
             <input type="hidden" name="color" value="${color}">
             <div class="bonds-swatches">${SECTOR_COLORS.map(c => `<button type="button" class="bonds-swatch ${c === color ? "is-on" : ""}" data-action="swatch" data-color="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+            ${sector ? `<p class="bonds-form__hint">${esc(this.t("DissolveHint"))}</p>` : ""}
             <div class="bonds-form__row">
-                ${sector ? `
-                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="-1" ${index <= 0 ? "disabled" : ""} title="${esc(this.t("MoveLeft"))}" aria-label="${esc(this.t("MoveLeft"))}"><i class="fa-solid fa-rotate-left" inert></i></button>
-                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="1" ${index >= this.#bonds.sectors.length - 1 ? "disabled" : ""} title="${esc(this.t("MoveRight"))}" aria-label="${esc(this.t("MoveRight"))}"><i class="fa-solid fa-rotate-right" inert></i></button>
-                    <button type="button" class="persona-mini persona-mini--icon bonds-danger" data-action="sectorDelete" title="${esc(this.t("DeleteSector"))}" aria-label="${esc(this.t("DeleteSector"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
+                ${sector ? `<button type="button" class="persona-mini bonds-danger" data-action="sectorDelete"><i class="fa-solid fa-folder-minus" inert></i><span>${esc(this.t("Dissolve"))}</span></button>` : ""}
                 <span class="bonds-form__spacer"></span>
                 <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
                 <button type="submit" class="persona-button">${esc(sector ? this.t("Save") : this.t("Create"))}</button>
@@ -709,9 +730,10 @@ export class BondsView {
         const color = form.querySelector('[name="color"]').value;
         if (!label) return form.querySelector('[name="label"]').focus();
         const id = form.dataset.sector;
+        const entryId = form.dataset.entry;
         this.#closePop();
         if (id) this.#commit(updateSector(this.#bonds, id, { label, color }));
-        else this.#commit(addSector(this.#bonds, { label, color }).bonds);
+        else if (entryId) this.#commit(createSector(this.#bonds, entryId, { label, color }));
     };
 
     /* -------------------------------------------- */

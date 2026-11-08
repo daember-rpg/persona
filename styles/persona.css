@@ -2106,11 +2106,18 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.persona .bonds-node > img {
+/* The portrait is clipped to the circle: a zoomed framing (Persona editor) must not spill out. */
+.bonds-node__img {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.persona .bonds-node__img img {
     width: 100%;
     height: 100%;
     border: 0;
-    border-radius: 50%;
     object-fit: cover;
     display: block;
 }
@@ -2147,9 +2154,9 @@
 
 .persona .bonds-node.is-lifted { opacity: 0.25; }
 
-.persona .bonds-node.is-dead > img { filter: grayscale(1) brightness(0.62); }
+.persona .bonds-node.is-dead .bonds-node__img img { filter: grayscale(1) brightness(0.62); }
 .persona .bonds-node.is-dead { border-color: rgba(234, 223, 196, 0.35); }
-.persona .bonds-node.is-missing > img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
+.persona .bonds-node.is-missing .bonds-node__img img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
 .persona .bonds-node.is-missing { border-style: dashed; }
 
 .bonds-node__mark {
@@ -2250,6 +2257,7 @@
 }
 
 .bonds-ghost img { width: 100%; height: 100%; border: 0; object-fit: cover; }
+.bonds-loose__img { overflow: hidden; }
 
 /* ---------- Overlays on the viewport ---------- */
 
@@ -2635,3 +2643,26 @@
 .persona-drag-ghost img { width: 30px; height: 40px; object-fit: cover; border: 0; border-radius: 3px; }
 .persona-drag-ghost i { color: var(--dp-clay-light); padding: 0 4px 0 8px; }
 .persona-drag-ghost span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Drawer drop zones: shown while a portrait is being dragged. */
+.bonds-newcat,
+.bonds-takeoff {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 10px 12px;
+    border: 1.5px dashed var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-newcat i { color: var(--dp-gold); font-size: 16px; }
+.bonds-takeoff i { color: #e58a74; font-size: 15px; }
+.bonds.is-dragging .bonds-newcat,
+.bonds.is-dragging .bonds-takeoff { display: flex; }
+.bonds-newcat.is-target { border-color: var(--dp-gold); background: rgba(201, 163, 90, 0.14); color: var(--dp-parchment); }
+.bonds-drawer.is-target .bonds-takeoff { border-color: var(--dp-ember); color: var(--dp-parchment); }
+.bonds-form__hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--dp-parchment-faint); }

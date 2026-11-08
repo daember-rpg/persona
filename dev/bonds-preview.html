@@ -2112,11 +2112,18 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.persona .bonds-node > img {
+/* The portrait is clipped to the circle: a zoomed framing (Persona editor) must not spill out. */
+.bonds-node__img {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.persona .bonds-node__img img {
     width: 100%;
     height: 100%;
     border: 0;
-    border-radius: 50%;
     object-fit: cover;
     display: block;
 }
@@ -2153,9 +2160,9 @@
 
 .persona .bonds-node.is-lifted { opacity: 0.25; }
 
-.persona .bonds-node.is-dead > img { filter: grayscale(1) brightness(0.62); }
+.persona .bonds-node.is-dead .bonds-node__img img { filter: grayscale(1) brightness(0.62); }
 .persona .bonds-node.is-dead { border-color: rgba(234, 223, 196, 0.35); }
-.persona .bonds-node.is-missing > img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
+.persona .bonds-node.is-missing .bonds-node__img img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
 .persona .bonds-node.is-missing { border-style: dashed; }
 
 .bonds-node__mark {
@@ -2256,6 +2263,7 @@
 }
 
 .bonds-ghost img { width: 100%; height: 100%; border: 0; object-fit: cover; }
+.bonds-loose__img { overflow: hidden; }
 
 /* ---------- Overlays on the viewport ---------- */
 
@@ -2557,6 +2565,114 @@
     .bonds-drawer { border-left: 0; border-top: 1px solid var(--dp-line); }
 }
 
+/* ==========================================================================
+   Director: arrange by drag and drop (GM)
+   ========================================================================== */
+
+.persona-row.is-draggable { position: relative; cursor: grab; }
+.persona-row.is-draggable:active { cursor: grabbing; }
+
+.persona-row__grip {
+    position: absolute;
+    top: 24px;
+    left: -15px;
+    width: 12px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.persona-row.is-draggable:hover .persona-row__grip { opacity: 1; }
+
+.persona-row.is-dragging,
+.persona-section.is-dragging { opacity: 0.35; }
+
+.persona-row.is-drop-before,
+.persona-row.is-drop-after,
+.persona .persona-folder.is-drop-before,
+.persona .persona-folder.is-drop-after { position: relative; }
+
+.persona-row.is-drop-before::before,
+.persona-row.is-drop-after::after,
+.persona .persona-folder.is-drop-before::before,
+.persona .persona-folder.is-drop-after::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--dp-clay-light);
+    box-shadow: 0 0 8px var(--dp-clay);
+    pointer-events: none;
+}
+
+.persona-row.is-drop-before::before { top: -9px; }
+.persona-row.is-drop-after::after { bottom: 7px; }
+.persona .persona-folder.is-drop-before::before { top: -4px; }
+.persona .persona-folder.is-drop-after::after { bottom: -4px; }
+
+.persona .persona-folder.is-drop-into {
+    background: var(--dp-clay-soft);
+    border-bottom-color: var(--dp-clay-light);
+    color: var(--dp-parchment);
+}
+
+
+.persona .persona-folder[data-drag-group] { cursor: grab; }
+.persona.is-arranging,
+.persona.is-arranging * { cursor: grabbing !important; user-select: none; }
+
+.persona-drag-ghost {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 260px;
+    padding: 6px 14px 6px 6px;
+    transform: translate(12px, -50%);
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-clay-light);
+    background: var(--dp-charcoal);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    font-family: var(--dp-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dp-parchment);
+    pointer-events: none;
+}
+
+.persona-drag-ghost img { width: 30px; height: 40px; object-fit: cover; border: 0; border-radius: 3px; }
+.persona-drag-ghost i { color: var(--dp-clay-light); padding: 0 4px 0 8px; }
+.persona-drag-ghost span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Drawer drop zones: shown while a portrait is being dragged. */
+.bonds-newcat,
+.bonds-takeoff {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 10px 12px;
+    border: 1.5px dashed var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-newcat i { color: var(--dp-gold); font-size: 16px; }
+.bonds-takeoff i { color: #e58a74; font-size: 15px; }
+.bonds.is-dragging .bonds-newcat,
+.bonds.is-dragging .bonds-takeoff { display: flex; }
+.bonds-newcat.is-target { border-color: var(--dp-gold); background: rgba(201, 163, 90, 0.14); color: var(--dp-parchment); }
+.bonds-drawer.is-target .bonds-takeoff { border-color: var(--dp-ember); color: var(--dp-parchment); }
+.bonds-form__hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--dp-parchment-faint); }
+
 /* Preview chrome (not part of the module) */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; background: #0b0a09; }
@@ -2593,7 +2709,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>
-const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Eyebrow":"Who's who to you","ReadOnlyEyebrow":"A player's wheel","Party":"Party","Unnamed":"Unnamed","Link":"Link","LinkHint":"Draw a relation between two portraits","LinkPickFirst":"Pick the first portrait","LinkPickSecond":"Now pick who they are linked to","Done":"Done","AddSector":"Slice","NewSector":"New slice","EditSector":"Edit slice","SectorPlaceholder":"Kingdom, allies, enemies…","MoveLeft":"Move counter-clockwise","MoveRight":"Move clockwise","DeleteSector":"Delete slice (people go back to the list)","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait into a slice. Closer to the centre, closer to you.","SectorFirst":"Create a slice first, then drag people into it.","FromFolders":"Start from the Persona folders","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Create a slice to start your wheel","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"GMEditing":"Editing {name}'s wheel — the player sees your changes"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Eyebrow":"Quem é quem para você","ReadOnlyEyebrow":"Roda de um jogador","Party":"Grupo","Unnamed":"Sem nome","Link":"Ligar","LinkHint":"Desenhe uma relação entre dois retratos","LinkPickFirst":"Escolha o primeiro retrato","LinkPickSecond":"Agora escolha com quem ele se liga","Done":"Pronto","AddSector":"Fatia","NewSector":"Nova fatia","EditSector":"Editar fatia","SectorPlaceholder":"Reino, aliados, inimigos…","MoveLeft":"Mover no sentido anti-horário","MoveRight":"Mover no sentido horário","DeleteSector":"Apagar fatia (as pessoas voltam para a lista)","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para uma fatia. Mais perto do centro, mais perto de você.","SectorFirst":"Crie uma fatia primeiro e depois arraste as pessoas para ela.","FromFolders":"Começar pelas pastas do Persona","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Crie uma fatia para começar sua roda","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"GMEditing":"Editando a roda de {name} — o jogador vê suas mudanças"}}}};
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Eyebrow":"Who's who to you","ReadOnlyEyebrow":"A player's wheel","Party":"Party","Unnamed":"Unnamed","Link":"Link","LinkHint":"Draw a relation between two portraits","LinkPickFirst":"Pick the first portrait","LinkPickSecond":"Now pick who they are linked to","Done":"Done","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"GMEditing":"Editing {name}'s wheel — the player sees your changes","NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it."},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Eyebrow":"Quem é quem para você","ReadOnlyEyebrow":"Roda de um jogador","Party":"Grupo","Unnamed":"Sem nome","Link":"Ligar","LinkHint":"Desenhe uma relação entre dois retratos","LinkPickFirst":"Escolha o primeiro retrato","LinkPickSecond":"Agora escolha com quem ele se liga","Done":"Pronto","NewSector":"Nova categoria","EditSector":"Editar categoria","SectorPlaceholder":"Não confio, nos deve um favor…","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para a roda: cada pessoa vai para a fatia da sua pasta, e o anel onde você solta define a distância. Mais perto do centro, mais perto de você.","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Arraste alguém para a roda para começar","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"GMEditing":"Editando a roda de {name} — o jogador vê suas mudanças","NoFolder":"Sem pasta","PlaceAll":"Colocar todos na roda","NewCategoryDrop":"Solte aqui para criar uma categoria sua","TakeOffDrop":"Solte aqui para tirar da roda","Dissolve":"Desfazer","DissolveHint":"Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém."},"Arrange":{"Moved":"{name} foi para {group}","Hint":"Arraste para reordenar ou mover para outra pasta"}}}};
 /**
  * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
  *
@@ -2602,8 +2718,12 @@ const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New"
  *
  * A player's wheel (stored in their own user flags):
  *   { v, sectors: [{ id, label, color }], placements: [{ id, sector, ring }], links: [{ id, a, b, type }] }
- * - sectors: groups the player creates (a kingdom, "enemies", "don't trust"…), shown as slices.
- * - placements: a known person (Persona entry id) in a slice, at a distance ring (1 close … 3 distant).
+ * - Slices are derived, never empty: by default a person sits in the slice of their Persona folder
+ *   (the GM's tags), and a slice exists only while someone is in it.
+ * - sectors: the player's own categories ("don't trust"…). A person moved into one keeps
+ *   `placement.sector` = its id; otherwise `sector` is null (= their folder's slice).
+ *   A category with nobody in it is dropped.
+ * - placements: a known person (Persona entry id) at a distance ring (1 close … 3 distant).
  *   The order of the array is the order inside each slice and ring.
  * - links: a relation between two portraits. Node ids are entry ids, "self" or "u:<userId>" (party).
  * Everything is an array so a Foundry flag update replaces it whole (objects would be merged).
@@ -2657,22 +2777,26 @@ function emptyBonds() {
 function normalizeBonds(raw) {
     const out = emptyBonds();
     if (!raw || typeof raw !== "object") return out;
+    const sectors = [];
     const sectorIds = new Set();
     for (const s of Array.isArray(raw.sectors) ? raw.sectors : []) {
         if (!s?.id || sectorIds.has(s.id)) continue;
         sectorIds.add(s.id);
-        out.sectors.push({
+        sectors.push({
             id: String(s.id),
             label: String(s.label ?? "").slice(0, 60),
-            color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : SECTOR_COLORS[out.sectors.length % SECTOR_COLORS.length]
+            color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : SECTOR_COLORS[sectors.length % SECTOR_COLORS.length]
         });
     }
     const placed = new Set();
     for (const p of Array.isArray(raw.placements) ? raw.placements : []) {
-        if (!p?.id || placed.has(p.id) || !sectorIds.has(p.sector)) continue;
+        if (!p?.id || placed.has(p.id)) continue;
         placed.add(p.id);
-        out.placements.push({ id: String(p.id), sector: String(p.sector), ring: clampRing(p.ring) });
+        out.placements.push({ id: String(p.id), sector: sectorIds.has(p.sector) ? String(p.sector) : null, ring: clampRing(p.ring) });
     }
+    // A category exists only while someone is in it.
+    const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
+    out.sectors = sectors.filter(s => used.has(s.id));
     const types = new Set(LINK_TYPES.map(t => t.id));
     const pairs = new Set();
     for (const l of Array.isArray(raw.links) ? raw.links : []) {
@@ -2689,13 +2813,17 @@ function normalizeBonds(raw) {
 /*  Edits (pure: each returns a new wheel)      */
 /* -------------------------------------------- */
 
-const copy = bonds => normalizeBonds(JSON.parse(JSON.stringify(bonds ?? emptyBonds())));
+const copy = bonds => JSON.parse(JSON.stringify(normalizeBonds(bonds)));
 
-function addSector(bonds, { label, color } = {}) {
+/** A new category holding one person (a category never exists empty). */
+function createSector(bonds, entryId, { label, color } = {}, ring = 2) {
     const next = copy(bonds);
     const id = uid();
     next.sectors.push({ id, label: String(label ?? "").trim().slice(0, 60), color: color ?? SECTOR_COLORS[next.sectors.length % SECTOR_COLORS.length] });
-    return { bonds: normalizeBonds(next), id };
+    const was = next.placements.find(p => p.id === entryId);
+    next.placements = next.placements.filter(p => p.id !== entryId);
+    next.placements.push({ id: entryId, sector: id, ring: was?.ring ?? ring });
+    return normalizeBonds(next);
 }
 
 function updateSector(bonds, id, changes) {
@@ -2708,34 +2836,24 @@ function updateSector(bonds, id, changes) {
     return normalizeBonds(next);
 }
 
-/** Moves a slice one step around the wheel (-1 counter-clockwise, +1 clockwise). */
-function moveSector(bonds, id, step) {
-    const next = copy(bonds);
-    const i = next.sectors.findIndex(s => s.id === id);
-    const j = i + step;
-    if (i < 0 || j < 0 || j >= next.sectors.length) return next;
-    [next.sectors[i], next.sectors[j]] = [next.sectors[j], next.sectors[i]];
-    return next;
-}
-
-/** Removes a slice; the people in it go back to the unplaced list. */
+/** Dissolves a category: its people go back to their folders' slices, same distance. */
 function removeSector(bonds, id) {
     const next = copy(bonds);
-    next.sectors = next.sectors.filter(s => s.id !== id);
+    for (const p of next.placements) if (p.sector === id) p.sector = null;
     return normalizeBonds(next);
 }
 
 /**
- * Puts a person in a slice and ring, just before `beforeId` (another person in that cell),
- * or at the end. Moving inside the same cell reorders.
+ * Puts a person at a ring, in a category (`sector` = its id) or in their folder's slice (null),
+ * just before `beforeId`, or at the end. Moving inside the same cell reorders.
  */
 function place(bonds, entryId, sector, ring, beforeId = null) {
     const next = copy(bonds);
-    if (!next.sectors.some(s => s.id === sector)) return next;
+    if (sector && !next.sectors.some(s => s.id === sector)) sector = null;
     ring = clampRing(ring);
     const rest = next.placements.filter(p => p.id !== entryId);
-    const item = { id: entryId, sector, ring };
-    const anchor = beforeId ? rest.findIndex(p => p.id === beforeId && p.sector === sector && p.ring === ring) : -1;
+    const item = { id: entryId, sector: sector ?? null, ring };
+    const anchor = beforeId ? rest.findIndex(p => p.id === beforeId) : -1;
     if (anchor >= 0) rest.splice(anchor, 0, item);
     else rest.push(item);
     next.placements = rest;
@@ -2745,7 +2863,7 @@ function place(bonds, entryId, sector, ring, beforeId = null) {
 function unplace(bonds, entryId) {
     const next = copy(bonds);
     next.placements = next.placements.filter(p => p.id !== entryId);
-    return next;
+    return normalizeBonds(next);
 }
 
 /** Creates the link between two nodes, or changes its type if they are already linked. */
@@ -2770,24 +2888,20 @@ function removeLink(bonds, id) {
     return next;
 }
 
-/**
- * Starts a wheel from the GM's Persona folders the player can see:
- * one slice per folder, its people on the middle ring.
- */
-function fromFolders(bonds, folders) {
-    let next = copy(bonds);
+/** Puts everyone not yet on the wheel in their folders' slices, on the given ring. */
+function placeAll(bonds, entryIds, ring = 2) {
+    const next = copy(bonds);
     const placed = new Set(next.placements.map(p => p.id));
-    folders.forEach(folder => {
-        const result = addSector(next, { label: folder.label, color: SECTOR_COLORS[(next.sectors.length) % SECTOR_COLORS.length] });
-        next = result.bonds;
-        for (const id of folder.entryIds) {
-            if (placed.has(id)) continue;
-            placed.add(id);
-            next = place(next, id, result.id, 2);
-        }
-    });
-    return next;
+    for (const id of entryIds) if (!placed.has(id)) next.placements.push({ id, sector: null, ring });
+    return normalizeBonds(next);
 }
+
+/** The slice key a placement lands in: its category, else its folder (tag), else "_none". */
+function sectorKeyOf(placement, tagOf) {
+    return placement.sector ?? tagOf.get(placement.id) ?? NO_TAG;
+}
+
+const NO_TAG = "_none";
 
 /* -------------------------------------------- */
 /*  Geometry                                    */
@@ -2813,39 +2927,53 @@ const ringMid = (ring, g) => (g.ringBands[ring - 1][0] + g.ringBands[ring - 1][1
  * @param bonds    a normalized wheel
  * @param visible  Set of entry ids this viewer may see (others are skipped, never drawn)
  * @param partyIds node ids of the other party members, in order
+ * @param tags     { list: [{ key, label, color }] in the GM's folder order, tagOf: Map(entryId → key),
+ *                   noneLabel } — the slices people fall into by default
  * @returns { sectors, nodes: Map(id → {x, y, angle, ring, sector}), self, party }
  */
-function layout(bonds, visible, partyIds = [], g = GEOMETRY) {
+function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     const TAU = Math.PI * 2;
-    const placements = bonds.placements.filter(p => visible.has(p.id));
-    const count = (sector, ring) => placements.filter(p => p.sector === sector && p.ring === ring).length;
+    const tagOf = tags.tagOf ?? new Map();
+    const placements = bonds.placements.filter(p => visible.has(p.id)).map(p => ({ ...p, key: sectorKeyOf(p, tagOf) }));
+    const present = new Set(placements.map(p => p.key));
+    // Only slices with someone in them: folders in the GM's order, then the player's categories, then "no folder".
+    const defs = [
+        ...(tags.list ?? []).filter(t => present.has(t.key)).map(t => ({ id: t.key, label: t.label, color: t.color, custom: false })),
+        ...bonds.sectors.filter(s => present.has(s.id)).map(s => ({ id: s.id, label: s.label, color: s.color, custom: true })),
+        ...(present.has(NO_TAG) ? [{ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }] : [])
+    ];
+    // A folder the viewer can't see as a tag still shows (its entries are known): fall back to "no folder".
+    const known = new Set(defs.map(d => d.id));
+    for (const p of placements) if (!known.has(p.key)) {
+        p.key = NO_TAG;
+        if (!known.has(NO_TAG)) { defs.push({ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }); known.add(NO_TAG); }
+    }
 
-    // How wide each slice needs to be for its fullest ring.
-    const needs = bonds.sectors.map(s => Math.max(g.minSector, ...RINGS.map(ring => count(s.id, ring) * (g.nodeArc / ringMid(ring, g)))));
-    const n = bonds.sectors.length;
+    const count = (key, ring) => placements.filter(p => p.key === key && p.ring === ring).length;
+    const needs = defs.map(d => Math.max(g.minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / ringMid(ring, g)))));
+    const n = defs.length;
     const available = TAU - n * g.gap;
-    const total = needs.reduce((a, b) => a + b, 0);
+    const total = needs.reduce((x, y) => x + y, 0);
     const widths = total <= available
         ? needs.map(w => w + (available - total) / Math.max(1, n))
         : needs.map(w => w * (available / total));
 
     const sectors = [];
     let cursor = n > 1 ? -widths[0] / 2 : -available / 2; // first slice centred at the top
-    bonds.sectors.forEach((s, i) => {
+    defs.forEach((d, i) => {
         const start = cursor + g.gap / 2;
         const end = start + widths[i];
         cursor = end + g.gap / 2;
-        sectors.push({ ...s, index: i, start, end, mid: (start + end) / 2 });
+        sectors.push({ ...d, index: i, start, end, mid: (start + end) / 2 });
     });
 
     const nodes = new Map();
     for (const sector of sectors) {
         for (const ring of RINGS) {
-            const cell = placements.filter(p => p.sector === sector.id && p.ring === ring);
+            const cell = placements.filter(p => p.key === sector.id && p.ring === ring);
             const r = ringMid(ring, g);
             const span = sector.end - sector.start;
             const step = g.nodeArc / r;
-            // Cluster in the middle of the slice, spreading out only when needed.
             const used = Math.min(span, cell.length * step);
             const first = sector.mid - used / 2;
             cell.forEach((p, i) => {
@@ -2876,33 +3004,34 @@ function inSector(angle, sector) {
 }
 
 /**
- * Where a drop lands: { kind: "cell", sector, ring, before } inside the wheel (`before`: the
- * person the dropped one goes in front of, or null for the end),
- * { kind: "out" } past the outer edge (unplace), or { kind: "none" } over the centre/party.
+ * Where a drop lands: { kind: "cell", sector, ring, before } inside the wheel — `sector` is the
+ * slice key under the pointer (null on an empty wheel), `before` the person the dropped one goes
+ * in front of (null = the end) —, { kind: "out" } past the outer edge (take off the wheel),
+ * or { kind: "none" } over the centre and party.
  */
-function hitTest(x, y, laid, bonds, visible, draggedId = null, g = GEOMETRY) {
+function hitTest(x, y, laid, draggedId = null, g = GEOMETRY) {
     const { r, angle } = toPolar(x, y, g);
     const outer = g.ringBands[2][1];
     if (r > outer + 24) return { kind: "out" };
     if (r < g.ringBands[0][0]) return { kind: "none" };
-    if (!laid.sectors.length) return { kind: "none" };
     const ring = r < g.ringBands[0][1] ? 1 : r < g.ringBands[1][1] ? 2 : 3;
+    if (!laid.sectors.length) return { kind: "cell", sector: null, ring, before: null };
     let sector = laid.sectors.find(s => inSector(angle, s));
     if (!sector) {
-        // In a gap: the nearest slice edge.
         const dist = s => Math.min(Math.abs(norm(angle - s.start)), Math.abs(norm(s.start - angle)),
             Math.abs(norm(angle - s.end)), Math.abs(norm(s.end - angle)));
         sector = [...laid.sectors].sort((a, b) => dist(a) - dist(b))[0];
     }
-    // Who it goes in front of, by angle.
-    const cell = bonds.placements.filter(p => p.sector === sector.id && p.ring === ring && p.id !== draggedId && visible.has(p.id));
     const rel = a => norm(a - sector.start);
     const target = rel(angle);
-    const before = cell.find(p => {
-        const node = laid.nodes.get(p.id);
-        return node && rel(node.angle) > target;
-    });
-    return { kind: "cell", sector: sector.id, ring, before: before?.id ?? null };
+    let before = null;
+    let best = Infinity;
+    for (const [id, node] of laid.nodes) {
+        if (id === draggedId || node.sector !== sector.id || node.ring !== ring) continue;
+        const d = rel(node.angle);
+        if (d > target && d < best) { best = d; before = id; }
+    }
+    return { kind: "cell", sector: sector.id, ring, before };
 }
 
 /* -------------------------------------------- */
@@ -2960,7 +3089,8 @@ function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
  * }
  * getModel() → {
  *   editable, isGM, owner: { id, name }, self: { name, img }, party: [{ id, name, img }],
- *   entries: [{ id, name, title, img, frame, status, isNew }], bonds, folders: [{ label, entryIds }],
+ *   entries: [{ id, name, title, img, frame, status, isNew, tag }], bonds,
+ *   tags: [{ key, label, color }] (Persona folders, in the GM's order — the default slices),
  *   players: [{ id, name }], moments: [{ id, label, ts }], momentId
  * }
  */
@@ -2977,6 +3107,7 @@ class BondsView {
     #bonds = null;
     #laid = null;
     #visible = new Set();
+    #tagOf = new Map();
     #linkMode = false;
     #linkFrom = null;
     #gesture = null;
@@ -3032,7 +3163,8 @@ class BondsView {
         const m = this.#model;
         const entries = this.#entryMap();
         this.#visible = new Set(entries.keys());
-        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id));
+        this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
+        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
         const loose = m.entries.filter(e => !placed.has(e.id));
         const pop = this.host.querySelector(".bonds-pop");
@@ -3080,7 +3212,6 @@ class BondsView {
         const tools = [];
         if (m.editable) {
             tools.push(`<button type="button" class="persona-button bonds-tool ${this.#linkMode ? "is-on" : ""}" data-action="linkMode" aria-pressed="${this.#linkMode}" title="${esc(this.t("LinkHint"))}"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("Link"))}</span></button>`);
-            tools.push(`<button type="button" class="persona-button bonds-tool" data-action="newSector"><i class="fa-solid fa-chart-pie" inert></i><span>${esc(this.t("AddSector"))}</span></button>`);
         }
         if (m.isGM && m.players.length) {
             tools.push(`<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`);
@@ -3136,7 +3267,7 @@ class BondsView {
             const arc = arcPath(G.labelRadius, s.start, s.end);
             const label = s.label || this.t("Unnamed");
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
-            parts.push(`<text class="bonds-sector-label" ${m.editable ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
+            parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
         }
         if (!laid.sectors.length) {
             parts.push(`<circle class="bonds-empty-ring" cx="${C}" cy="${C}" r="${(inner + outer) / 2}"/>`);
@@ -3184,11 +3315,11 @@ class BondsView {
         const picked = id => (this.#linkFrom === id ? "is-picked" : "");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
-            <img src="${esc(m.self.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
+            <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
             out.push(`<button type="button" class="bonds-node bonds-node--party ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
-                <img src="${esc(p.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(p.name)}</span></button>`);
+                <span class="bonds-node__img"><img src="${esc(p.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(p.name)}</span></button>`);
         }
         for (const placement of this.#bonds.placements) {
             const entry = entries.get(placement.id);
@@ -3207,7 +3338,7 @@ class BondsView {
         const name = entry.name ?? "???";
         const statusText = entry.status && entry.status !== "alive" ? this.adapter.t(`PERSONA.Status.${entry.status}`) : "";
         return `<button type="button" class="bonds-node bonds-node--entry ${status} ${entry.isNew ? "is-new" : ""} ${extra}" data-node="${esc(entry.id)}" data-entry="${esc(entry.id)}" style="${style}" aria-label="${esc(name)}">
-            <img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false">${mark}
+            <span class="bonds-node__img"><img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false"></span>${mark}
             <span class="bonds-node__name">${esc(name)}${entry.title ? `<small>${esc(entry.title)}</small>` : ""}${statusText ? `<small class="bonds-node__status">${esc(statusText)}</small>` : ""}</span></button>`;
     }
 
@@ -3264,12 +3395,19 @@ class BondsView {
                     <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
                 </div>`).join("")}</div>`;
         }
-        const start = m.editable && !this.#bonds.sectors.length && m.folders.length
-            ? `<button type="button" class="persona-button bonds-drawer__start" data-action="fromFolders"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("FromFolders"))}</span></button>`
+        const start = m.editable && loose.length > 1
+            ? `<button type="button" class="persona-button bonds-drawer__start" data-action="placeAll"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("PlaceAll"))}</span></button>`
             : "";
-        const hint = m.editable && loose.length
-            ? `<p class="bonds-drawer__tip">${esc(this.#bonds.sectors.length ? this.t("DragHint") : this.t("SectorFirst"))}</p>` : "";
+        const hint = m.editable && loose.length ? `<p class="bonds-drawer__tip">${esc(this.t("DragHint"))}</p>` : "";
+        // Shown while dragging a portrait: drop here to start a category of your own.
+        const newCat = m.editable
+            ? `<div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>`
+            : "";
+        const out = m.editable
+            ? `<div class="bonds-takeoff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOffDrop"))}</span></div>`
+            : "";
         return `<aside class="bonds-drawer" data-drawer>
+            ${newCat}${out}
             <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
             ${start}${hint}${body}
         </aside>`;
@@ -3387,15 +3525,17 @@ class BondsView {
         if (!g) return;
         if (g.kind === "pan") return;
         if (!g.dragging) return; // a plain click: handled by #onClick
+        // Read the target while the drop zones are still shown.
+        const target = this.#dropTarget(event, g.id);
         g.ghost?.remove();
         g.source.classList.remove("is-lifted");
         this.host.querySelector(".bonds")?.classList.remove("is-dragging");
         this.#highlight(null);
         this.#suppressClick = true;
         setTimeout(() => { this.#suppressClick = false; }, 0);
-        const target = this.#dropTarget(event, g.id);
-        if (target.kind === "cell") this.#commit(place(this.#bonds, g.id, target.sector, target.ring, target.before));
+        if (target.kind === "cell") this.#commit(place(this.#bonds, g.id, target.category, target.ring, target.before));
         else if (target.kind === "out") this.#commit(unplace(this.#bonds, g.id));
+        else if (target.kind === "new") this.#sectorPop(null, this.host.querySelector(".bonds-drawer__head"), g.id);
         else if (g.stale) this.refresh();
     };
 
@@ -3438,25 +3578,39 @@ class BondsView {
         return ghost;
     }
 
-    /** Over the drawer → unplace; over the wheel → hit test; elsewhere → nothing. */
+    /**
+     * Over "new category" → create one; over the drawer → take off the wheel; over the wheel →
+     * a ring and slice. Dropping on another folder's slice keeps the person in their own folder's
+     * slice (folders are the GM's tags); a category of the player's own takes anyone.
+     */
     #dropTarget(event, id) {
-        const drawer = this.host.querySelector("[data-drawer]")?.getBoundingClientRect();
-        const inside = r => r && event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
-        if (inside(drawer)) return { kind: "out", drawer: true };
-        const viewport = this.host.querySelector("[data-viewport]")?.getBoundingClientRect();
-        if (!inside(viewport)) return { kind: "none" };
+        const inside = el => {
+            const r = el?.getBoundingClientRect();
+            return r && r.width && event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+        };
+        const placed = this.#bonds.placements.some(p => p.id === id);
+        if (inside(this.host.querySelector("[data-new-sector]"))) return { kind: "new" };
+        if (inside(this.host.querySelector("[data-drawer]"))) return placed ? { kind: "out" } : { kind: "none" };
+        if (!inside(this.host.querySelector("[data-viewport]"))) return { kind: "none" };
         const { x, y } = this.#toStage(event.clientX, event.clientY);
-        const hit = hitTest(x, y, this.#laid, this.#bonds, this.#visible, id);
-        // Dropping a not-yet-placed person past the rim does nothing.
-        if (hit.kind === "out" && !this.#bonds.placements.some(p => p.id === id)) return { kind: "none" };
-        return hit;
+        const hit = hitTest(x, y, this.#laid, id);
+        if (hit.kind === "out") return placed ? hit : { kind: "none" };
+        if (hit.kind !== "cell") return hit;
+        const custom = hit.sector && this.#bonds.sectors.some(s => s.id === hit.sector);
+        const own = this.#tagOf.get(id) ?? NO_TAG;
+        const dest = custom ? hit.sector : own;
+        // `before` only counts inside the slice the person really lands in.
+        return { ...hit, category: custom ? hit.sector : null, dest, before: dest === hit.sector ? hit.before : null };
     }
 
     #highlight(target) {
         this.host.querySelectorAll(".bonds-cell.is-target").forEach(el => el.classList.remove("is-target"));
         this.host.querySelector("[data-drawer]")?.classList.toggle("is-target", target?.kind === "out");
+        this.host.querySelector("[data-new-sector]")?.classList.toggle("is-target", target?.kind === "new");
         if (target?.kind === "cell") {
-            this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.sector}|${target.ring}`)}"]`)?.classList.add("is-target");
+            const cell = this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.dest}|${target.ring}`)}"]`)
+                ?? this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.sector}|${target.ring}`)}"]`);
+            cell?.classList.add("is-target");
         }
     }
 
@@ -3474,7 +3628,7 @@ class BondsView {
         const node = event.target.closest("[data-node]");
         const loose = event.target.closest("[data-loose]");
 
-        if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"], [data-action="newSector"]')) {
+        if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"]')) {
             this.#closePop();
             if (!node) return;
         }
@@ -3509,21 +3663,18 @@ class BondsView {
             this.#linkFrom = null;
             this.#render();
         },
-        newSector: el => this.#sectorPop(null, el),
         editSector: (el, id) => this.#sectorPop(id, el),
         editLink: (el, id) => this.#linkPop(id, el),
-        fromFolders: () => this.#commit(fromFolders(this.#bonds, this.#model.folders)),
+        placeAll: () => {
+            const placed = new Set(this.#bonds.placements.map(p => p.id));
+            this.#commit(placeAll(this.#bonds, this.#model.entries.filter(e => !placed.has(e.id)).map(e => e.id), 3));
+        },
         // Popover actions
         popClose: () => this.#closePop(),
         swatch: el => {
             el.closest(".bonds-pop").querySelectorAll(".bonds-swatch").forEach(s => s.classList.toggle("is-on", s === el));
             const input = el.closest("form")?.querySelector('[name="color"]');
             if (input) input.value = el.dataset.color;
-        },
-        sectorMove: el => {
-            const id = el.closest("[data-sector-form]").dataset.sector;
-            this.#commit(moveSector(this.#bonds, id, Number(el.dataset.step)));
-            this.#closePop();
         },
         sectorDelete: el => {
             const id = el.closest("[data-sector-form]").dataset.sector;
@@ -3599,21 +3750,20 @@ class BondsView {
         pop.innerHTML = "";
     }
 
-    #sectorPop(id, anchor) {
+    /** Name and colour of a category: a new one (for `entryId`, just dropped) or an existing one. */
+    #sectorPop(id, anchor, entryId = null) {
         const sector = id ? this.#bonds.sectors.find(s => s.id === id) : null;
-        const color = sector?.color ?? SECTOR_COLORS[this.#bonds.sectors.length % SECTOR_COLORS.length];
-        const index = sector ? this.#bonds.sectors.indexOf(sector) : -1;
+        const color = sector?.color ?? SECTOR_COLORS[(this.#bonds.sectors.length + 4) % SECTOR_COLORS.length];
+        const who = entryId ? this.#model.entries.find(e => e.id === entryId)?.name ?? "???" : "";
         const html = `
-        <form class="bonds-form" data-sector-form data-sector="${esc(id ?? "")}">
-            <span class="persona-eyebrow">${esc(sector ? this.t("EditSector") : this.t("NewSector"))}</span>
+        <form class="bonds-form" data-sector-form data-sector="${esc(id ?? "")}" data-entry="${esc(entryId ?? "")}">
+            <span class="persona-eyebrow">${esc(sector ? this.t("EditSector") : this.t("NewSector"))}${who ? ` · ${esc(who)}` : ""}</span>
             <input type="text" name="label" maxlength="60" value="${esc(sector?.label ?? "")}" placeholder="${esc(this.t("SectorPlaceholder"))}" autocomplete="off">
             <input type="hidden" name="color" value="${color}">
             <div class="bonds-swatches">${SECTOR_COLORS.map(c => `<button type="button" class="bonds-swatch ${c === color ? "is-on" : ""}" data-action="swatch" data-color="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+            ${sector ? `<p class="bonds-form__hint">${esc(this.t("DissolveHint"))}</p>` : ""}
             <div class="bonds-form__row">
-                ${sector ? `
-                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="-1" ${index <= 0 ? "disabled" : ""} title="${esc(this.t("MoveLeft"))}" aria-label="${esc(this.t("MoveLeft"))}"><i class="fa-solid fa-rotate-left" inert></i></button>
-                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="1" ${index >= this.#bonds.sectors.length - 1 ? "disabled" : ""} title="${esc(this.t("MoveRight"))}" aria-label="${esc(this.t("MoveRight"))}"><i class="fa-solid fa-rotate-right" inert></i></button>
-                    <button type="button" class="persona-mini persona-mini--icon bonds-danger" data-action="sectorDelete" title="${esc(this.t("DeleteSector"))}" aria-label="${esc(this.t("DeleteSector"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
+                ${sector ? `<button type="button" class="persona-mini bonds-danger" data-action="sectorDelete"><i class="fa-solid fa-folder-minus" inert></i><span>${esc(this.t("Dissolve"))}</span></button>` : ""}
                 <span class="bonds-form__spacer"></span>
                 <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
                 <button type="submit" class="persona-button">${esc(sector ? this.t("Save") : this.t("Create"))}</button>
@@ -3656,9 +3806,10 @@ class BondsView {
         const color = form.querySelector('[name="color"]').value;
         if (!label) return form.querySelector('[name="label"]').focus();
         const id = form.dataset.sector;
+        const entryId = form.dataset.entry;
         this.#closePop();
         if (id) this.#commit(updateSector(this.#bonds, id, { label, color }));
-        else this.#commit(addSector(this.#bonds, { label, color }).bonds);
+        else if (entryId) this.#commit(createSector(this.#bonds, entryId, { label, color }));
     };
 
     /* -------------------------------------------- */
@@ -3712,19 +3863,19 @@ class BondsView {
         E("e14", "Pell", "Street urchin, Lowmarket")
     ];
 
+    const TAGS = [
+        { key: "Embermark", label: "Embermark", color: "#b4643e" },
+        { key: "Veiled Order", label: "Veiled Order", color: "#8a5a8f" },
+        { key: "Kurdrax", label: "Kurdrax", color: "#c8452f" }
+    ];
     const sample = () => ({
         v: 1,
-        sectors: [
-            { id: "s1", label: "Embermark", color: "#b4643e" },
-            { id: "s2", label: "Veiled Order", color: "#8a5a8f" },
-            { id: "s3", label: "Enemies", color: "#c8452f" },
-            { id: "s4", label: "My people", color: "#74864a" }
-        ],
+        sectors: [{ id: "c1", label: "My people", color: "#74864a" }],
         placements: [
-            { id: "e1", sector: "s1", ring: 1 }, { id: "e2", sector: "s1", ring: 2 }, { id: "e3", sector: "s1", ring: 2 }, { id: "e4", sector: "s1", ring: 3 },
-            { id: "e5", sector: "s2", ring: 2 }, { id: "e6", sector: "s2", ring: 3 }, { id: "e7", sector: "s2", ring: 1 },
-            { id: "e8", sector: "s3", ring: 3 }, { id: "e9", sector: "s3", ring: 2 }, { id: "e10", sector: "s3", ring: 2 },
-            { id: "e12", sector: "s4", ring: 1 }, { id: "e11", sector: "s4", ring: 2 }
+            { id: "e1", sector: null, ring: 1 }, { id: "e2", sector: null, ring: 2 }, { id: "e3", sector: null, ring: 2 }, { id: "e4", sector: null, ring: 3 },
+            { id: "e5", sector: null, ring: 2 }, { id: "e6", sector: null, ring: 3 }, { id: "e7", sector: null, ring: 1 },
+            { id: "e8", sector: null, ring: 3 }, { id: "e9", sector: null, ring: 2 }, { id: "e10", sector: null, ring: 2 },
+            { id: "e12", sector: "c1", ring: 1 }, { id: "e11", sector: "c1", ring: 2 }
         ],
         links: [
             { id: "l1", a: "self", b: "e12", type: "family" },
@@ -3739,7 +3890,7 @@ class BondsView {
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [{ id: "a", label: "Kurdrax", color: "#c8452f" }], placements: [{ id: "e9", sector: "a", ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         gmOwner: "p1"
@@ -3748,8 +3899,7 @@ class BondsView {
     // One older moment: before Bram died and before the Order and Nyx were met.
     const older = sample();
     older.placements = older.placements.filter(p => !["e5", "e6", "e7", "e10"].includes(p.id));
-    older.sectors = older.sectors.filter(s => s.id !== "s2");
-    older.links = older.links.filter(l => !["l5"].includes(l.id));
+        older.links = older.links.filter(l => !["l5"].includes(l.id));
     const seedMoments = () => [{ id: "m1", label: "Sessão 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Sessão 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
     S.moments = seedMoments();
 
@@ -3767,7 +3917,6 @@ class BondsView {
             const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
             const known = S.entries.filter(e => e.known.includes(ownerId));
-            const groups = [...new Set(known.map(e => e.group).filter(Boolean))];
             return {
                 isGM,
                 editable: !moment,
@@ -3778,11 +3927,12 @@ class BondsView {
                     id: e.id,
                     name: e.named.includes(ownerId) ? e.name : null,
                     title: e.named.includes(ownerId) ? e.title : "",
-                    img: e.img, frame: "", status: moment?.statuses?.[e.id] ?? e.status,
-                    isNew: !isGM && e.id === "e14"
+                    img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
+                    isNew: !isGM && e.id === "e14",
+                    tag: e.group ?? "_none"
                 })),
                 bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
-                folders: groups.map(label => ({ label, entryIds: known.filter(e => e.group === label).map(e => e.id) })),
+                tags: TAGS,
                 players: PLAYERS.map(p => ({ id: p.id, name: `${p.name} · ${p.character}` })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
                 momentId: moment?.id ?? null

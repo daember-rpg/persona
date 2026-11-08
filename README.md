@@ -30,8 +30,10 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 ## Bonds: each player's relationship wheel
 Inspired by the *People* screen of Final Fantasy XVI.
 - **Centre**: the player's character. **Inner ring**: the rest of the party, always there and always close.
-- **Slices**: groups the player creates — a kingdom, the Order, enemies, "don't trust". Name and colour are theirs; rotate or delete them from the slice label. *Start from the Persona folders* creates one slice per folder they can see.
-- **Rings**: distance. Close (inner), Known, Distant (outer). Drag a portrait from *Not placed yet* into a slice and ring; drag it back to the list (or past the rim) to take it off.
+- **Slices come from the Persona folders**: drag a portrait onto the wheel and the person lands in their folder's slice (the GM's tags, in folder order; people without a folder go to *No folder*). The ring you drop on sets the distance: Close (inner), Known, Distant (outer). *Put everyone on the wheel* drops all the rest on the outer ring.
+- **Categories of their own**: while dragging, drop on *create a category of your own* to start one ("don't trust", "owes us a favour"…) with a name and colour; drop anyone onto it to add them. Click its label to rename, recolour or dissolve it (people go back to their folders).
+- **Never empty**: a slice or category with nobody in it disappears.
+- **Take off**: drag a portrait back to the list (or past the rim).
 - **Links**: *Link*, then click two portraits (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link icon).
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.

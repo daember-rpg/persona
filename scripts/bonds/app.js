@@ -13,7 +13,7 @@ import { getSetting } from "../settings.js";
 import { getEntries, getGroups, canSee, seenIds, players, updateSetting } from "../store.js";
 import { imageOf, frameStyle } from "../view-data.js";
 import { BondsView } from "./view.js";
-import { normalizeBonds, PARTY_PREFIX } from "./model.js";
+import { normalizeBonds, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
 
 const t = key => game.i18n.localize(key);
 
@@ -45,6 +45,22 @@ function persona(user) {
         name: actor?.name ?? user.name,
         img: actor?.img || user.avatar || "icons/svg/mystery-man.svg"
     };
+}
+
+/** The GM's Persona folders as the wheel's default slices, in folder order. */
+function folderTags() {
+    return getGroups().map((g, i) => ({ key: g.id, label: g.label, color: SECTOR_COLORS[i % SECTOR_COLORS.length] }));
+}
+
+/**
+ * Wheels from 0.5.0–0.5.3 had hand-made slices, often copies of the folders. A category named like
+ * a folder becomes that folder's slice again (its people go back to "follow the folder").
+ */
+function migrate(bonds) {
+    const labels = new Set(getGroups().map(g => g.label.trim().toLowerCase()));
+    const copies = new Set(bonds.sectors.filter(s => labels.has(s.label.trim().toLowerCase())).map(s => s.id));
+    if (!copies.size) return bonds;
+    return normalizeBonds({ ...bonds, placements: bonds.placements.map(p => copies.has(p.sector) ? { ...p, sector: null } : p) });
 }
 
 export function getMoments() {
@@ -159,7 +175,7 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         if (!owner) {
             return {
                 ...base, editable: false, owner: { id: null, name: "" },
-                self: { name: "—", img: "icons/svg/mystery-man.svg" }, party: [], entries: [], bonds: null, folders: []
+                self: { name: "—", img: "icons/svg/mystery-man.svg" }, party: [], entries: [], bonds: null, tags: []
             };
         }
 
@@ -167,8 +183,12 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         const seen = seenIds(owner);
         const statusOf = entry => moment?.statuses?.[entry.id] ?? entry.status;
         const known = getEntries().filter(e => e.kind === "npc" && canSee(e, "face", owner));
+        const tags = folderTags();
+        const order = new Map(tags.map((tag, i) => [tag.key, i]));
         const entries = known.map(e => {
             const named = canSee(e, "name", owner);
+            // The person's slice by default: their first folder, in the GM's folder order.
+            const tag = [...e.groups].filter(id => order.has(id)).sort((a, b) => order.get(a) - order.get(b))[0] ?? NO_TAG;
             return {
                 id: e.id,
                 name: named ? e.name : null,
@@ -176,13 +196,11 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
                 img: imageOf(e),
                 frame: frameStyle(e),
                 status: statusOf(e),
-                isNew: !isGM && !seen.has(e.id)
+                isNew: !isGM && !seen.has(e.id),
+                tag
             };
         });
         const knownIds = new Set(known.map(e => e.id));
-        const folders = getGroups()
-            .map(g => ({ label: g.label, entryIds: known.filter(e => e.groups.includes(g.id)).map(e => e.id) }))
-            .filter(f => f.entryIds.length);
         const self = persona(owner);
 
         return {
@@ -193,8 +211,8 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             self: { name: self.name, img: self.img },
             party: roster.filter(u => u.id !== owner.id).map(persona),
             entries: entries.filter(e => knownIds.has(e.id)),
-            bonds: moment ? moment.wheels?.[owner.id] ?? null : bondsOf(owner),
-            folders
+            bonds: migrate(normalizeBonds(moment ? moment.wheels?.[owner.id] : owner.getFlag(MODULE_ID, "bonds"))),
+            tags
         };
     }
 

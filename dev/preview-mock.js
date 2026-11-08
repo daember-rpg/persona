@@ -34,19 +34,19 @@
         E("e14", "Pell", "Street urchin, Lowmarket")
     ];
 
+    const TAGS = [
+        { key: "Embermark", label: "Embermark", color: "#b4643e" },
+        { key: "Veiled Order", label: "Veiled Order", color: "#8a5a8f" },
+        { key: "Kurdrax", label: "Kurdrax", color: "#c8452f" }
+    ];
     const sample = () => ({
         v: 1,
-        sectors: [
-            { id: "s1", label: "Embermark", color: "#b4643e" },
-            { id: "s2", label: "Veiled Order", color: "#8a5a8f" },
-            { id: "s3", label: "Enemies", color: "#c8452f" },
-            { id: "s4", label: "My people", color: "#74864a" }
-        ],
+        sectors: [{ id: "c1", label: "My people", color: "#74864a" }],
         placements: [
-            { id: "e1", sector: "s1", ring: 1 }, { id: "e2", sector: "s1", ring: 2 }, { id: "e3", sector: "s1", ring: 2 }, { id: "e4", sector: "s1", ring: 3 },
-            { id: "e5", sector: "s2", ring: 2 }, { id: "e6", sector: "s2", ring: 3 }, { id: "e7", sector: "s2", ring: 1 },
-            { id: "e8", sector: "s3", ring: 3 }, { id: "e9", sector: "s3", ring: 2 }, { id: "e10", sector: "s3", ring: 2 },
-            { id: "e12", sector: "s4", ring: 1 }, { id: "e11", sector: "s4", ring: 2 }
+            { id: "e1", sector: null, ring: 1 }, { id: "e2", sector: null, ring: 2 }, { id: "e3", sector: null, ring: 2 }, { id: "e4", sector: null, ring: 3 },
+            { id: "e5", sector: null, ring: 2 }, { id: "e6", sector: null, ring: 3 }, { id: "e7", sector: null, ring: 1 },
+            { id: "e8", sector: null, ring: 3 }, { id: "e9", sector: null, ring: 2 }, { id: "e10", sector: null, ring: 2 },
+            { id: "e12", sector: "c1", ring: 1 }, { id: "e11", sector: "c1", ring: 2 }
         ],
         links: [
             { id: "l1", a: "self", b: "e12", type: "family" },
@@ -61,7 +61,7 @@
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [{ id: "a", label: "Kurdrax", color: "#c8452f" }], placements: [{ id: "e9", sector: "a", ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         gmOwner: "p1"
@@ -70,8 +70,7 @@
     // One older moment: before Bram died and before the Order and Nyx were met.
     const older = sample();
     older.placements = older.placements.filter(p => !["e5", "e6", "e7", "e10"].includes(p.id));
-    older.sectors = older.sectors.filter(s => s.id !== "s2");
-    older.links = older.links.filter(l => !["l5"].includes(l.id));
+        older.links = older.links.filter(l => !["l5"].includes(l.id));
     const seedMoments = () => [{ id: "m1", label: "Sessão 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Sessão 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
     S.moments = seedMoments();
 
@@ -89,7 +88,6 @@
             const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
             const known = S.entries.filter(e => e.known.includes(ownerId));
-            const groups = [...new Set(known.map(e => e.group).filter(Boolean))];
             return {
                 isGM,
                 editable: !moment,
@@ -100,11 +98,12 @@
                     id: e.id,
                     name: e.named.includes(ownerId) ? e.name : null,
                     title: e.named.includes(ownerId) ? e.title : "",
-                    img: e.img, frame: "", status: moment?.statuses?.[e.id] ?? e.status,
-                    isNew: !isGM && e.id === "e14"
+                    img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
+                    isNew: !isGM && e.id === "e14",
+                    tag: e.group ?? "_none"
                 })),
                 bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
-                folders: groups.map(label => ({ label, entryIds: known.filter(e => e.group === label).map(e => e.id) })),
+                tags: TAGS,
                 players: PLAYERS.map(p => ({ id: p.id, name: `${p.name} · ${p.character}` })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
                 momentId: moment?.id ?? null

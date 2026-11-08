@@ -6,8 +6,12 @@
  *
  * A player's wheel (stored in their own user flags):
  *   { v, sectors: [{ id, label, color }], placements: [{ id, sector, ring }], links: [{ id, a, b, type }] }
- * - sectors: groups the player creates (a kingdom, "enemies", "don't trust"…), shown as slices.
- * - placements: a known person (Persona entry id) in a slice, at a distance ring (1 close … 3 distant).
+ * - Slices are derived, never empty: by default a person sits in the slice of their Persona folder
+ *   (the GM's tags), and a slice exists only while someone is in it.
+ * - sectors: the player's own categories ("don't trust"…). A person moved into one keeps
+ *   `placement.sector` = its id; otherwise `sector` is null (= their folder's slice).
+ *   A category with nobody in it is dropped.
+ * - placements: a known person (Persona entry id) at a distance ring (1 close … 3 distant).
  *   The order of the array is the order inside each slice and ring.
  * - links: a relation between two portraits. Node ids are entry ids, "self" or "u:<userId>" (party).
  * Everything is an array so a Foundry flag update replaces it whole (objects would be merged).
@@ -61,22 +65,26 @@ export function emptyBonds() {
 export function normalizeBonds(raw) {
     const out = emptyBonds();
     if (!raw || typeof raw !== "object") return out;
+    const sectors = [];
     const sectorIds = new Set();
     for (const s of Array.isArray(raw.sectors) ? raw.sectors : []) {
         if (!s?.id || sectorIds.has(s.id)) continue;
         sectorIds.add(s.id);
-        out.sectors.push({
+        sectors.push({
             id: String(s.id),
             label: String(s.label ?? "").slice(0, 60),
-            color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : SECTOR_COLORS[out.sectors.length % SECTOR_COLORS.length]
+            color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : SECTOR_COLORS[sectors.length % SECTOR_COLORS.length]
         });
     }
     const placed = new Set();
     for (const p of Array.isArray(raw.placements) ? raw.placements : []) {
-        if (!p?.id || placed.has(p.id) || !sectorIds.has(p.sector)) continue;
+        if (!p?.id || placed.has(p.id)) continue;
         placed.add(p.id);
-        out.placements.push({ id: String(p.id), sector: String(p.sector), ring: clampRing(p.ring) });
+        out.placements.push({ id: String(p.id), sector: sectorIds.has(p.sector) ? String(p.sector) : null, ring: clampRing(p.ring) });
     }
+    // A category exists only while someone is in it.
+    const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
+    out.sectors = sectors.filter(s => used.has(s.id));
     const types = new Set(LINK_TYPES.map(t => t.id));
     const pairs = new Set();
     for (const l of Array.isArray(raw.links) ? raw.links : []) {
@@ -93,13 +101,17 @@ export function normalizeBonds(raw) {
 /*  Edits (pure: each returns a new wheel)      */
 /* -------------------------------------------- */
 
-const copy = bonds => normalizeBonds(JSON.parse(JSON.stringify(bonds ?? emptyBonds())));
+const copy = bonds => JSON.parse(JSON.stringify(normalizeBonds(bonds)));
 
-export function addSector(bonds, { label, color } = {}) {
+/** A new category holding one person (a category never exists empty). */
+export function createSector(bonds, entryId, { label, color } = {}, ring = 2) {
     const next = copy(bonds);
     const id = uid();
     next.sectors.push({ id, label: String(label ?? "").trim().slice(0, 60), color: color ?? SECTOR_COLORS[next.sectors.length % SECTOR_COLORS.length] });
-    return { bonds: normalizeBonds(next), id };
+    const was = next.placements.find(p => p.id === entryId);
+    next.placements = next.placements.filter(p => p.id !== entryId);
+    next.placements.push({ id: entryId, sector: id, ring: was?.ring ?? ring });
+    return normalizeBonds(next);
 }
 
 export function updateSector(bonds, id, changes) {
@@ -112,34 +124,24 @@ export function updateSector(bonds, id, changes) {
     return normalizeBonds(next);
 }
 
-/** Moves a slice one step around the wheel (-1 counter-clockwise, +1 clockwise). */
-export function moveSector(bonds, id, step) {
-    const next = copy(bonds);
-    const i = next.sectors.findIndex(s => s.id === id);
-    const j = i + step;
-    if (i < 0 || j < 0 || j >= next.sectors.length) return next;
-    [next.sectors[i], next.sectors[j]] = [next.sectors[j], next.sectors[i]];
-    return next;
-}
-
-/** Removes a slice; the people in it go back to the unplaced list. */
+/** Dissolves a category: its people go back to their folders' slices, same distance. */
 export function removeSector(bonds, id) {
     const next = copy(bonds);
-    next.sectors = next.sectors.filter(s => s.id !== id);
+    for (const p of next.placements) if (p.sector === id) p.sector = null;
     return normalizeBonds(next);
 }
 
 /**
- * Puts a person in a slice and ring, just before `beforeId` (another person in that cell),
- * or at the end. Moving inside the same cell reorders.
+ * Puts a person at a ring, in a category (`sector` = its id) or in their folder's slice (null),
+ * just before `beforeId`, or at the end. Moving inside the same cell reorders.
  */
 export function place(bonds, entryId, sector, ring, beforeId = null) {
     const next = copy(bonds);
-    if (!next.sectors.some(s => s.id === sector)) return next;
+    if (sector && !next.sectors.some(s => s.id === sector)) sector = null;
     ring = clampRing(ring);
     const rest = next.placements.filter(p => p.id !== entryId);
-    const item = { id: entryId, sector, ring };
-    const anchor = beforeId ? rest.findIndex(p => p.id === beforeId && p.sector === sector && p.ring === ring) : -1;
+    const item = { id: entryId, sector: sector ?? null, ring };
+    const anchor = beforeId ? rest.findIndex(p => p.id === beforeId) : -1;
     if (anchor >= 0) rest.splice(anchor, 0, item);
     else rest.push(item);
     next.placements = rest;
@@ -149,7 +151,7 @@ export function place(bonds, entryId, sector, ring, beforeId = null) {
 export function unplace(bonds, entryId) {
     const next = copy(bonds);
     next.placements = next.placements.filter(p => p.id !== entryId);
-    return next;
+    return normalizeBonds(next);
 }
 
 /** Creates the link between two nodes, or changes its type if they are already linked. */
@@ -174,24 +176,20 @@ export function removeLink(bonds, id) {
     return next;
 }
 
-/**
- * Starts a wheel from the GM's Persona folders the player can see:
- * one slice per folder, its people on the middle ring.
- */
-export function fromFolders(bonds, folders) {
-    let next = copy(bonds);
+/** Puts everyone not yet on the wheel in their folders' slices, on the given ring. */
+export function placeAll(bonds, entryIds, ring = 2) {
+    const next = copy(bonds);
     const placed = new Set(next.placements.map(p => p.id));
-    folders.forEach(folder => {
-        const result = addSector(next, { label: folder.label, color: SECTOR_COLORS[(next.sectors.length) % SECTOR_COLORS.length] });
-        next = result.bonds;
-        for (const id of folder.entryIds) {
-            if (placed.has(id)) continue;
-            placed.add(id);
-            next = place(next, id, result.id, 2);
-        }
-    });
-    return next;
+    for (const id of entryIds) if (!placed.has(id)) next.placements.push({ id, sector: null, ring });
+    return normalizeBonds(next);
 }
+
+/** The slice key a placement lands in: its category, else its folder (tag), else "_none". */
+export function sectorKeyOf(placement, tagOf) {
+    return placement.sector ?? tagOf.get(placement.id) ?? NO_TAG;
+}
+
+export const NO_TAG = "_none";
 
 /* -------------------------------------------- */
 /*  Geometry                                    */
@@ -217,39 +215,53 @@ const ringMid = (ring, g) => (g.ringBands[ring - 1][0] + g.ringBands[ring - 1][1
  * @param bonds    a normalized wheel
  * @param visible  Set of entry ids this viewer may see (others are skipped, never drawn)
  * @param partyIds node ids of the other party members, in order
+ * @param tags     { list: [{ key, label, color }] in the GM's folder order, tagOf: Map(entryId → key),
+ *                   noneLabel } — the slices people fall into by default
  * @returns { sectors, nodes: Map(id → {x, y, angle, ring, sector}), self, party }
  */
-export function layout(bonds, visible, partyIds = [], g = GEOMETRY) {
+export function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     const TAU = Math.PI * 2;
-    const placements = bonds.placements.filter(p => visible.has(p.id));
-    const count = (sector, ring) => placements.filter(p => p.sector === sector && p.ring === ring).length;
+    const tagOf = tags.tagOf ?? new Map();
+    const placements = bonds.placements.filter(p => visible.has(p.id)).map(p => ({ ...p, key: sectorKeyOf(p, tagOf) }));
+    const present = new Set(placements.map(p => p.key));
+    // Only slices with someone in them: folders in the GM's order, then the player's categories, then "no folder".
+    const defs = [
+        ...(tags.list ?? []).filter(t => present.has(t.key)).map(t => ({ id: t.key, label: t.label, color: t.color, custom: false })),
+        ...bonds.sectors.filter(s => present.has(s.id)).map(s => ({ id: s.id, label: s.label, color: s.color, custom: true })),
+        ...(present.has(NO_TAG) ? [{ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }] : [])
+    ];
+    // A folder the viewer can't see as a tag still shows (its entries are known): fall back to "no folder".
+    const known = new Set(defs.map(d => d.id));
+    for (const p of placements) if (!known.has(p.key)) {
+        p.key = NO_TAG;
+        if (!known.has(NO_TAG)) { defs.push({ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }); known.add(NO_TAG); }
+    }
 
-    // How wide each slice needs to be for its fullest ring.
-    const needs = bonds.sectors.map(s => Math.max(g.minSector, ...RINGS.map(ring => count(s.id, ring) * (g.nodeArc / ringMid(ring, g)))));
-    const n = bonds.sectors.length;
+    const count = (key, ring) => placements.filter(p => p.key === key && p.ring === ring).length;
+    const needs = defs.map(d => Math.max(g.minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / ringMid(ring, g)))));
+    const n = defs.length;
     const available = TAU - n * g.gap;
-    const total = needs.reduce((a, b) => a + b, 0);
+    const total = needs.reduce((x, y) => x + y, 0);
     const widths = total <= available
         ? needs.map(w => w + (available - total) / Math.max(1, n))
         : needs.map(w => w * (available / total));
 
     const sectors = [];
     let cursor = n > 1 ? -widths[0] / 2 : -available / 2; // first slice centred at the top
-    bonds.sectors.forEach((s, i) => {
+    defs.forEach((d, i) => {
         const start = cursor + g.gap / 2;
         const end = start + widths[i];
         cursor = end + g.gap / 2;
-        sectors.push({ ...s, index: i, start, end, mid: (start + end) / 2 });
+        sectors.push({ ...d, index: i, start, end, mid: (start + end) / 2 });
     });
 
     const nodes = new Map();
     for (const sector of sectors) {
         for (const ring of RINGS) {
-            const cell = placements.filter(p => p.sector === sector.id && p.ring === ring);
+            const cell = placements.filter(p => p.key === sector.id && p.ring === ring);
             const r = ringMid(ring, g);
             const span = sector.end - sector.start;
             const step = g.nodeArc / r;
-            // Cluster in the middle of the slice, spreading out only when needed.
             const used = Math.min(span, cell.length * step);
             const first = sector.mid - used / 2;
             cell.forEach((p, i) => {
@@ -280,33 +292,34 @@ export function inSector(angle, sector) {
 }
 
 /**
- * Where a drop lands: { kind: "cell", sector, ring, before } inside the wheel (`before`: the
- * person the dropped one goes in front of, or null for the end),
- * { kind: "out" } past the outer edge (unplace), or { kind: "none" } over the centre/party.
+ * Where a drop lands: { kind: "cell", sector, ring, before } inside the wheel — `sector` is the
+ * slice key under the pointer (null on an empty wheel), `before` the person the dropped one goes
+ * in front of (null = the end) —, { kind: "out" } past the outer edge (take off the wheel),
+ * or { kind: "none" } over the centre and party.
  */
-export function hitTest(x, y, laid, bonds, visible, draggedId = null, g = GEOMETRY) {
+export function hitTest(x, y, laid, draggedId = null, g = GEOMETRY) {
     const { r, angle } = toPolar(x, y, g);
     const outer = g.ringBands[2][1];
     if (r > outer + 24) return { kind: "out" };
     if (r < g.ringBands[0][0]) return { kind: "none" };
-    if (!laid.sectors.length) return { kind: "none" };
     const ring = r < g.ringBands[0][1] ? 1 : r < g.ringBands[1][1] ? 2 : 3;
+    if (!laid.sectors.length) return { kind: "cell", sector: null, ring, before: null };
     let sector = laid.sectors.find(s => inSector(angle, s));
     if (!sector) {
-        // In a gap: the nearest slice edge.
         const dist = s => Math.min(Math.abs(norm(angle - s.start)), Math.abs(norm(s.start - angle)),
             Math.abs(norm(angle - s.end)), Math.abs(norm(s.end - angle)));
         sector = [...laid.sectors].sort((a, b) => dist(a) - dist(b))[0];
     }
-    // Who it goes in front of, by angle.
-    const cell = bonds.placements.filter(p => p.sector === sector.id && p.ring === ring && p.id !== draggedId && visible.has(p.id));
     const rel = a => norm(a - sector.start);
     const target = rel(angle);
-    const before = cell.find(p => {
-        const node = laid.nodes.get(p.id);
-        return node && rel(node.angle) > target;
-    });
-    return { kind: "cell", sector: sector.id, ring, before: before?.id ?? null };
+    let before = null;
+    let best = Infinity;
+    for (const [id, node] of laid.nodes) {
+        if (id === draggedId || node.sector !== sector.id || node.ring !== ring) continue;
+        const d = rel(node.angle);
+        if (d > target && d < best) { best = d; before = id; }
+    }
+    return { kind: "cell", sector: sector.id, ring, before };
 }
 
 /* -------------------------------------------- */
