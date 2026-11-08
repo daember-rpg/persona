@@ -3,7 +3,7 @@
 The people and places of your story, revealed when you choose. Players keep a gallery of everyone they have met, with cards and notes, and arrange them on their own **Bonds** wheel; the GM shows cards to players like handouts and plays full-screen videos for the whole table. System-agnostic, Foundry VTT V13/V14.
 
 ## Install
-Manifest URL: `https://github.com/daember-rpg/persona/releases/latest/download/module.json`
+Manifest URL: `https://raw.githubusercontent.com/daember-rpg/persona/main/module.json`
 
 Third module of the Triad suite (Triad · First Strike · Persona). Works on its own as a window, or as a tab in Triad's tray.
 
