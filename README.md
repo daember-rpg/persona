@@ -34,7 +34,10 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Categories of their own**: while dragging, drop on *create a category of your own* to start one ("don't trust", "owes us a favour"…) with a name and colour; drop anyone onto it to add them. Click its label to rename, recolour or dissolve it (people go back to their folders).
 - **Never empty**: a slice or category with nobody in it disappears.
 - **Take off**: drag a portrait back to the list (or past the rim).
-- **Links**: *Link*, then click two portraits (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link icon).
+- **Inspector**: click a portrait to select it. The side panel shows who they are, their distance (change it in one click — or put someone on the wheel without dragging), their bonds, *Link to someone*, *Open card* and *Take off the wheel*. Double-click opens the Persona card. Click the empty wheel or press Escape to deselect.
+- **Focus**: hovering or selecting someone lights up them and everyone they're bound to, and dims the rest.
+- **Links**: *Link to someone* in the inspector, then click the other portrait (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link). With many links, their icons only show for the person in focus.
+- **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
 - **Private**: each player sees and edits only their own wheel. The GM can open and edit anyone's from the player chips (the player sees the changes live).

@@ -179,15 +179,8 @@
     "Bonds": {
       "Title": "Bonds",
       "Open": "Bonds — your relationship wheel",
-      "Eyebrow": "Who's who to you",
-      "ReadOnlyEyebrow": "A player's wheel",
       "Party": "Party",
       "Unnamed": "Unnamed",
-      "Link": "Link",
-      "LinkHint": "Draw a relation between two portraits",
-      "LinkPickFirst": "Pick the first portrait",
-      "LinkPickSecond": "Now pick who they are linked to",
-      "Done": "Done",
       "NewSector": "New category",
       "EditSector": "Edit category",
       "SectorPlaceholder": "Don't trust, owe us a favour…",
@@ -229,13 +222,44 @@
         "serves": "Serves",
         "betrayed": "Betrayed"
       },
-      "GMEditing": "Editing {name}'s wheel — the player sees your changes",
       "NoFolder": "No folder",
       "PlaceAll": "Put everyone on the wheel",
       "NewCategoryDrop": "Drop here to create a category of your own",
       "TakeOffDrop": "Drop here to take off the wheel",
       "Dissolve": "Dissolve",
-      "DissolveHint": "Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it."
+      "DissolveHint": "Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.",
+      "Players": "Players",
+      "TitleOf": "{name}'s bonds",
+      "SubPlayer": "Click someone to see their bonds. Drag portraits to arrange the wheel.",
+      "SubGM": "You're editing {name}'s wheel. The player sees your changes.",
+      "SubPast": "As it was at {label}. Go back to now to make changes.",
+      "LinkPickTarget": "Click who {name} is linked to",
+      "Search": "Find someone",
+      "You": "You",
+      "Distance": "Distance",
+      "PutOnWheel": "Put on the wheel",
+      "Bonds": "Bonds",
+      "NoBondsYet": "No bonds yet. Link them to someone to show how they relate.",
+      "NoBonds": "No bonds.",
+      "LinkTo": "Link to someone",
+      "OpenCard": "Open card",
+      "TakeOff": "Take off the wheel",
+      "BackToList": "Not on the wheel ({n})",
+      "Close": "Close",
+      "EditLink": "Change or remove",
+      "TypeDir": {
+        "serves": {
+          "out": "Serves",
+          "in": "Served by"
+        },
+        "betrayed": {
+          "out": "Betrayed",
+          "in": "Betrayed by"
+        }
+      },
+      "FindOnWheel": "Find on the wheel",
+      "HideDead": "Hide the dead ({n})",
+      "ShowDead": "Show the dead ({n})"
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

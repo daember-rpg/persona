@@ -179,15 +179,8 @@
     "Bonds": {
       "Title": "Laços",
       "Open": "Laços — sua roda de relações",
-      "Eyebrow": "Quem é quem para você",
-      "ReadOnlyEyebrow": "Roda de um jogador",
       "Party": "Grupo",
       "Unnamed": "Sem nome",
-      "Link": "Ligar",
-      "LinkHint": "Desenhe uma relação entre dois retratos",
-      "LinkPickFirst": "Escolha o primeiro retrato",
-      "LinkPickSecond": "Agora escolha com quem ele se liga",
-      "Done": "Pronto",
       "NewSector": "Nova categoria",
       "EditSector": "Editar categoria",
       "SectorPlaceholder": "Não confio, nos deve um favor…",
@@ -229,13 +222,44 @@
         "serves": "Serve a",
         "betrayed": "Traiu"
       },
-      "GMEditing": "Editando a roda de {name} — o jogador vê suas mudanças",
       "NoFolder": "Sem pasta",
       "PlaceAll": "Colocar todos na roda",
       "NewCategoryDrop": "Solte aqui para criar uma categoria sua",
       "TakeOffDrop": "Solte aqui para tirar da roda",
       "Dissolve": "Desfazer",
-      "DissolveHint": "Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém."
+      "DissolveHint": "Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém.",
+      "Players": "Jogadores",
+      "TitleOf": "Laços de {name}",
+      "SubPlayer": "Clique em alguém para ver os laços. Arraste retratos para montar a roda.",
+      "SubGM": "Você está editando a roda de {name}. O jogador vê suas mudanças.",
+      "SubPast": "Como estava em {label}. Volte para agora para mudar algo.",
+      "LinkPickTarget": "Clique em quem se liga a {name}",
+      "Search": "Procurar alguém",
+      "You": "Você",
+      "Distance": "Distância",
+      "PutOnWheel": "Colocar na roda",
+      "Bonds": "Laços",
+      "NoBondsYet": "Nenhum laço ainda. Ligue esta pessoa a alguém para mostrar a relação.",
+      "NoBonds": "Nenhum laço.",
+      "LinkTo": "Ligar a alguém",
+      "OpenCard": "Abrir cartão",
+      "TakeOff": "Tirar da roda",
+      "BackToList": "Fora da roda ({n})",
+      "Close": "Fechar",
+      "EditLink": "Mudar ou remover",
+      "TypeDir": {
+        "serves": {
+          "out": "Serve a",
+          "in": "Servido por"
+        },
+        "betrayed": {
+          "out": "Traiu",
+          "in": "Traído por"
+        }
+      },
+      "FindOnWheel": "Achar na roda",
+      "HideDead": "Esconder mortos ({n})",
+      "ShowDead": "Mostrar mortos ({n})"
     },
     "Arrange": {
       "Moved": "{name} foi para {group}",

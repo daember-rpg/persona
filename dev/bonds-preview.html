@@ -2673,6 +2673,410 @@
 .bonds-drawer.is-target .bonds-takeoff { border-color: var(--dp-ember); color: var(--dp-parchment); }
 .bonds-form__hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--dp-parchment-faint); }
 
+/* ==========================================================================
+   Bonds — header, focus mode, inspector
+   ========================================================================== */
+
+/* ---------- Header: whose wheel, players, tools ---------- */
+
+.bonds-bar {
+    gap: var(--dp-3);
+    padding: 14px var(--dp-3);
+}
+
+.bonds-who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.bonds-who__img {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--dp-gold);
+    box-shadow: 0 0 0 3px rgba(201, 163, 90, 0.15);
+}
+
+.bonds-who__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+
+.bonds-who__text h2 {
+    margin: 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color: var(--dp-parchment);
+}
+
+.bonds-who__text p {
+    margin: 3px 0 0;
+    max-width: 52ch;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--dp-parchment-faint);
+}
+
+.bonds-players {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(15, 14, 12, 0.6);
+    border: 1px solid var(--dp-line);
+}
+
+.persona .bonds-player {
+    gap: 8px;
+    height: 40px;
+    padding: 3px;
+    border-radius: 999px;
+    color: var(--dp-parchment-dim);
+    transition: background 0.15s ease;
+}
+
+.bonds-player__img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid var(--dp-line-strong);
+    filter: saturate(0.6) brightness(0.85);
+    transition: filter 0.15s ease, border-color 0.15s ease;
+}
+
+.bonds-player__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-player__name { display: none; padding-right: 12px; font-family: var(--dp-display); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+.persona .bonds-player:hover .bonds-player__img { filter: none; border-color: var(--dp-parchment-dim); }
+.persona .bonds-player.is-active { background: var(--dp-charcoal-3); color: var(--dp-parchment); }
+.persona .bonds-player.is-active .bonds-player__img { filter: none; border-color: var(--dp-gold); }
+.persona .bonds-player.is-active .bonds-player__name { display: inline; }
+
+/* ---------- Portraits: bigger, clearer states ---------- */
+
+.persona .bonds-node {
+    width: 62px;
+    height: 62px;
+    margin: -31px 0 0 -31px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+.persona .bonds-node--self {
+    width: 116px;
+    height: 116px;
+    margin: -58px 0 0 -58px;
+}
+
+.persona .bonds-node--party {
+    width: 76px;
+    height: 76px;
+    margin: -38px 0 0 -38px;
+}
+
+.persona .bonds-node.is-selected {
+    z-index: 7;
+    transform: scale(1.14);
+    box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 28px rgba(201, 163, 90, 0.55);
+}
+
+.persona .bonds-node--self.is-selected { transform: none; }
+
+/* Focus: a person and their web of bonds; everything else steps back. */
+.bonds.has-focus .bonds-node:not(.is-near),
+.bonds.has-focus .bonds-marker:not(.is-near) { opacity: 0.22; filter: grayscale(0.7); }
+.bonds.has-focus .bonds-link { stroke-opacity: 0.08; }
+.bonds.has-focus .bonds-link.is-near { stroke-opacity: 1; stroke-width: 3.5; }
+.bonds.has-focus .bonds-sector { fill-opacity: 0.55; }
+.bonds-link { transition: stroke-opacity 0.2s ease; }
+
+.bonds-sector-label { font-size: 18px; }
+
+/* ---------- Drawer: list mode ---------- */
+
+.bonds-drawer { width: auto; gap: 12px; padding: var(--dp-2); }
+.bonds-main { grid-template-columns: minmax(0, 1fr) 288px; }
+
+.bonds-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    background: var(--dp-night);
+    color: var(--dp-parchment-faint);
+}
+
+.bonds-search input {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-family: var(--dp-body);
+    font-size: 14px;
+    color: var(--dp-parchment);
+}
+
+.bonds-search input:focus { outline: none; box-shadow: none; }
+.bonds-search:focus-within { border-color: var(--dp-clay-light); }
+
+.bonds-drawer__list { gap: 2px; }
+
+.bonds-loose {
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+}
+
+.bonds-loose:hover { border-color: transparent; background: var(--dp-charcoal-2); }
+.bonds-loose[hidden] { display: none; }
+.bonds-loose__img { width: 36px; height: 36px; }
+
+.persona .bonds-drawer__start {
+    background: transparent;
+    border: 1px dashed var(--dp-line-strong);
+    color: var(--dp-parchment-dim);
+    font-weight: 500;
+}
+
+.persona .bonds-drawer__start:hover { border-color: var(--dp-clay); background: var(--dp-clay-soft); color: var(--dp-parchment); }
+
+/* ---------- Drawer: inspector ---------- */
+
+.bonds-inspector { gap: var(--dp-2); }
+
+.persona .bonds-back {
+    align-self: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-back:hover { color: var(--dp-parchment); }
+
+.bonds-insp__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: var(--dp-2);
+    border-bottom: 1px solid var(--dp-line);
+    text-align: center;
+}
+
+.bonds-insp__portrait {
+    width: 112px;
+    height: 112px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--dp-clay-light);
+    box-shadow: 0 0 0 4px var(--dp-charcoal), 0 0 0 5px var(--dp-line-strong), 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.bonds-insp__portrait.self { border-color: var(--dp-gold); }
+.bonds-insp__portrait img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-insp__head.is-dead .bonds-insp__portrait img { filter: grayscale(1) brightness(0.65); }
+.bonds-insp__head.is-missing .bonds-insp__portrait img { filter: grayscale(0.6) sepia(0.3); }
+
+.bonds-insp__head h3 {
+    margin: 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--dp-parchment);
+}
+
+.bonds-insp__title { margin: 0; font-style: italic; font-size: 14px; color: var(--dp-parchment-dim); }
+.bonds-insp__tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 4px; }
+
+.bonds-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-tag.is-dead { color: var(--dp-parchment); background: rgba(234, 223, 196, 0.1); }
+.bonds-tag.is-missing { color: var(--dp-gold); background: rgba(201, 163, 90, 0.15); }
+
+.bonds-insp__block { display: flex; flex-direction: column; gap: 8px; }
+
+.bonds-insp__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-insp__label b {
+    min-width: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-family: var(--dp-body);
+    font-size: 11px;
+    text-align: center;
+}
+
+.bonds-insp__value, .bonds-insp__empty { margin: 0; font-size: 13px; line-height: 1.45; color: var(--dp-parchment-faint); }
+
+.bonds-seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 3px;
+    border-radius: var(--dp-radius);
+    background: var(--dp-night);
+    border: 1px solid var(--dp-line);
+}
+
+.persona .bonds-seg button {
+    height: 30px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--dp-parchment-dim);
+}
+
+.persona .bonds-seg button:hover { color: var(--dp-parchment); }
+.persona .bonds-seg button.is-on { background: var(--dp-clay); color: var(--dp-night); font-weight: 600; }
+
+.bonds-bonds { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+
+.bonds-bond {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: var(--dp-radius);
+    border-left: 2px solid var(--c);
+    background: var(--dp-charcoal-2);
+}
+
+.persona .bonds-bond__who {
+    flex: 1;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.bonds-bond__img { flex: none; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; }
+.bonds-bond__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-bond__text { display: flex; flex-direction: column; min-width: 0; }
+.bonds-bond__text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: 13px; color: var(--dp-parchment); }
+.bonds-bond__text small { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--c); }
+.persona .bonds-bond__who:hover b { text-decoration: underline; }
+
+.persona .bonds-bond__edit {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    margin-right: 4px;
+    border-radius: 4px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-bond__edit:hover { background: var(--dp-charcoal-3); color: var(--dp-parchment); }
+
+.bonds-insp__actions { display: grid; gap: 8px; }
+.persona .bonds-insp__actions .persona-button { width: 100%; }
+
+.persona .bonds-ghost-btn {
+    background: transparent;
+    border: 1px solid var(--dp-line-strong);
+    color: var(--dp-parchment);
+    font-weight: 500;
+}
+
+.persona .bonds-ghost-btn:hover { background: var(--dp-charcoal-3); border-color: var(--dp-parchment-faint); }
+
+.persona .bonds-takeoff-btn {
+    align-self: center;
+    gap: 8px;
+    margin-top: auto;
+    padding: 6px 4px;
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-takeoff-btn:hover { color: #e58a74; }
+
+/* The legend only explains the link icons; distance lives in the inspector. */
+.bonds-legend { padding: 8px 12px; }
+
+/* ---------- Big wheels: finder, hide the dead, dense links ---------- */
+
+.bonds-finder {
+    position: absolute;
+    top: var(--dp-2);
+    right: var(--dp-2);
+    z-index: 4;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.bonds-search--wheel { width: 220px; background: rgba(15, 14, 12, 0.85); }
+
+.bonds-finder__results {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 220px;
+    padding: 4px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    background: var(--dp-charcoal);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+.bonds-finder__results[hidden] { display: none; }
+
+.persona .bonds-finder__results button {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-finder__results button:hover { background: var(--dp-charcoal-3); }
+.bonds-finder__results img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 0; }
+.persona .bonds-finder .persona-mini { height: 34px; background: rgba(15, 14, 12, 0.85); }
+
+/* Many links: icons only show for the person in focus. */
+.bonds.is-dense .bonds-marker:not(.is-near) { display: none; }
+.bonds.is-dense .bonds-link { stroke-opacity: 0.35; }
+.bonds.is-dense.has-focus .bonds-link:not(.is-near) { stroke-opacity: 0.05; }
+
 /* Preview chrome (not part of the module) */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; background: #0b0a09; }
@@ -2709,7 +3113,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>
-const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Eyebrow":"Who's who to you","ReadOnlyEyebrow":"A player's wheel","Party":"Party","Unnamed":"Unnamed","Link":"Link","LinkHint":"Draw a relation between two portraits","LinkPickFirst":"Pick the first portrait","LinkPickSecond":"Now pick who they are linked to","Done":"Done","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"GMEditing":"Editing {name}'s wheel — the player sees your changes","NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it."},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Eyebrow":"Quem é quem para você","ReadOnlyEyebrow":"Roda de um jogador","Party":"Grupo","Unnamed":"Sem nome","Link":"Ligar","LinkHint":"Desenhe uma relação entre dois retratos","LinkPickFirst":"Escolha o primeiro retrato","LinkPickSecond":"Agora escolha com quem ele se liga","Done":"Pronto","NewSector":"Nova categoria","EditSector":"Editar categoria","SectorPlaceholder":"Não confio, nos deve um favor…","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para a roda: cada pessoa vai para a fatia da sua pasta, e o anel onde você solta define a distância. Mais perto do centro, mais perto de você.","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Arraste alguém para a roda para começar","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"GMEditing":"Editando a roda de {name} — o jogador vê suas mudanças","NoFolder":"Sem pasta","PlaceAll":"Colocar todos na roda","NewCategoryDrop":"Solte aqui para criar uma categoria sua","TakeOffDrop":"Solte aqui para tirar da roda","Dissolve":"Desfazer","DissolveHint":"Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém."},"Arrange":{"Moved":"{name} foi para {group}","Hint":"Arraste para reordenar ou mover para outra pasta"}}}};
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Party":"Grupo","Unnamed":"Sem nome","NewSector":"Nova categoria","EditSector":"Editar categoria","SectorPlaceholder":"Não confio, nos deve um favor…","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para a roda: cada pessoa vai para a fatia da sua pasta, e o anel onde você solta define a distância. Mais perto do centro, mais perto de você.","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Arraste alguém para a roda para começar","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"NoFolder":"Sem pasta","PlaceAll":"Colocar todos na roda","NewCategoryDrop":"Solte aqui para criar uma categoria sua","TakeOffDrop":"Solte aqui para tirar da roda","Dissolve":"Desfazer","DissolveHint":"Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém.","Players":"Jogadores","TitleOf":"Laços de {name}","SubPlayer":"Clique em alguém para ver os laços. Arraste retratos para montar a roda.","SubGM":"Você está editando a roda de {name}. O jogador vê suas mudanças.","SubPast":"Como estava em {label}. Volte para agora para mudar algo.","LinkPickTarget":"Clique em quem se liga a {name}","Search":"Procurar alguém","You":"Você","Distance":"Distância","PutOnWheel":"Colocar na roda","Bonds":"Laços","NoBondsYet":"Nenhum laço ainda. Ligue esta pessoa a alguém para mostrar a relação.","NoBonds":"Nenhum laço.","LinkTo":"Ligar a alguém","OpenCard":"Abrir cartão","TakeOff":"Tirar da roda","BackToList":"Fora da roda ({n})","Close":"Fechar","EditLink":"Mudar ou remover","TypeDir":{"serves":{"out":"Serve a","in":"Servido por"},"betrayed":{"out":"Traiu","in":"Traído por"}},"FindOnWheel":"Achar na roda","HideDead":"Esconder mortos ({n})","ShowDead":"Mostrar mortos ({n})"},"Arrange":{"Moved":"{name} foi para {group}","Hint":"Arraste para reordenar ou mover para outra pasta"}}}};
 /**
  * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
  *
@@ -2758,7 +3162,8 @@ const GEOMETRY = {
     partyBand: [92, 172],
     ringBands: [[180, 272], [272, 364], [364, 456]],
     labelRadius: 478,
-    nodeArc: 66,          // arc length one portrait needs on its ring
+    nodeArc: 74,          // arc length one portrait needs on its ring
+    laneWidth: 70,        // extra depth a ring gains for each lane when it fills up
     minSector: 0.42,      // radians
     gap: 0.035            // radians between slices
 };
@@ -2950,9 +3355,13 @@ function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     }
 
     const count = (key, ring) => placements.filter(p => p.key === key && p.ring === ring).length;
-    const needs = defs.map(d => Math.max(g.minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / ringMid(ring, g)))));
     const n = defs.length;
     const available = TAU - n * g.gap;
+    const minSector = Math.min(g.minSector, (available / Math.max(1, n)) * 0.8);
+
+    // Slice widths: room for the fullest ring, on a single lane; shrunk to fit when needed.
+    const baseMid = k => (g.ringBands[k][0] + g.ringBands[k][1]) / 2;
+    const needs = defs.map(d => Math.max(minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / baseMid(ring - 1)))));
     const total = needs.reduce((x, y) => x + y, 0);
     const widths = total <= available
         ? needs.map(w => w + (available - total) / Math.max(1, n))
@@ -2967,19 +3376,53 @@ function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
         sectors.push({ ...d, index: i, start, end, mid: (start + end) / 2 });
     });
 
+    // Rings grow with the campaign: when a slice can't hold a ring's people side by side, that
+    // ring gets another lane and the wheel grows outward, instead of piling portraits up.
+    const bands = [];
+    const lanes = [];
+    let edge = g.ringBands[0][0];
+    for (let k = 0; k < 3; k++) {
+        const base = g.ringBands[k][1] - g.ringBands[k][0];
+        const laneR = edge + base / 2;
+        let L = 1;
+        for (const sector of sectors) {
+            const perLane = Math.max(1, Math.floor(((sector.end - sector.start) * laneR) / g.nodeArc));
+            L = Math.max(L, Math.ceil(count(sector.id, k + 1) / perLane));
+        }
+        const width = base + (L - 1) * g.laneWidth;
+        bands.push([edge, edge + width]);
+        lanes.push(L);
+        edge += width;
+    }
+    const outer = bands[2][1];
+    const geo = { ...g, ringBands: bands, labelRadius: outer + 22, outer, lanes };
+
     const nodes = new Map();
     for (const sector of sectors) {
+        const span = sector.end - sector.start;
         for (const ring of RINGS) {
+            const k = ring - 1;
             const cell = placements.filter(p => p.key === sector.id && p.ring === ring);
-            const r = ringMid(ring, g);
-            const span = sector.end - sector.start;
-            const step = g.nodeArc / r;
-            const used = Math.min(span, cell.length * step);
-            const first = sector.mid - used / 2;
-            cell.forEach((p, i) => {
-                const angle = first + (i + 0.5) * (used / cell.length);
-                nodes.set(p.id, { ...polar(r, angle, g), angle, ring, sector: sector.id, r });
-            });
+            if (!cell.length) continue;
+            const [r0, r1] = bands[k];
+            const laneDepth = (r1 - r0) / lanes[k];
+            // Fill from the inside out, one lane at a time.
+            let i = 0;
+            for (let lane = 0; lane < lanes[k] && i < cell.length; lane++) {
+                const r = r0 + (lane + 0.5) * laneDepth;
+                const perLane = Math.max(1, Math.floor((span * r) / g.nodeArc));
+                const row = cell.slice(i, i + perLane);
+                i += row.length;
+                const step = g.nodeArc / r;
+                const used = Math.min(span * 0.94, row.length * step);
+                // Odd lanes sit half a seat over, like an amphitheatre.
+                const shift = lane % 2 && row.length * step < span * 0.94 - step / 2 ? step / 2 : 0;
+                const first = sector.mid - used / 2 + shift;
+                row.forEach((p, j) => {
+                    const angle = first + (j + 0.5) * (used / row.length);
+                    nodes.set(p.id, { ...polar(r, angle, g), angle, ring, sector: sector.id, r });
+                });
+            }
         }
     }
 
@@ -2992,7 +3435,7 @@ function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     const self = { x: g.center, y: g.center, angle: 0, r: 0, id: SELF };
     nodes.set(SELF, self);
 
-    return { sectors, nodes, party, self };
+    return { sectors, nodes, party, self, g: geo };
 }
 
 const norm = a => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -3009,7 +3452,8 @@ function inSector(angle, sector) {
  * in front of (null = the end) —, { kind: "out" } past the outer edge (take off the wheel),
  * or { kind: "none" } over the centre and party.
  */
-function hitTest(x, y, laid, draggedId = null, g = GEOMETRY) {
+function hitTest(x, y, laid, draggedId = null) {
+    const g = laid.g ?? GEOMETRY;
     const { r, angle } = toPolar(x, y, g);
     const outer = g.ringBands[2][1];
     if (r > outer + 24) return { kind: "out" };
@@ -3097,7 +3541,7 @@ function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
 
 const G = GEOMETRY;
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const NODE_R = { self: 54, party: 34, entry: 28 };
+const NODE_R = { self: 58, party: 38, entry: 31 };
 const DRAG_THRESHOLD = 5;
 
 class BondsView {
@@ -3109,6 +3553,10 @@ class BondsView {
     #visible = new Set();
     #tagOf = new Map();
     #linkMode = false;
+    /** The portrait shown in the inspector and in focus on the wheel. */
+    #selected = null;
+    #query = "";
+    #hideDead = false;
     #linkFrom = null;
     #gesture = null;
     #resize = null;
@@ -3121,6 +3569,10 @@ class BondsView {
         host.addEventListener("pointerdown", this.#onPointerDown);
         host.addEventListener("pointermove", this.#onHover);
         host.addEventListener("click", this.#onClick);
+        host.addEventListener("dblclick", this.#onDoubleClick);
+        host.addEventListener("pointerover", this.#onOver);
+        host.addEventListener("pointerout", this.#onOut);
+        host.addEventListener("input", this.#onInput);
         host.addEventListener("wheel", this.#onWheel, { passive: false });
         host.addEventListener("keydown", this.#onKey);
         host.addEventListener("submit", this.#onSubmit);
@@ -3133,6 +3585,10 @@ class BondsView {
         this.host.removeEventListener("pointerdown", this.#onPointerDown);
         this.host.removeEventListener("pointermove", this.#onHover);
         this.host.removeEventListener("click", this.#onClick);
+        this.host.removeEventListener("dblclick", this.#onDoubleClick);
+        this.host.removeEventListener("pointerover", this.#onOver);
+        this.host.removeEventListener("pointerout", this.#onOut);
+        this.host.removeEventListener("input", this.#onInput);
         this.host.removeEventListener("wheel", this.#onWheel);
         this.host.removeEventListener("keydown", this.#onKey);
         this.host.removeEventListener("submit", this.#onSubmit);
@@ -3151,6 +3607,7 @@ class BondsView {
         this.#bonds = normalizeBonds(this.#model.bonds);
         // Another player's wheel (GM): a half-drawn link belongs to the old one.
         if (previous !== undefined && previous !== this.#model.owner?.id) this.#linkFrom = null;
+        if (previous !== undefined && previous !== this.#model.owner?.id) this.#selected = null;
         if (!this.#model.editable) this.#linkMode = false;
         this.#render();
     }
@@ -3162,16 +3619,18 @@ class BondsView {
     #render() {
         const m = this.#model;
         const entries = this.#entryMap();
-        this.#visible = new Set(entries.keys());
+        // "Hide the dead" only thins the wheel; they stay in the inspector and the timeline.
+        this.#visible = new Set([...entries.keys()].filter(id => !(this.#hideDead && entries.get(id).status === "dead" && id !== this.#selected)));
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
         this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
         const loose = m.entries.filter(e => !placed.has(e.id));
+        if (this.#selected && !this.#nodeInfo(this.#selected)) this.#selected = null;
         const pop = this.host.querySelector(".bonds-pop");
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
 
         this.host.innerHTML = `
-        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""}" tabindex="-1">
+        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""}" tabindex="-1">
             ${this.#renderBar()}
             <div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
@@ -3180,6 +3639,7 @@ class BondsView {
                         <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
                     </div>
                     ${this.#renderBanner()}
+                    ${this.#renderFinder(entries)}
                     ${this.#renderLegend()}
                     <div class="bonds-zoom">
                         <button type="button" class="persona-icon-btn" data-action="zoomIn" aria-label="${esc(this.t("ZoomIn"))}" title="${esc(this.t("ZoomIn"))}"><i class="fa-solid fa-plus" inert></i></button>
@@ -3187,7 +3647,7 @@ class BondsView {
                         <button type="button" class="persona-icon-btn" data-action="fit" aria-label="${esc(this.t("Fit"))}" title="${esc(this.t("Fit"))}"><i class="fa-solid fa-expand" inert></i></button>
                     </div>
                 </div>
-                ${this.#renderDrawer(loose)}
+                ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
             </div>
             ${this.#renderTimeline()}
             <div class="bonds-pop" hidden></div>
@@ -3199,31 +3659,37 @@ class BondsView {
         this.#resize.observe(viewport);
         if (this.#cam.auto) this.fit();
         if (keepPop) this.#closePop();
+        this.#applyFocus(this.#selected);
+        this.#filterLoose();
     }
 
     #renderBar() {
         const m = this.#model;
+        const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
         const players = m.isGM && m.players.length
-            ? `<div class="bonds-players" role="tablist">${m.players.map(p => `
-                <button type="button" class="persona-chip ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}">
-                    <i class="fa-solid fa-user" inert></i><span>${esc(p.name)}</span>
-                </button>`).join("")}</div>`
+            ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
+                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
+                    <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
+                    <span class="bonds-player__name">${esc(p.name)}</span>
+                </button>`).join("")}</nav>`
             : "";
-        const tools = [];
-        if (m.editable) {
-            tools.push(`<button type="button" class="persona-button bonds-tool ${this.#linkMode ? "is-on" : ""}" data-action="linkMode" aria-pressed="${this.#linkMode}" title="${esc(this.t("LinkHint"))}"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("Link"))}</span></button>`);
-        }
-        if (m.isGM && m.players.length) {
-            tools.push(`<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`);
-        }
+        const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
+            : m.editable ? this.t("SubPlayer") : "";
+        const tools = m.isGM && m.players.length
+            ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`
+            : "";
         return `
         <header class="bonds-bar">
-            <div class="bonds-bar__title">
-                <span class="persona-eyebrow">${esc(m.isGM ? this.t("ReadOnlyEyebrow") : this.t("Eyebrow"))}</span>
-                <h2>${esc(this.t("Title"))}${m.owner?.name ? ` <small>${esc(m.owner.name)}</small>` : ""}</h2>
+            <div class="bonds-who">
+                <span class="bonds-who__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span>
+                <div class="bonds-who__text">
+                    <h2>${esc(m.owner?.name ? this.adapter.t("PERSONA.Bonds.TitleOf").replace("{name}", m.owner.name) : this.t("Title"))}</h2>
+                    ${sub ? `<p>${esc(sub)}</p>` : ""}
+                </div>
             </div>
             ${players}
-            <div class="bonds-bar__tools">${tools.join("")}</div>
+            <div class="bonds-bar__tools">${tools}</div>
         </header>`;
     }
 
@@ -3231,8 +3697,9 @@ class BondsView {
         const m = this.#model;
         const laid = this.#laid;
         const C = G.center;
-        const outer = G.ringBands[2][1];
-        const inner = G.ringBands[0][0];
+        const g = laid.g;
+        const outer = g.ringBands[2][1];
+        const inner = g.ringBands[0][0];
         const parts = [];
 
         // Gradients per slice colour, brightest near the party, fading outward.
@@ -3244,7 +3711,7 @@ class BondsView {
         }
         const gradient = color => `url(#bonds-g${colors.indexOf(color)})`;
 
-        parts.push(`<circle cx="${C}" cy="${C}" r="${G.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
+        parts.push(`<circle cx="${C}" cy="${C}" r="${g.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
         // Fine radial grid, like an astrolabe.
         const spokes = [];
         for (let a = 0; a < 360; a += 6) {
@@ -3252,20 +3719,23 @@ class BondsView {
             spokes.push(`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`);
         }
         parts.push(`<path class="bonds-grid" d="${spokes.join("")}"/>`);
-        for (const r of [inner, G.ringBands[0][1], G.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
+        for (const r of [inner, g.ringBands[0][1], g.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
 
         // Slices: a wedge per ring (drop targets), divider arcs, the label along the rim.
         for (const s of laid.sectors) {
             parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${gradient(s.color)}" stroke="${s.color}"/>`);
             for (const ring of RINGS) {
-                const [r1, r2] = G.ringBands[ring - 1];
+                const [r1, r2] = g.ringBands[ring - 1];
                 parts.push(`<path class="bonds-cell" data-cell="${esc(s.id)}|${ring}" d="${wedgePath(r1, r2, s.start, s.end)}"/>`);
             }
-            for (const r of [G.ringBands[0][1], G.ringBands[1][1]]) {
+            for (const r of [g.ringBands[0][1], g.ringBands[1][1]]) {
                 parts.push(`<path class="bonds-divider" d="${arcPath(r, s.start, s.end).d}" stroke="${s.color}"/>`);
             }
-            const arc = arcPath(G.labelRadius, s.start, s.end);
-            const label = s.label || this.t("Unnamed");
+            const arc = arcPath(g.labelRadius, s.start, s.end);
+            // Narrow slices (a campaign with many folders) shorten their label to fit the arc.
+            const fits = Math.max(3, Math.floor(((s.end - s.start) * g.labelRadius) / 15));
+            const full = s.label || this.t("Unnamed");
+            const label = full.length > fits ? `${full.slice(0, Math.max(2, fits - 1)).trimEnd()}…` : full;
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
             parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
         }
@@ -3289,7 +3759,7 @@ class BondsView {
             const geo = this.#linkGeometry(link);
             if (!geo) continue;
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            links.push(`<path class="bonds-link bonds-link--${type.id}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -3312,7 +3782,7 @@ class BondsView {
         const laid = this.#laid;
         const sectors = new Map(laid.sectors.map(s => [s.id, s]));
         const out = [];
-        const picked = id => (this.#linkFrom === id ? "is-picked" : "");
+        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : ""].join(" ");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
             <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
@@ -3349,7 +3819,7 @@ class BondsView {
             if (!geo) return "";
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
             const label = this.t(`Type.${type.id}`);
-            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
+            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
         }).join("");
     }
 
@@ -3364,11 +3834,45 @@ class BondsView {
             </div>`;
         }
         if (this.#linkMode) {
-            return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.#linkFrom ? this.t("LinkPickSecond") : this.t("LinkPickFirst"))}</span>
-                <button type="button" class="persona-mini" data-action="linkMode">${esc(this.t("Done"))}</button></div>`;
+            const from = this.#nodeInfo(this.#linkFrom)?.name ?? "";
+            return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.LinkPickTarget").replace("{name}", from))}</span>
+                <button type="button" class="persona-mini" data-action="cancelLink">${esc(this.t("Cancel"))}</button></div>`;
         }
-        if (m.isGM && m.editable && m.owner?.name) return `<div class="bonds-banner bonds-banner--quiet"><i class="fa-solid fa-pen" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.GMEditing").replace("{name}", m.owner.name))}</span></div>`;
         return "";
+    }
+
+    /** Find someone on a big wheel, and thin it out by hiding the dead. */
+    #renderFinder(entries) {
+        const placed = this.#bonds.placements.filter(p => entries.has(p.id));
+        if (placed.length < 8) return "";
+        const dead = placed.filter(p => entries.get(p.id).status === "dead").length;
+        return `<div class="bonds-finder">
+            <label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
+                <input type="search" name="bondsFind" placeholder="${esc(this.t("FindOnWheel"))}" autocomplete="off"></label>
+            <div class="bonds-finder__results" data-find-results hidden></div>
+            ${dead ? `<button type="button" class="persona-mini ${this.#hideDead ? "is-on" : ""}" data-action="toggleDead" aria-pressed="${this.#hideDead}"><i class="fa-solid ${this.#hideDead ? "fa-eye" : "fa-skull"}" inert></i><span>${esc(this.#hideDead ? this.adapter.t("PERSONA.Bonds.ShowDead").replace("{n}", dead) : this.adapter.t("PERSONA.Bonds.HideDead").replace("{n}", dead))}</span></button>` : ""}
+        </div>`;
+    }
+
+    #onFind(value) {
+        const box = this.host.querySelector("[data-find-results]");
+        if (!box) return;
+        const q = value.trim().toLowerCase();
+        const placed = new Set(this.#bonds.placements.map(p => p.id));
+        const hits = q ? this.#model.entries.filter(e => placed.has(e.id) && (e.name ?? "").toLowerCase().includes(q)).slice(0, 8) : [];
+        box.hidden = !hits.length;
+        box.innerHTML = hits.map(e => `<button type="button" data-action="findGo" data-id="${esc(e.id)}"><img src="${esc(e.img)}" alt=""><span>${esc(e.name)}</span></button>`).join("");
+    }
+
+    /** Moves the camera so a portrait sits in the middle of the view. */
+    #centerOn(id) {
+        const node = this.#laid?.nodes.get(id);
+        const viewport = this.host.querySelector("[data-viewport]");
+        if (!node || !viewport) return;
+        const { width, height } = viewport.getBoundingClientRect();
+        const s = Math.max(this.#cam.s, Math.min(width, height) / 700);
+        this.#cam = { s, x: width / 2 - node.x * s, y: height / 2 - node.y * s, auto: false };
+        this.#applyCam();
     }
 
     #renderLegend() {
@@ -3399,6 +3903,8 @@ class BondsView {
             ? `<button type="button" class="persona-button bonds-drawer__start" data-action="placeAll"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("PlaceAll"))}</span></button>`
             : "";
         const hint = m.editable && loose.length ? `<p class="bonds-drawer__tip">${esc(this.t("DragHint"))}</p>` : "";
+        const search = loose.length > 6
+            ? `<label class="bonds-search"><i class="fa-solid fa-magnifying-glass" inert></i><input type="search" name="bondsQuery" value="${esc(this.#query)}" placeholder="${esc(this.t("Search"))}" autocomplete="off"></label>` : "";
         // Shown while dragging a portrait: drop here to start a category of your own.
         const newCat = m.editable
             ? `<div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>`
@@ -3409,8 +3915,134 @@ class BondsView {
         return `<aside class="bonds-drawer" data-drawer>
             ${newCat}${out}
             <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
-            ${start}${hint}${body}
+            ${search}${body}${start}${hint}
         </aside>`;
+    }
+
+    /** Name, portrait and kind of any node on the wheel (or a person not on it yet). */
+    #nodeInfo(id) {
+        if (!id) return null;
+        const m = this.#model;
+        if (id === SELF) return { id, kind: "self", name: m.self.name, img: m.self.img };
+        const party = m.party.find(p => p.id === id);
+        if (party) return { id, kind: "party", name: party.name, img: party.img };
+        const entry = m.entries.find(e => e.id === id);
+        return entry ? { id, kind: "entry", name: entry.name ?? "???", img: entry.img, entry } : null;
+    }
+
+    /** Everyone linked to `id`, and the links themselves. */
+    #linksOf(id) {
+        return this.#bonds.links.filter(l => l.a === id || l.b === id);
+    }
+
+    #renderInspector(loose) {
+        const m = this.#model;
+        const info = this.#nodeInfo(this.#selected);
+        const placement = this.#bonds.placements.find(p => p.id === info.id);
+        const entry = info.entry;
+        const editable = m.editable;
+
+        // Where they sit: their category, else their folder.
+        let place = "";
+        if (info.kind === "self") place = this.t("You");
+        else if (info.kind === "party") place = this.t("Party");
+        else if (placement?.sector) place = this.#bonds.sectors.find(s => s.id === placement.sector)?.label ?? "";
+        else place = (m.tags ?? []).find(t => t.key === entry?.tag)?.label ?? this.t("NoFolder");
+        const status = entry?.status && entry.status !== "alive"
+            ? `<span class="bonds-tag is-${entry.status}"><i class="${entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question"}" inert></i>${esc(this.adapter.t(`PERSONA.Status.${entry.status}`))}</span>` : "";
+
+        // Distance: one click instead of a drag. For someone off the wheel, it puts them on it.
+        let distance = "";
+        if (info.kind === "entry" && editable) {
+            const ring = placement?.ring ?? 0;
+            distance = `<div class="bonds-insp__block">
+                <span class="bonds-insp__label">${esc(placement ? this.t("Distance") : this.t("PutOnWheel"))}</span>
+                <div class="bonds-seg" role="group">${RINGS.map(r => `<button type="button" class="${ring === r ? "is-on" : ""}" data-action="setRing" data-ring="${r}" aria-pressed="${ring === r}">${esc(this.t(`Ring${r}`))}</button>`).join("")}</div>
+            </div>`;
+        } else if (info.kind === "entry" && placement) {
+            distance = `<div class="bonds-insp__block"><span class="bonds-insp__label">${esc(this.t("Distance"))}</span><p class="bonds-insp__value">${esc(this.t(`Ring${placement.ring}`))}</p></div>`;
+        }
+
+        const links = this.#linksOf(info.id);
+        const rows = links.map(l => {
+            const other = this.#nodeInfo(l.a === info.id ? l.b : l.a);
+            if (!other) return "";
+            const type = LINK_TYPES.find(t => t.id === l.type) ?? LINK_TYPES[0];
+            const outgoing = l.a === info.id;
+            const label = type.directed ? this.t(`TypeDir.${type.id}.${outgoing ? "out" : "in"}`) : this.t(`Type.${type.id}`);
+            return `<li class="bonds-bond" style="--c:${type.color}">
+                <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
+                    <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}</small></span>
+                </button>
+                ${editable ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-ellipsis" inert></i></button>` : ""}
+            </li>`;
+        }).join("");
+
+        const actions = [];
+        if (editable && (placement || info.kind !== "entry")) actions.push(`<button type="button" class="persona-button" data-action="startLink"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("LinkTo"))}</span></button>`);
+        if (entry) actions.push(`<button type="button" class="persona-button bonds-ghost-btn" data-action="openCard" data-id="${esc(entry.id)}"><i class="fa-solid fa-id-card" inert></i><span>${esc(this.t("OpenCard"))}</span></button>`);
+
+        return `<aside class="bonds-drawer bonds-inspector" data-drawer>
+            <button type="button" class="bonds-back" data-action="deselect"><i class="fa-solid fa-chevron-left" inert></i><span>${esc(loose.length ? this.adapter.t("PERSONA.Bonds.BackToList").replace("{n}", loose.length) : this.t("Close"))}</span></button>
+            <div class="bonds-insp__head ${entry?.status && entry.status !== "alive" ? `is-${entry.status}` : ""}">
+                <span class="bonds-insp__portrait ${info.kind}"><img class="persona-fit" src="${esc(info.img)}" style="${esc(entry?.frame ?? "")}" alt="" draggable="false"></span>
+                <h3>${esc(info.name)}</h3>
+                ${entry?.title ? `<p class="bonds-insp__title">${esc(entry.title)}</p>` : ""}
+                <div class="bonds-insp__tags"><span class="bonds-tag">${esc(place)}</span>${status}</div>
+            </div>
+            ${distance}
+            <div class="bonds-insp__block">
+                <span class="bonds-insp__label">${esc(this.t("Bonds"))}${links.length ? ` <b>${links.length}</b>` : ""}</span>
+                ${rows ? `<ul class="bonds-bonds">${rows}</ul>` : `<p class="bonds-insp__empty">${esc(editable && (placement || info.kind !== "entry") ? this.t("NoBondsYet") : this.t("NoBonds"))}</p>`}
+            </div>
+            <div class="bonds-insp__actions">${actions.join("")}</div>
+            ${editable && placement ? `<button type="button" class="bonds-takeoff-btn" data-action="takeOff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOff"))}</span></button>` : ""}
+            <div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>
+        </aside>`;
+    }
+
+    /** Lights up a person and everyone linked to them; dims the rest. */
+    #applyFocus(id) {
+        const root = this.host.querySelector(".bonds");
+        if (!root) return;
+        root.classList.toggle("has-focus", !!id);
+        const near = new Set(id ? [id] : []);
+        if (id) for (const l of this.#linksOf(id)) { near.add(l.a); near.add(l.b); }
+        root.querySelectorAll("[data-node]").forEach(el => el.classList.toggle("is-near", near.has(el.dataset.node)));
+        root.querySelectorAll(".bonds-link, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
+    }
+
+    #onOver = event => {
+        if (this.#gesture?.dragging || this.#linkMode) return;
+        const node = event.target.closest?.("[data-node]");
+        if (node) this.#applyFocus(node.dataset.node);
+    };
+
+    #onOut = event => {
+        if (this.#gesture?.dragging || this.#linkMode) return;
+        const node = event.target.closest?.("[data-node]");
+        if (node && !node.contains(event.relatedTarget)) this.#applyFocus(this.#selected);
+    };
+
+    #onInput = event => {
+        if (event.target.name === "bondsFind") return this.#onFind(event.target.value);
+        if (event.target.name !== "bondsQuery") return;
+        this.#query = event.target.value;
+        this.#filterLoose();
+    };
+
+    /** Filters the off-wheel list in place (no redraw, so typing keeps focus). */
+    #filterLoose() {
+        const q = this.#query.trim().toLowerCase();
+        this.host.querySelectorAll("[data-loose]").forEach(el => {
+            el.hidden = !!q && !el.textContent.toLowerCase().includes(q);
+        });
+    }
+
+    #select(id) {
+        this.#selected = id;
+        this.#render();
     }
 
     #renderTimeline() {
@@ -3446,8 +4078,10 @@ class BondsView {
         if (!viewport) return;
         const { width, height } = viewport.getBoundingClientRect();
         if (!width || !height) return;
-        const s = Math.min(width, height) / (G.size * 1.04);
-        this.#cam = { s, x: (width - G.size * s) / 2, y: (height - G.size * s) / 2, auto: true };
+        // The wheel grows with the campaign: fit its real outer edge, labels included.
+        const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 34;
+        const s = Math.min(width, height) / (2 * R);
+        this.#cam = { s, x: width / 2 - G.center * s, y: height / 2 - G.center * s, auto: true };
         this.#applyCam();
     }
 
@@ -3630,7 +4264,7 @@ class BondsView {
 
         if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"]')) {
             this.#closePop();
-            if (!node) return;
+            if (!node && !loose) return;
         }
 
         if (actionEl) {
@@ -3641,13 +4275,23 @@ class BondsView {
             }
         }
         if (node && this.#linkMode) return this.#pickForLink(node.dataset.node);
-        if (node?.dataset.entry || loose) return this.adapter.openCard((node ?? loose).dataset.entry);
+        if (node) return this.#select(node.dataset.node);
+        if (loose) return this.#select(loose.dataset.entry);
+        // A click on the empty wheel clears the selection.
+        if (event.target.closest("[data-viewport]") && this.#selected && !this.#linkMode) return this.#select(null);
+    };
+
+    /** Double-click a person: their Persona card. */
+    #onDoubleClick = event => {
+        const el = event.target.closest("[data-entry]");
+        if (el && !this.#linkMode) this.adapter.openCard(el.dataset.entry);
     };
 
     #onKey = event => {
         if (event.key !== "Escape") return;
         if (!this.host.querySelector(".bonds-pop")?.hidden) { event.stopPropagation(); return this.#closePop(); }
         if (this.#linkMode) { event.stopPropagation(); this.#linkMode = false; this.#linkFrom = null; return this.#render(); }
+        if (this.#selected) { event.stopPropagation(); return this.#select(null); }
     };
 
     #actions = {
@@ -3658,11 +4302,29 @@ class BondsView {
         zoomIn: () => this.#zoomAt(1.2),
         zoomOut: () => this.#zoomAt(1 / 1.2),
         fit: () => this.fit(),
-        linkMode: () => {
-            this.#linkMode = !this.#linkMode;
+        select: (_el, id) => this.#select(id),
+        toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
+        findGo: (_el, id) => { this.#select(id); this.#centerOn(id); },
+        deselect: () => this.#select(null),
+        openCard: (_el, id) => this.adapter.openCard(id),
+        startLink: () => {
+            this.#linkMode = true;
+            this.#linkFrom = this.#selected;
+            this.#render();
+        },
+        cancelLink: () => {
+            this.#linkMode = false;
             this.#linkFrom = null;
             this.#render();
         },
+        setRing: el => {
+            const id = this.#selected;
+            const ring = Number(el.dataset.ring);
+            const placement = this.#bonds.placements.find(p => p.id === id);
+            if (placement?.ring === ring) return;
+            this.#commit(place(this.#bonds, id, placement?.sector ?? null, ring, null));
+        },
+        takeOff: () => this.#commit(unplace(this.#bonds, this.#selected)),
         editSector: (el, id) => this.#sectorPop(id, el),
         editLink: (el, id) => this.#linkPop(id, el),
         placeAll: () => {
@@ -3703,13 +4365,11 @@ class BondsView {
             this.#linkFrom = id;
             return this.#render();
         }
-        if (this.#linkFrom === id) {
-            this.#linkFrom = null;
-            return this.#render();
-        }
         const a = this.#linkFrom;
         this.#linkFrom = null;
+        this.#linkMode = false;
         this.#render();
+        if (a === id) return;
         const pa = this.#laid.nodes.get(a), pb = this.#laid.nodes.get(id);
         const mid = linkPath(pa, pb).mid;
         this.#linkPop(null, null, { a, b: id, at: mid });
@@ -3868,6 +4528,10 @@ class BondsView {
         { key: "Veiled Order", label: "Veiled Order", color: "#8a5a8f" },
         { key: "Kurdrax", label: "Kurdrax", color: "#c8452f" }
     ];
+    if (location.search.includes("big")) {
+        const folders = ["Embermark", "Veiled Order", "Kurdrax"];
+        for (let i = 0; i < 90; i++) ENTRIES.push(E(`x${i}`, `Figure ${i + 1}`, "Someone met along the way", { group: folders[i % 3], status: i % 11 === 0 ? "dead" : "alive" }));
+    }
     const sample = () => ({
         v: 1,
         sectors: [{ id: "c1", label: "My people", color: "#74864a" }],
@@ -3890,7 +4554,7 @@ class BondsView {
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         gmOwner: "p1"
@@ -3933,7 +4597,7 @@ class BondsView {
                 })),
                 bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
                 tags: TAGS,
-                players: PLAYERS.map(p => ({ id: p.id, name: `${p.name} · ${p.character}` })),
+                players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
                 momentId: moment?.id ?? null
             };

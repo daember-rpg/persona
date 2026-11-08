@@ -2666,3 +2666,407 @@
 .bonds-newcat.is-target { border-color: var(--dp-gold); background: rgba(201, 163, 90, 0.14); color: var(--dp-parchment); }
 .bonds-drawer.is-target .bonds-takeoff { border-color: var(--dp-ember); color: var(--dp-parchment); }
 .bonds-form__hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--dp-parchment-faint); }
+
+/* ==========================================================================
+   Bonds — header, focus mode, inspector
+   ========================================================================== */
+
+/* ---------- Header: whose wheel, players, tools ---------- */
+
+.bonds-bar {
+    gap: var(--dp-3);
+    padding: 14px var(--dp-3);
+}
+
+.bonds-who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.bonds-who__img {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--dp-gold);
+    box-shadow: 0 0 0 3px rgba(201, 163, 90, 0.15);
+}
+
+.bonds-who__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+
+.bonds-who__text h2 {
+    margin: 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color: var(--dp-parchment);
+}
+
+.bonds-who__text p {
+    margin: 3px 0 0;
+    max-width: 52ch;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--dp-parchment-faint);
+}
+
+.bonds-players {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(15, 14, 12, 0.6);
+    border: 1px solid var(--dp-line);
+}
+
+.persona .bonds-player {
+    gap: 8px;
+    height: 40px;
+    padding: 3px;
+    border-radius: 999px;
+    color: var(--dp-parchment-dim);
+    transition: background 0.15s ease;
+}
+
+.bonds-player__img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid var(--dp-line-strong);
+    filter: saturate(0.6) brightness(0.85);
+    transition: filter 0.15s ease, border-color 0.15s ease;
+}
+
+.bonds-player__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-player__name { display: none; padding-right: 12px; font-family: var(--dp-display); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+.persona .bonds-player:hover .bonds-player__img { filter: none; border-color: var(--dp-parchment-dim); }
+.persona .bonds-player.is-active { background: var(--dp-charcoal-3); color: var(--dp-parchment); }
+.persona .bonds-player.is-active .bonds-player__img { filter: none; border-color: var(--dp-gold); }
+.persona .bonds-player.is-active .bonds-player__name { display: inline; }
+
+/* ---------- Portraits: bigger, clearer states ---------- */
+
+.persona .bonds-node {
+    width: 62px;
+    height: 62px;
+    margin: -31px 0 0 -31px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+.persona .bonds-node--self {
+    width: 116px;
+    height: 116px;
+    margin: -58px 0 0 -58px;
+}
+
+.persona .bonds-node--party {
+    width: 76px;
+    height: 76px;
+    margin: -38px 0 0 -38px;
+}
+
+.persona .bonds-node.is-selected {
+    z-index: 7;
+    transform: scale(1.14);
+    box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 28px rgba(201, 163, 90, 0.55);
+}
+
+.persona .bonds-node--self.is-selected { transform: none; }
+
+/* Focus: a person and their web of bonds; everything else steps back. */
+.bonds.has-focus .bonds-node:not(.is-near),
+.bonds.has-focus .bonds-marker:not(.is-near) { opacity: 0.22; filter: grayscale(0.7); }
+.bonds.has-focus .bonds-link { stroke-opacity: 0.08; }
+.bonds.has-focus .bonds-link.is-near { stroke-opacity: 1; stroke-width: 3.5; }
+.bonds.has-focus .bonds-sector { fill-opacity: 0.55; }
+.bonds-link { transition: stroke-opacity 0.2s ease; }
+
+.bonds-sector-label { font-size: 18px; }
+
+/* ---------- Drawer: list mode ---------- */
+
+.bonds-drawer { width: auto; gap: 12px; padding: var(--dp-2); }
+.bonds-main { grid-template-columns: minmax(0, 1fr) 288px; }
+
+.bonds-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    background: var(--dp-night);
+    color: var(--dp-parchment-faint);
+}
+
+.bonds-search input {
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-family: var(--dp-body);
+    font-size: 14px;
+    color: var(--dp-parchment);
+}
+
+.bonds-search input:focus { outline: none; box-shadow: none; }
+.bonds-search:focus-within { border-color: var(--dp-clay-light); }
+
+.bonds-drawer__list { gap: 2px; }
+
+.bonds-loose {
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+}
+
+.bonds-loose:hover { border-color: transparent; background: var(--dp-charcoal-2); }
+.bonds-loose[hidden] { display: none; }
+.bonds-loose__img { width: 36px; height: 36px; }
+
+.persona .bonds-drawer__start {
+    background: transparent;
+    border: 1px dashed var(--dp-line-strong);
+    color: var(--dp-parchment-dim);
+    font-weight: 500;
+}
+
+.persona .bonds-drawer__start:hover { border-color: var(--dp-clay); background: var(--dp-clay-soft); color: var(--dp-parchment); }
+
+/* ---------- Drawer: inspector ---------- */
+
+.bonds-inspector { gap: var(--dp-2); }
+
+.persona .bonds-back {
+    align-self: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-back:hover { color: var(--dp-parchment); }
+
+.bonds-insp__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: var(--dp-2);
+    border-bottom: 1px solid var(--dp-line);
+    text-align: center;
+}
+
+.bonds-insp__portrait {
+    width: 112px;
+    height: 112px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--dp-clay-light);
+    box-shadow: 0 0 0 4px var(--dp-charcoal), 0 0 0 5px var(--dp-line-strong), 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.bonds-insp__portrait.self { border-color: var(--dp-gold); }
+.bonds-insp__portrait img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-insp__head.is-dead .bonds-insp__portrait img { filter: grayscale(1) brightness(0.65); }
+.bonds-insp__head.is-missing .bonds-insp__portrait img { filter: grayscale(0.6) sepia(0.3); }
+
+.bonds-insp__head h3 {
+    margin: 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--dp-parchment);
+}
+
+.bonds-insp__title { margin: 0; font-style: italic; font-size: 14px; color: var(--dp-parchment-dim); }
+.bonds-insp__tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 4px; }
+
+.bonds-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-tag.is-dead { color: var(--dp-parchment); background: rgba(234, 223, 196, 0.1); }
+.bonds-tag.is-missing { color: var(--dp-gold); background: rgba(201, 163, 90, 0.15); }
+
+.bonds-insp__block { display: flex; flex-direction: column; gap: 8px; }
+
+.bonds-insp__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-insp__label b {
+    min-width: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-family: var(--dp-body);
+    font-size: 11px;
+    text-align: center;
+}
+
+.bonds-insp__value, .bonds-insp__empty { margin: 0; font-size: 13px; line-height: 1.45; color: var(--dp-parchment-faint); }
+
+.bonds-seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 3px;
+    border-radius: var(--dp-radius);
+    background: var(--dp-night);
+    border: 1px solid var(--dp-line);
+}
+
+.persona .bonds-seg button {
+    height: 30px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--dp-parchment-dim);
+}
+
+.persona .bonds-seg button:hover { color: var(--dp-parchment); }
+.persona .bonds-seg button.is-on { background: var(--dp-clay); color: var(--dp-night); font-weight: 600; }
+
+.bonds-bonds { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+
+.bonds-bond {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: var(--dp-radius);
+    border-left: 2px solid var(--c);
+    background: var(--dp-charcoal-2);
+}
+
+.persona .bonds-bond__who {
+    flex: 1;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.bonds-bond__img { flex: none; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; }
+.bonds-bond__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-bond__text { display: flex; flex-direction: column; min-width: 0; }
+.bonds-bond__text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: 13px; color: var(--dp-parchment); }
+.bonds-bond__text small { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--c); }
+.persona .bonds-bond__who:hover b { text-decoration: underline; }
+
+.persona .bonds-bond__edit {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    margin-right: 4px;
+    border-radius: 4px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-bond__edit:hover { background: var(--dp-charcoal-3); color: var(--dp-parchment); }
+
+.bonds-insp__actions { display: grid; gap: 8px; }
+.persona .bonds-insp__actions .persona-button { width: 100%; }
+
+.persona .bonds-ghost-btn {
+    background: transparent;
+    border: 1px solid var(--dp-line-strong);
+    color: var(--dp-parchment);
+    font-weight: 500;
+}
+
+.persona .bonds-ghost-btn:hover { background: var(--dp-charcoal-3); border-color: var(--dp-parchment-faint); }
+
+.persona .bonds-takeoff-btn {
+    align-self: center;
+    gap: 8px;
+    margin-top: auto;
+    padding: 6px 4px;
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-takeoff-btn:hover { color: #e58a74; }
+
+/* The legend only explains the link icons; distance lives in the inspector. */
+.bonds-legend { padding: 8px 12px; }
+
+/* ---------- Big wheels: finder, hide the dead, dense links ---------- */
+
+.bonds-finder {
+    position: absolute;
+    top: var(--dp-2);
+    right: var(--dp-2);
+    z-index: 4;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.bonds-search--wheel { width: 220px; background: rgba(15, 14, 12, 0.85); }
+
+.bonds-finder__results {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 220px;
+    padding: 4px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    background: var(--dp-charcoal);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+.bonds-finder__results[hidden] { display: none; }
+
+.persona .bonds-finder__results button {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-finder__results button:hover { background: var(--dp-charcoal-3); }
+.bonds-finder__results img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 0; }
+.persona .bonds-finder .persona-mini { height: 34px; background: rgba(15, 14, 12, 0.85); }
+
+/* Many links: icons only show for the person in focus. */
+.bonds.is-dense .bonds-marker:not(.is-near) { display: none; }
+.bonds.is-dense .bonds-link { stroke-opacity: 0.35; }
+.bonds.is-dense.has-focus .bonds-link:not(.is-near) { stroke-opacity: 0.05; }

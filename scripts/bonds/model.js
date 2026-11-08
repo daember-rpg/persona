@@ -46,7 +46,8 @@ export const GEOMETRY = {
     partyBand: [92, 172],
     ringBands: [[180, 272], [272, 364], [364, 456]],
     labelRadius: 478,
-    nodeArc: 66,          // arc length one portrait needs on its ring
+    nodeArc: 74,          // arc length one portrait needs on its ring
+    laneWidth: 70,        // extra depth a ring gains for each lane when it fills up
     minSector: 0.42,      // radians
     gap: 0.035            // radians between slices
 };
@@ -238,9 +239,13 @@ export function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     }
 
     const count = (key, ring) => placements.filter(p => p.key === key && p.ring === ring).length;
-    const needs = defs.map(d => Math.max(g.minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / ringMid(ring, g)))));
     const n = defs.length;
     const available = TAU - n * g.gap;
+    const minSector = Math.min(g.minSector, (available / Math.max(1, n)) * 0.8);
+
+    // Slice widths: room for the fullest ring, on a single lane; shrunk to fit when needed.
+    const baseMid = k => (g.ringBands[k][0] + g.ringBands[k][1]) / 2;
+    const needs = defs.map(d => Math.max(minSector, ...RINGS.map(ring => count(d.id, ring) * (g.nodeArc / baseMid(ring - 1)))));
     const total = needs.reduce((x, y) => x + y, 0);
     const widths = total <= available
         ? needs.map(w => w + (available - total) / Math.max(1, n))
@@ -255,19 +260,53 @@ export function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
         sectors.push({ ...d, index: i, start, end, mid: (start + end) / 2 });
     });
 
+    // Rings grow with the campaign: when a slice can't hold a ring's people side by side, that
+    // ring gets another lane and the wheel grows outward, instead of piling portraits up.
+    const bands = [];
+    const lanes = [];
+    let edge = g.ringBands[0][0];
+    for (let k = 0; k < 3; k++) {
+        const base = g.ringBands[k][1] - g.ringBands[k][0];
+        const laneR = edge + base / 2;
+        let L = 1;
+        for (const sector of sectors) {
+            const perLane = Math.max(1, Math.floor(((sector.end - sector.start) * laneR) / g.nodeArc));
+            L = Math.max(L, Math.ceil(count(sector.id, k + 1) / perLane));
+        }
+        const width = base + (L - 1) * g.laneWidth;
+        bands.push([edge, edge + width]);
+        lanes.push(L);
+        edge += width;
+    }
+    const outer = bands[2][1];
+    const geo = { ...g, ringBands: bands, labelRadius: outer + 22, outer, lanes };
+
     const nodes = new Map();
     for (const sector of sectors) {
+        const span = sector.end - sector.start;
         for (const ring of RINGS) {
+            const k = ring - 1;
             const cell = placements.filter(p => p.key === sector.id && p.ring === ring);
-            const r = ringMid(ring, g);
-            const span = sector.end - sector.start;
-            const step = g.nodeArc / r;
-            const used = Math.min(span, cell.length * step);
-            const first = sector.mid - used / 2;
-            cell.forEach((p, i) => {
-                const angle = first + (i + 0.5) * (used / cell.length);
-                nodes.set(p.id, { ...polar(r, angle, g), angle, ring, sector: sector.id, r });
-            });
+            if (!cell.length) continue;
+            const [r0, r1] = bands[k];
+            const laneDepth = (r1 - r0) / lanes[k];
+            // Fill from the inside out, one lane at a time.
+            let i = 0;
+            for (let lane = 0; lane < lanes[k] && i < cell.length; lane++) {
+                const r = r0 + (lane + 0.5) * laneDepth;
+                const perLane = Math.max(1, Math.floor((span * r) / g.nodeArc));
+                const row = cell.slice(i, i + perLane);
+                i += row.length;
+                const step = g.nodeArc / r;
+                const used = Math.min(span * 0.94, row.length * step);
+                // Odd lanes sit half a seat over, like an amphitheatre.
+                const shift = lane % 2 && row.length * step < span * 0.94 - step / 2 ? step / 2 : 0;
+                const first = sector.mid - used / 2 + shift;
+                row.forEach((p, j) => {
+                    const angle = first + (j + 0.5) * (used / row.length);
+                    nodes.set(p.id, { ...polar(r, angle, g), angle, ring, sector: sector.id, r });
+                });
+            }
         }
     }
 
@@ -280,7 +319,7 @@ export function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     const self = { x: g.center, y: g.center, angle: 0, r: 0, id: SELF };
     nodes.set(SELF, self);
 
-    return { sectors, nodes, party, self };
+    return { sectors, nodes, party, self, g: geo };
 }
 
 const norm = a => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
@@ -297,7 +336,8 @@ export function inSector(angle, sector) {
  * in front of (null = the end) —, { kind: "out" } past the outer edge (take off the wheel),
  * or { kind: "none" } over the centre and party.
  */
-export function hitTest(x, y, laid, draggedId = null, g = GEOMETRY) {
+export function hitTest(x, y, laid, draggedId = null) {
+    const g = laid.g ?? GEOMETRY;
     const { r, angle } = toPolar(x, y, g);
     const outer = g.ringBands[2][1];
     if (r > outer + 24) return { kind: "out" };

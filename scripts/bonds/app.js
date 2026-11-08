@@ -168,7 +168,7 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
 
         const base = {
             isGM,
-            players: isGM ? roster.map(u => ({ id: u.id, name: u.character?.name ? `${u.name} · ${u.character.name}` : u.name })) : [],
+            players: isGM ? roster.map(u => ({ id: u.id, name: u.character?.name ?? u.name, user: u.character ? u.name : "", img: u.character?.img || u.avatar || "icons/svg/mystery-man.svg" })) : [],
             moments: moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
             momentId: moment?.id ?? null
         };

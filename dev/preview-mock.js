@@ -39,6 +39,10 @@
         { key: "Veiled Order", label: "Veiled Order", color: "#8a5a8f" },
         { key: "Kurdrax", label: "Kurdrax", color: "#c8452f" }
     ];
+    if (location.search.includes("big")) {
+        const folders = ["Embermark", "Veiled Order", "Kurdrax"];
+        for (let i = 0; i < 90; i++) ENTRIES.push(E(`x${i}`, `Figure ${i + 1}`, "Someone met along the way", { group: folders[i % 3], status: i % 11 === 0 ? "dead" : "alive" }));
+    }
     const sample = () => ({
         v: 1,
         sectors: [{ id: "c1", label: "My people", color: "#74864a" }],
@@ -61,7 +65,7 @@
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         gmOwner: "p1"
@@ -104,7 +108,7 @@
                 })),
                 bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
                 tags: TAGS,
-                players: PLAYERS.map(p => ({ id: p.id, name: `${p.name} · ${p.character}` })),
+                players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
                 momentId: moment?.id ?? null
             };

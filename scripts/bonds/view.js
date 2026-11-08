@@ -21,7 +21,7 @@ import {
 
 const G = GEOMETRY;
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const NODE_R = { self: 54, party: 34, entry: 28 };
+const NODE_R = { self: 58, party: 38, entry: 31 };
 const DRAG_THRESHOLD = 5;
 
 export class BondsView {
@@ -33,6 +33,10 @@ export class BondsView {
     #visible = new Set();
     #tagOf = new Map();
     #linkMode = false;
+    /** The portrait shown in the inspector and in focus on the wheel. */
+    #selected = null;
+    #query = "";
+    #hideDead = false;
     #linkFrom = null;
     #gesture = null;
     #resize = null;
@@ -45,6 +49,10 @@ export class BondsView {
         host.addEventListener("pointerdown", this.#onPointerDown);
         host.addEventListener("pointermove", this.#onHover);
         host.addEventListener("click", this.#onClick);
+        host.addEventListener("dblclick", this.#onDoubleClick);
+        host.addEventListener("pointerover", this.#onOver);
+        host.addEventListener("pointerout", this.#onOut);
+        host.addEventListener("input", this.#onInput);
         host.addEventListener("wheel", this.#onWheel, { passive: false });
         host.addEventListener("keydown", this.#onKey);
         host.addEventListener("submit", this.#onSubmit);
@@ -57,6 +65,10 @@ export class BondsView {
         this.host.removeEventListener("pointerdown", this.#onPointerDown);
         this.host.removeEventListener("pointermove", this.#onHover);
         this.host.removeEventListener("click", this.#onClick);
+        this.host.removeEventListener("dblclick", this.#onDoubleClick);
+        this.host.removeEventListener("pointerover", this.#onOver);
+        this.host.removeEventListener("pointerout", this.#onOut);
+        this.host.removeEventListener("input", this.#onInput);
         this.host.removeEventListener("wheel", this.#onWheel);
         this.host.removeEventListener("keydown", this.#onKey);
         this.host.removeEventListener("submit", this.#onSubmit);
@@ -75,6 +87,7 @@ export class BondsView {
         this.#bonds = normalizeBonds(this.#model.bonds);
         // Another player's wheel (GM): a half-drawn link belongs to the old one.
         if (previous !== undefined && previous !== this.#model.owner?.id) this.#linkFrom = null;
+        if (previous !== undefined && previous !== this.#model.owner?.id) this.#selected = null;
         if (!this.#model.editable) this.#linkMode = false;
         this.#render();
     }
@@ -86,16 +99,18 @@ export class BondsView {
     #render() {
         const m = this.#model;
         const entries = this.#entryMap();
-        this.#visible = new Set(entries.keys());
+        // "Hide the dead" only thins the wheel; they stay in the inspector and the timeline.
+        this.#visible = new Set([...entries.keys()].filter(id => !(this.#hideDead && entries.get(id).status === "dead" && id !== this.#selected)));
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
         this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
         const loose = m.entries.filter(e => !placed.has(e.id));
+        if (this.#selected && !this.#nodeInfo(this.#selected)) this.#selected = null;
         const pop = this.host.querySelector(".bonds-pop");
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
 
         this.host.innerHTML = `
-        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""}" tabindex="-1">
+        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""}" tabindex="-1">
             ${this.#renderBar()}
             <div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
@@ -104,6 +119,7 @@ export class BondsView {
                         <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
                     </div>
                     ${this.#renderBanner()}
+                    ${this.#renderFinder(entries)}
                     ${this.#renderLegend()}
                     <div class="bonds-zoom">
                         <button type="button" class="persona-icon-btn" data-action="zoomIn" aria-label="${esc(this.t("ZoomIn"))}" title="${esc(this.t("ZoomIn"))}"><i class="fa-solid fa-plus" inert></i></button>
@@ -111,7 +127,7 @@ export class BondsView {
                         <button type="button" class="persona-icon-btn" data-action="fit" aria-label="${esc(this.t("Fit"))}" title="${esc(this.t("Fit"))}"><i class="fa-solid fa-expand" inert></i></button>
                     </div>
                 </div>
-                ${this.#renderDrawer(loose)}
+                ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
             </div>
             ${this.#renderTimeline()}
             <div class="bonds-pop" hidden></div>
@@ -123,31 +139,37 @@ export class BondsView {
         this.#resize.observe(viewport);
         if (this.#cam.auto) this.fit();
         if (keepPop) this.#closePop();
+        this.#applyFocus(this.#selected);
+        this.#filterLoose();
     }
 
     #renderBar() {
         const m = this.#model;
+        const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
         const players = m.isGM && m.players.length
-            ? `<div class="bonds-players" role="tablist">${m.players.map(p => `
-                <button type="button" class="persona-chip ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}">
-                    <i class="fa-solid fa-user" inert></i><span>${esc(p.name)}</span>
-                </button>`).join("")}</div>`
+            ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
+                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
+                    <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
+                    <span class="bonds-player__name">${esc(p.name)}</span>
+                </button>`).join("")}</nav>`
             : "";
-        const tools = [];
-        if (m.editable) {
-            tools.push(`<button type="button" class="persona-button bonds-tool ${this.#linkMode ? "is-on" : ""}" data-action="linkMode" aria-pressed="${this.#linkMode}" title="${esc(this.t("LinkHint"))}"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("Link"))}</span></button>`);
-        }
-        if (m.isGM && m.players.length) {
-            tools.push(`<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`);
-        }
+        const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
+            : m.editable ? this.t("SubPlayer") : "";
+        const tools = m.isGM && m.players.length
+            ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`
+            : "";
         return `
         <header class="bonds-bar">
-            <div class="bonds-bar__title">
-                <span class="persona-eyebrow">${esc(m.isGM ? this.t("ReadOnlyEyebrow") : this.t("Eyebrow"))}</span>
-                <h2>${esc(this.t("Title"))}${m.owner?.name ? ` <small>${esc(m.owner.name)}</small>` : ""}</h2>
+            <div class="bonds-who">
+                <span class="bonds-who__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span>
+                <div class="bonds-who__text">
+                    <h2>${esc(m.owner?.name ? this.adapter.t("PERSONA.Bonds.TitleOf").replace("{name}", m.owner.name) : this.t("Title"))}</h2>
+                    ${sub ? `<p>${esc(sub)}</p>` : ""}
+                </div>
             </div>
             ${players}
-            <div class="bonds-bar__tools">${tools.join("")}</div>
+            <div class="bonds-bar__tools">${tools}</div>
         </header>`;
     }
 
@@ -155,8 +177,9 @@ export class BondsView {
         const m = this.#model;
         const laid = this.#laid;
         const C = G.center;
-        const outer = G.ringBands[2][1];
-        const inner = G.ringBands[0][0];
+        const g = laid.g;
+        const outer = g.ringBands[2][1];
+        const inner = g.ringBands[0][0];
         const parts = [];
 
         // Gradients per slice colour, brightest near the party, fading outward.
@@ -168,7 +191,7 @@ export class BondsView {
         }
         const gradient = color => `url(#bonds-g${colors.indexOf(color)})`;
 
-        parts.push(`<circle cx="${C}" cy="${C}" r="${G.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
+        parts.push(`<circle cx="${C}" cy="${C}" r="${g.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
         // Fine radial grid, like an astrolabe.
         const spokes = [];
         for (let a = 0; a < 360; a += 6) {
@@ -176,20 +199,23 @@ export class BondsView {
             spokes.push(`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`);
         }
         parts.push(`<path class="bonds-grid" d="${spokes.join("")}"/>`);
-        for (const r of [inner, G.ringBands[0][1], G.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
+        for (const r of [inner, g.ringBands[0][1], g.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
 
         // Slices: a wedge per ring (drop targets), divider arcs, the label along the rim.
         for (const s of laid.sectors) {
             parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${gradient(s.color)}" stroke="${s.color}"/>`);
             for (const ring of RINGS) {
-                const [r1, r2] = G.ringBands[ring - 1];
+                const [r1, r2] = g.ringBands[ring - 1];
                 parts.push(`<path class="bonds-cell" data-cell="${esc(s.id)}|${ring}" d="${wedgePath(r1, r2, s.start, s.end)}"/>`);
             }
-            for (const r of [G.ringBands[0][1], G.ringBands[1][1]]) {
+            for (const r of [g.ringBands[0][1], g.ringBands[1][1]]) {
                 parts.push(`<path class="bonds-divider" d="${arcPath(r, s.start, s.end).d}" stroke="${s.color}"/>`);
             }
-            const arc = arcPath(G.labelRadius, s.start, s.end);
-            const label = s.label || this.t("Unnamed");
+            const arc = arcPath(g.labelRadius, s.start, s.end);
+            // Narrow slices (a campaign with many folders) shorten their label to fit the arc.
+            const fits = Math.max(3, Math.floor(((s.end - s.start) * g.labelRadius) / 15));
+            const full = s.label || this.t("Unnamed");
+            const label = full.length > fits ? `${full.slice(0, Math.max(2, fits - 1)).trimEnd()}…` : full;
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
             parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
         }
@@ -213,7 +239,7 @@ export class BondsView {
             const geo = this.#linkGeometry(link);
             if (!geo) continue;
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            links.push(`<path class="bonds-link bonds-link--${type.id}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -236,7 +262,7 @@ export class BondsView {
         const laid = this.#laid;
         const sectors = new Map(laid.sectors.map(s => [s.id, s]));
         const out = [];
-        const picked = id => (this.#linkFrom === id ? "is-picked" : "");
+        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : ""].join(" ");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
             <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
@@ -273,7 +299,7 @@ export class BondsView {
             if (!geo) return "";
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
             const label = this.t(`Type.${type.id}`);
-            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
+            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
         }).join("");
     }
 
@@ -288,11 +314,45 @@ export class BondsView {
             </div>`;
         }
         if (this.#linkMode) {
-            return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.#linkFrom ? this.t("LinkPickSecond") : this.t("LinkPickFirst"))}</span>
-                <button type="button" class="persona-mini" data-action="linkMode">${esc(this.t("Done"))}</button></div>`;
+            const from = this.#nodeInfo(this.#linkFrom)?.name ?? "";
+            return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.LinkPickTarget").replace("{name}", from))}</span>
+                <button type="button" class="persona-mini" data-action="cancelLink">${esc(this.t("Cancel"))}</button></div>`;
         }
-        if (m.isGM && m.editable && m.owner?.name) return `<div class="bonds-banner bonds-banner--quiet"><i class="fa-solid fa-pen" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.GMEditing").replace("{name}", m.owner.name))}</span></div>`;
         return "";
+    }
+
+    /** Find someone on a big wheel, and thin it out by hiding the dead. */
+    #renderFinder(entries) {
+        const placed = this.#bonds.placements.filter(p => entries.has(p.id));
+        if (placed.length < 8) return "";
+        const dead = placed.filter(p => entries.get(p.id).status === "dead").length;
+        return `<div class="bonds-finder">
+            <label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
+                <input type="search" name="bondsFind" placeholder="${esc(this.t("FindOnWheel"))}" autocomplete="off"></label>
+            <div class="bonds-finder__results" data-find-results hidden></div>
+            ${dead ? `<button type="button" class="persona-mini ${this.#hideDead ? "is-on" : ""}" data-action="toggleDead" aria-pressed="${this.#hideDead}"><i class="fa-solid ${this.#hideDead ? "fa-eye" : "fa-skull"}" inert></i><span>${esc(this.#hideDead ? this.adapter.t("PERSONA.Bonds.ShowDead").replace("{n}", dead) : this.adapter.t("PERSONA.Bonds.HideDead").replace("{n}", dead))}</span></button>` : ""}
+        </div>`;
+    }
+
+    #onFind(value) {
+        const box = this.host.querySelector("[data-find-results]");
+        if (!box) return;
+        const q = value.trim().toLowerCase();
+        const placed = new Set(this.#bonds.placements.map(p => p.id));
+        const hits = q ? this.#model.entries.filter(e => placed.has(e.id) && (e.name ?? "").toLowerCase().includes(q)).slice(0, 8) : [];
+        box.hidden = !hits.length;
+        box.innerHTML = hits.map(e => `<button type="button" data-action="findGo" data-id="${esc(e.id)}"><img src="${esc(e.img)}" alt=""><span>${esc(e.name)}</span></button>`).join("");
+    }
+
+    /** Moves the camera so a portrait sits in the middle of the view. */
+    #centerOn(id) {
+        const node = this.#laid?.nodes.get(id);
+        const viewport = this.host.querySelector("[data-viewport]");
+        if (!node || !viewport) return;
+        const { width, height } = viewport.getBoundingClientRect();
+        const s = Math.max(this.#cam.s, Math.min(width, height) / 700);
+        this.#cam = { s, x: width / 2 - node.x * s, y: height / 2 - node.y * s, auto: false };
+        this.#applyCam();
     }
 
     #renderLegend() {
@@ -323,6 +383,8 @@ export class BondsView {
             ? `<button type="button" class="persona-button bonds-drawer__start" data-action="placeAll"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("PlaceAll"))}</span></button>`
             : "";
         const hint = m.editable && loose.length ? `<p class="bonds-drawer__tip">${esc(this.t("DragHint"))}</p>` : "";
+        const search = loose.length > 6
+            ? `<label class="bonds-search"><i class="fa-solid fa-magnifying-glass" inert></i><input type="search" name="bondsQuery" value="${esc(this.#query)}" placeholder="${esc(this.t("Search"))}" autocomplete="off"></label>` : "";
         // Shown while dragging a portrait: drop here to start a category of your own.
         const newCat = m.editable
             ? `<div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>`
@@ -333,8 +395,134 @@ export class BondsView {
         return `<aside class="bonds-drawer" data-drawer>
             ${newCat}${out}
             <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
-            ${start}${hint}${body}
+            ${search}${body}${start}${hint}
         </aside>`;
+    }
+
+    /** Name, portrait and kind of any node on the wheel (or a person not on it yet). */
+    #nodeInfo(id) {
+        if (!id) return null;
+        const m = this.#model;
+        if (id === SELF) return { id, kind: "self", name: m.self.name, img: m.self.img };
+        const party = m.party.find(p => p.id === id);
+        if (party) return { id, kind: "party", name: party.name, img: party.img };
+        const entry = m.entries.find(e => e.id === id);
+        return entry ? { id, kind: "entry", name: entry.name ?? "???", img: entry.img, entry } : null;
+    }
+
+    /** Everyone linked to `id`, and the links themselves. */
+    #linksOf(id) {
+        return this.#bonds.links.filter(l => l.a === id || l.b === id);
+    }
+
+    #renderInspector(loose) {
+        const m = this.#model;
+        const info = this.#nodeInfo(this.#selected);
+        const placement = this.#bonds.placements.find(p => p.id === info.id);
+        const entry = info.entry;
+        const editable = m.editable;
+
+        // Where they sit: their category, else their folder.
+        let place = "";
+        if (info.kind === "self") place = this.t("You");
+        else if (info.kind === "party") place = this.t("Party");
+        else if (placement?.sector) place = this.#bonds.sectors.find(s => s.id === placement.sector)?.label ?? "";
+        else place = (m.tags ?? []).find(t => t.key === entry?.tag)?.label ?? this.t("NoFolder");
+        const status = entry?.status && entry.status !== "alive"
+            ? `<span class="bonds-tag is-${entry.status}"><i class="${entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question"}" inert></i>${esc(this.adapter.t(`PERSONA.Status.${entry.status}`))}</span>` : "";
+
+        // Distance: one click instead of a drag. For someone off the wheel, it puts them on it.
+        let distance = "";
+        if (info.kind === "entry" && editable) {
+            const ring = placement?.ring ?? 0;
+            distance = `<div class="bonds-insp__block">
+                <span class="bonds-insp__label">${esc(placement ? this.t("Distance") : this.t("PutOnWheel"))}</span>
+                <div class="bonds-seg" role="group">${RINGS.map(r => `<button type="button" class="${ring === r ? "is-on" : ""}" data-action="setRing" data-ring="${r}" aria-pressed="${ring === r}">${esc(this.t(`Ring${r}`))}</button>`).join("")}</div>
+            </div>`;
+        } else if (info.kind === "entry" && placement) {
+            distance = `<div class="bonds-insp__block"><span class="bonds-insp__label">${esc(this.t("Distance"))}</span><p class="bonds-insp__value">${esc(this.t(`Ring${placement.ring}`))}</p></div>`;
+        }
+
+        const links = this.#linksOf(info.id);
+        const rows = links.map(l => {
+            const other = this.#nodeInfo(l.a === info.id ? l.b : l.a);
+            if (!other) return "";
+            const type = LINK_TYPES.find(t => t.id === l.type) ?? LINK_TYPES[0];
+            const outgoing = l.a === info.id;
+            const label = type.directed ? this.t(`TypeDir.${type.id}.${outgoing ? "out" : "in"}`) : this.t(`Type.${type.id}`);
+            return `<li class="bonds-bond" style="--c:${type.color}">
+                <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
+                    <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}</small></span>
+                </button>
+                ${editable ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-ellipsis" inert></i></button>` : ""}
+            </li>`;
+        }).join("");
+
+        const actions = [];
+        if (editable && (placement || info.kind !== "entry")) actions.push(`<button type="button" class="persona-button" data-action="startLink"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("LinkTo"))}</span></button>`);
+        if (entry) actions.push(`<button type="button" class="persona-button bonds-ghost-btn" data-action="openCard" data-id="${esc(entry.id)}"><i class="fa-solid fa-id-card" inert></i><span>${esc(this.t("OpenCard"))}</span></button>`);
+
+        return `<aside class="bonds-drawer bonds-inspector" data-drawer>
+            <button type="button" class="bonds-back" data-action="deselect"><i class="fa-solid fa-chevron-left" inert></i><span>${esc(loose.length ? this.adapter.t("PERSONA.Bonds.BackToList").replace("{n}", loose.length) : this.t("Close"))}</span></button>
+            <div class="bonds-insp__head ${entry?.status && entry.status !== "alive" ? `is-${entry.status}` : ""}">
+                <span class="bonds-insp__portrait ${info.kind}"><img class="persona-fit" src="${esc(info.img)}" style="${esc(entry?.frame ?? "")}" alt="" draggable="false"></span>
+                <h3>${esc(info.name)}</h3>
+                ${entry?.title ? `<p class="bonds-insp__title">${esc(entry.title)}</p>` : ""}
+                <div class="bonds-insp__tags"><span class="bonds-tag">${esc(place)}</span>${status}</div>
+            </div>
+            ${distance}
+            <div class="bonds-insp__block">
+                <span class="bonds-insp__label">${esc(this.t("Bonds"))}${links.length ? ` <b>${links.length}</b>` : ""}</span>
+                ${rows ? `<ul class="bonds-bonds">${rows}</ul>` : `<p class="bonds-insp__empty">${esc(editable && (placement || info.kind !== "entry") ? this.t("NoBondsYet") : this.t("NoBonds"))}</p>`}
+            </div>
+            <div class="bonds-insp__actions">${actions.join("")}</div>
+            ${editable && placement ? `<button type="button" class="bonds-takeoff-btn" data-action="takeOff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOff"))}</span></button>` : ""}
+            <div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>
+        </aside>`;
+    }
+
+    /** Lights up a person and everyone linked to them; dims the rest. */
+    #applyFocus(id) {
+        const root = this.host.querySelector(".bonds");
+        if (!root) return;
+        root.classList.toggle("has-focus", !!id);
+        const near = new Set(id ? [id] : []);
+        if (id) for (const l of this.#linksOf(id)) { near.add(l.a); near.add(l.b); }
+        root.querySelectorAll("[data-node]").forEach(el => el.classList.toggle("is-near", near.has(el.dataset.node)));
+        root.querySelectorAll(".bonds-link, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
+    }
+
+    #onOver = event => {
+        if (this.#gesture?.dragging || this.#linkMode) return;
+        const node = event.target.closest?.("[data-node]");
+        if (node) this.#applyFocus(node.dataset.node);
+    };
+
+    #onOut = event => {
+        if (this.#gesture?.dragging || this.#linkMode) return;
+        const node = event.target.closest?.("[data-node]");
+        if (node && !node.contains(event.relatedTarget)) this.#applyFocus(this.#selected);
+    };
+
+    #onInput = event => {
+        if (event.target.name === "bondsFind") return this.#onFind(event.target.value);
+        if (event.target.name !== "bondsQuery") return;
+        this.#query = event.target.value;
+        this.#filterLoose();
+    };
+
+    /** Filters the off-wheel list in place (no redraw, so typing keeps focus). */
+    #filterLoose() {
+        const q = this.#query.trim().toLowerCase();
+        this.host.querySelectorAll("[data-loose]").forEach(el => {
+            el.hidden = !!q && !el.textContent.toLowerCase().includes(q);
+        });
+    }
+
+    #select(id) {
+        this.#selected = id;
+        this.#render();
     }
 
     #renderTimeline() {
@@ -370,8 +558,10 @@ export class BondsView {
         if (!viewport) return;
         const { width, height } = viewport.getBoundingClientRect();
         if (!width || !height) return;
-        const s = Math.min(width, height) / (G.size * 1.04);
-        this.#cam = { s, x: (width - G.size * s) / 2, y: (height - G.size * s) / 2, auto: true };
+        // The wheel grows with the campaign: fit its real outer edge, labels included.
+        const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 34;
+        const s = Math.min(width, height) / (2 * R);
+        this.#cam = { s, x: width / 2 - G.center * s, y: height / 2 - G.center * s, auto: true };
         this.#applyCam();
     }
 
@@ -554,7 +744,7 @@ export class BondsView {
 
         if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"]')) {
             this.#closePop();
-            if (!node) return;
+            if (!node && !loose) return;
         }
 
         if (actionEl) {
@@ -565,13 +755,23 @@ export class BondsView {
             }
         }
         if (node && this.#linkMode) return this.#pickForLink(node.dataset.node);
-        if (node?.dataset.entry || loose) return this.adapter.openCard((node ?? loose).dataset.entry);
+        if (node) return this.#select(node.dataset.node);
+        if (loose) return this.#select(loose.dataset.entry);
+        // A click on the empty wheel clears the selection.
+        if (event.target.closest("[data-viewport]") && this.#selected && !this.#linkMode) return this.#select(null);
+    };
+
+    /** Double-click a person: their Persona card. */
+    #onDoubleClick = event => {
+        const el = event.target.closest("[data-entry]");
+        if (el && !this.#linkMode) this.adapter.openCard(el.dataset.entry);
     };
 
     #onKey = event => {
         if (event.key !== "Escape") return;
         if (!this.host.querySelector(".bonds-pop")?.hidden) { event.stopPropagation(); return this.#closePop(); }
         if (this.#linkMode) { event.stopPropagation(); this.#linkMode = false; this.#linkFrom = null; return this.#render(); }
+        if (this.#selected) { event.stopPropagation(); return this.#select(null); }
     };
 
     #actions = {
@@ -582,11 +782,29 @@ export class BondsView {
         zoomIn: () => this.#zoomAt(1.2),
         zoomOut: () => this.#zoomAt(1 / 1.2),
         fit: () => this.fit(),
-        linkMode: () => {
-            this.#linkMode = !this.#linkMode;
+        select: (_el, id) => this.#select(id),
+        toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
+        findGo: (_el, id) => { this.#select(id); this.#centerOn(id); },
+        deselect: () => this.#select(null),
+        openCard: (_el, id) => this.adapter.openCard(id),
+        startLink: () => {
+            this.#linkMode = true;
+            this.#linkFrom = this.#selected;
+            this.#render();
+        },
+        cancelLink: () => {
+            this.#linkMode = false;
             this.#linkFrom = null;
             this.#render();
         },
+        setRing: el => {
+            const id = this.#selected;
+            const ring = Number(el.dataset.ring);
+            const placement = this.#bonds.placements.find(p => p.id === id);
+            if (placement?.ring === ring) return;
+            this.#commit(place(this.#bonds, id, placement?.sector ?? null, ring, null));
+        },
+        takeOff: () => this.#commit(unplace(this.#bonds, this.#selected)),
         editSector: (el, id) => this.#sectorPop(id, el),
         editLink: (el, id) => this.#linkPop(id, el),
         placeAll: () => {
@@ -627,13 +845,11 @@ export class BondsView {
             this.#linkFrom = id;
             return this.#render();
         }
-        if (this.#linkFrom === id) {
-            this.#linkFrom = null;
-            return this.#render();
-        }
         const a = this.#linkFrom;
         this.#linkFrom = null;
+        this.#linkMode = false;
         this.#render();
+        if (a === id) return;
         const pa = this.#laid.nodes.get(a), pb = this.#laid.nodes.get(id);
         const mid = linkPath(pa, pb).mid;
         this.#linkPop(null, null, { a, b: id, at: mid });
