@@ -37,8 +37,7 @@ export class PanelView {
         host.classList.add("persona");
         host.addEventListener("click", this.#onClick);
         host.addEventListener("input", this.#onInput);
-        host.addEventListener("dragstart", this.#onDragStart);
-        host.addEventListener("dragend", this.#onDragEnd);
+        host.addEventListener("pointerdown", this.#onPointerDown);
         host.addEventListener("dragover", this.#onDragOver);
         host.addEventListener("dragleave", this.#onDragLeave);
         host.addEventListener("drop", this.#onDrop);
@@ -49,8 +48,7 @@ export class PanelView {
         if (!this.#hosts.delete(host)) return;
         host.removeEventListener("click", this.#onClick);
         host.removeEventListener("input", this.#onInput);
-        host.removeEventListener("dragstart", this.#onDragStart);
-        host.removeEventListener("dragend", this.#onDragEnd);
+        host.removeEventListener("pointerdown", this.#onPointerDown);
         host.removeEventListener("dragover", this.#onDragOver);
         host.removeEventListener("dragleave", this.#onDragLeave);
         host.removeEventListener("drop", this.#onDrop);
@@ -171,26 +169,146 @@ export class PanelView {
         return groupFilter ? this.filter : null;
     }
 
-    #onDragStart = event => {
-        if (!game.user.isGM) return;
-        const row = event.target.closest?.("[data-drag-entry]");
-        const folder = event.target.closest?.("[data-drag-group]");
+    /*
+     * Pointer-driven (not the browser's native drag and drop): native dragging dies silently when
+     * anything around the panel — Triad's tray, Foundry, another module — cancels the mouse press.
+     */
+    #press = null;
+
+    #onPointerDown = event => {
+        if (!game.user.isGM || event.button !== 0 || this.search) return;
+        if (event.target.closest("input, textarea, select, [contenteditable]")) return;
+        const row = event.target.closest("[data-drag-entry]");
+        const folder = row ? null : event.target.closest("[data-drag-group]");
         if (!row && !folder) return;
-        this.#arranging = row
-            ? { kind: "entry", id: row.dataset.dragEntry, from: this.#folderOf(row.dataset.folder), el: row }
-            : { kind: "group", id: folder.dataset.dragGroup, el: folder.closest(".persona-section") };
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", `persona:${this.#arranging.kind}:${this.#arranging.id}`);
-        requestAnimationFrame(() => this.#arranging?.el.classList.add("is-dragging"));
+        this.#press = {
+            x: event.clientX, y: event.clientY, host: event.currentTarget,
+            drag: row
+                ? { kind: "entry", id: row.dataset.dragEntry, from: this.#folderOf(row.dataset.folder), el: row }
+                : { kind: "group", id: folder.dataset.dragGroup, el: folder.closest(".persona-section"), handle: folder }
+        };
+        window.addEventListener("pointermove", this.#onPointerMove);
+        window.addEventListener("pointerup", this.#onPointerUp);
+        window.addEventListener("pointercancel", this.#onPointerCancel);
+        window.addEventListener("keydown", this.#onDragKey, true);
     };
 
-    #onDragEnd = () => {
+    #onPointerMove = event => {
+        const press = this.#press;
+        if (!press) return;
+        if (!this.#arranging) {
+            if (Math.hypot(event.clientX - press.x, event.clientY - press.y) < 6) return;
+            this.#arranging = { ...press.drag, host: press.host };
+            this.#arranging.ghost = this.#makeGhost(press.drag);
+            press.drag.el.classList.add("is-dragging");
+            press.host.classList.add("is-arranging");
+            window.getSelection()?.removeAllRanges();
+            this.#autoScroll();
+        }
         const drag = this.#arranging;
-        this.#arranging = null;
-        drag?.el.classList.remove("is-dragging");
+        drag.pointer = { x: event.clientX, y: event.clientY };
+        drag.ghost.style.left = `${event.clientX}px`;
+        drag.ghost.style.top = `${event.clientY}px`;
         this.#clearMarks();
-        if (drag?.stale) this.requestRender();
+        const target = this.#arrangeTarget(this.#pointAt(event.clientX, event.clientY));
+        target?.el.classList.add(target.mark);
     };
+
+    #onPointerUp = async event => {
+        const drag = this.#arranging;
+        this.#endPress();
+        if (!drag) return;
+        // The press ends in a click on whatever is under it (a portrait, a folder header): swallow it.
+        const swallow = e => { e.stopPropagation(); e.preventDefault(); };
+        window.addEventListener("click", swallow, { capture: true, once: true });
+        setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 50);
+        this.#arranging = drag; // keep renders paused until the move is saved
+        try {
+            await this.#arrangeDrop(this.#pointAt(event.clientX, event.clientY));
+        } catch (error) {
+            console.error(`${MODULE_ID} | arranging failed`, error);
+            ui.notifications.error(game.i18n.localize("PERSONA.Warn.ActionFailed"));
+        } finally {
+            this.#finishDrag(drag);
+        }
+    };
+
+    #onPointerCancel = () => {
+        const drag = this.#arranging;
+        this.#endPress();
+        if (drag) this.#finishDrag(drag);
+    };
+
+    #onDragKey = event => {
+        if (event.key !== "Escape" || !this.#arranging) return;
+        event.stopPropagation();
+        this.#onPointerCancel();
+    };
+
+    #endPress() {
+        this.#press = null;
+        window.removeEventListener("pointermove", this.#onPointerMove);
+        window.removeEventListener("pointerup", this.#onPointerUp);
+        window.removeEventListener("pointercancel", this.#onPointerCancel);
+        window.removeEventListener("keydown", this.#onDragKey, true);
+    }
+
+    #finishDrag(drag) {
+        drag.ghost?.remove();
+        drag.el.classList.remove("is-dragging");
+        drag.host?.classList.remove("is-arranging");
+        this.#clearMarks();
+        this.#arranging = null;
+        this.requestRender();
+    }
+
+    /** What is under the pointer (the ghost lets the pointer through). */
+    #pointAt(x, y) {
+        const el = document.elementFromPoint(x, y);
+        const host = this.#arranging?.host;
+        return { target: el && host?.contains(el) ? el : document.body, clientY: y };
+    }
+
+    #makeGhost(drag) {
+        const ghost = document.createElement("div");
+        ghost.className = "persona persona-drag-ghost";
+        if (drag.kind === "entry") {
+            const img = drag.el.querySelector(".persona-row__img img");
+            const name = drag.el.querySelector(".persona-row__name > span")?.textContent ?? "";
+            ghost.innerHTML = `<img src="${img?.getAttribute("src") ?? ""}" alt=""><span></span>`;
+            ghost.querySelector("span").textContent = name;
+        } else {
+            ghost.innerHTML = `<i class="fa-solid fa-folder" inert></i><span></span>`;
+            ghost.querySelector("span").textContent = drag.handle.querySelector(".persona-folder__label")?.textContent ?? "";
+        }
+        document.body.append(ghost);
+        return ghost;
+    }
+
+    /** Scrolls the list while the pointer rests near its top or bottom edge. */
+    #autoScroll() {
+        const step = () => {
+            const drag = this.#arranging;
+            if (!drag || !drag.ghost?.isConnected) return;
+            const body = drag.host.querySelector(".persona-body");
+            if (body && drag.pointer) {
+                const rect = body.getBoundingClientRect();
+                const edge = 48;
+                const y = drag.pointer.y;
+                let delta = 0;
+                if (y < rect.top + edge) delta = -Math.ceil((rect.top + edge - y) / 4);
+                else if (y > rect.bottom - edge) delta = Math.ceil((y - (rect.bottom - edge)) / 4);
+                if (delta) {
+                    body.scrollTop += delta;
+                    this.#clearMarks();
+                    const target = this.#arrangeTarget(this.#pointAt(drag.pointer.x, drag.pointer.y));
+                    target?.el.classList.add(target.mark);
+                }
+            }
+            requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
 
     #clearMarks() {
         for (const host of this.#hosts) {
@@ -220,7 +338,8 @@ export class PanelView {
         return null;
     }
 
-    async #arrangeDrop(event) {
+    async #arrangeDrop(point) {
+        const event = point;
         const drag = this.#arranging;
         const target = this.#arrangeTarget(event);
         this.#clearMarks();
@@ -249,35 +368,17 @@ export class PanelView {
     #onDragOver = event => {
         if (!game.user.isGM) return;
         event.preventDefault();
-        if (this.#arranging) {
-            event.dataTransfer.dropEffect = "move";
-            const target = this.#arrangeTarget(event);
-            this.#clearMarks();
-            target?.el.classList.add(target.mark);
-            return;
-        }
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.add("is-over");
     };
 
     #onDragLeave = event => {
         if (event.currentTarget.contains(event.relatedTarget)) return;
-        this.#clearMarks();
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.remove("is-over");
     };
 
     #onDrop = async event => {
         if (!game.user.isGM) return;
         event.preventDefault();
-        if (this.#arranging) {
-            const drag = this.#arranging;
-            try { await this.#arrangeDrop(event); }
-            finally {
-                drag.el.classList.remove("is-dragging");
-                this.#arranging = null;
-                this.requestRender();
-            }
-            return;
-        }
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.remove("is-over");
         const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
         const entry = await createFromDrop(data);

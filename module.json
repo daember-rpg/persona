@@ -2,7 +2,7 @@
   "id": "persona",
   "title": "Persona",
   "description": "The people and places of your story, revealed when you choose: a player gallery with cards and notes, cards shown to players like handouts, full-screen videos for everyone, and Bonds — each player's own relationship wheel.",
-  "version": "0.5.2-alpha",
+  "version": "0.5.3-alpha",
   "authors": [
     {
       "name": "Fernando Melo (Hello Melo Design)",
@@ -11,7 +11,7 @@
   ],
   "url": "https://github.com/daember-rpg/persona",
   "manifest": "https://raw.githubusercontent.com/daember-rpg/persona/main/module.json",
-  "download": "https://raw.githubusercontent.com/daember-rpg/persona/main/dist/persona-0.5.2-alpha.zip",
+  "download": "https://raw.githubusercontent.com/daember-rpg/persona/main/dist/persona-0.5.3-alpha.zip",
   "compatibility": {
     "minimum": "13",
     "verified": "14"

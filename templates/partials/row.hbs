@@ -1,4 +1,4 @@
-<div class="persona-row {{#if isOpen}}is-open{{/if}} {{#if canArrange}}is-draggable{{/if}}" data-id="{{id}}" {{#if canArrange}}draggable="true" data-drag-entry="{{id}}" data-folder="{{folder}}"{{/if}}>
+<div class="persona-row {{#if isOpen}}is-open{{/if}} {{#if canArrange}}is-draggable{{/if}}" data-id="{{id}}" {{#if canArrange}}data-drag-entry="{{id}}" data-folder="{{folder}}"{{/if}}>
     {{#if canArrange}}<span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>{{/if}}
     <button type="button" class="persona-row__img" data-action="openCard" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Card.Open"}}"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></button>
     <div class="persona-row__main">

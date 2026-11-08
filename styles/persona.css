@@ -2607,7 +2607,31 @@
     color: var(--dp-parchment);
 }
 
-.persona .persona-folder[draggable="true"] { cursor: grab; }
 
-/* The button reset above (all: unset) also clears the browser's drag behaviour. */
-.persona [draggable="true"] { -webkit-user-drag: element; }
+.persona .persona-folder[data-drag-group] { cursor: grab; }
+.persona.is-arranging,
+.persona.is-arranging * { cursor: grabbing !important; user-select: none; }
+
+.persona-drag-ghost {
+    position: fixed;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 260px;
+    padding: 6px 14px 6px 6px;
+    transform: translate(12px, -50%);
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-clay-light);
+    background: var(--dp-charcoal);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    font-family: var(--dp-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dp-parchment);
+    pointer-events: none;
+}
+
+.persona-drag-ghost img { width: 30px; height: 40px; object-fit: cover; border: 0; border-radius: 3px; }
+.persona-drag-ghost i { color: var(--dp-clay-light); padding: 0 4px 0 8px; }
+.persona-drag-ghost span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
