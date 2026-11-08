@@ -1,7 +1,7 @@
 <div class="persona-row {{#if isOpen}}is-open{{/if}}" data-id="{{id}}">
     <button type="button" class="persona-row__img" data-action="openCard" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Card.Open"}}"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></button>
     <div class="persona-row__main">
-        <div class="persona-row__name"><span>{{name}}</span>{{#if title}} <small>{{title}}</small>{{/if}}</div>
+        <div class="persona-row__name"><span>{{name}}</span>{{#if status}} <em class="persona-status-tag is-{{status}}">{{statusLabel}}</em>{{/if}}{{#if title}} <small>{{title}}</small>{{/if}}</div>
         <div class="persona-row__actions">
             <button type="button" class="persona-mini {{#if isSharing}}is-on{{/if}}" data-action="toggleShare" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Handout.Hint"}}"><i class="fa-solid fa-share-from-square" inert></i><span>{{localize "PERSONA.Handout.Show"}}</span></button>
             {{#if hasVideo}}<button type="button" class="persona-mini persona-mini--icon" data-action="playVideo" data-id="{{id}}" data-tooltip="{{localize "PERSONA.Video.PlayAll"}}" aria-label="{{localize "PERSONA.Video.PlayAll"}}"><i class="fa-solid fa-film" inert></i></button>{{/if}}

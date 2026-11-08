@@ -1,4 +1,4 @@
-<article class="persona-card persona-card--{{kind}}" role="dialog" aria-label="{{#if name}}{{name}}{{else}}???{{/if}}">
+<article class="persona-card persona-card--{{kind}} {{#if status}}is-{{status}}{{/if}}" role="dialog" aria-label="{{#if name}}{{name}}{{else}}???{{/if}}">
     <button type="button" class="persona-card__close" data-action="closeCard" aria-label="{{localize "PERSONA.Close"}}"><i class="fa-solid fa-xmark" inert></i></button>
     <div class="persona-card__art" style="--art: url('{{img}}')">
         <div class="persona-card__frame"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false"></div>
@@ -11,6 +11,7 @@
         {{#if named}}
             <h3>{{name}}</h3>
             {{#if title}}<p class="persona-card__title">{{title}}</p>{{/if}}
+            {{#if status}}<p class="persona-status-tag persona-status-tag--card is-{{status}}"><i class="{{statusIcon}}" inert></i> {{statusLabel}}</p>{{/if}}
         {{else}}
             <h3 class="is-unknown">???</h3>
         {{/if}}

@@ -1,6 +1,9 @@
 # Persona (Alpha)
 
-The people and places of your story, revealed when you choose. Players keep a gallery of everyone they have met, with cards and notes; the GM shows cards to players like handouts and plays full-screen videos for the whole table. System-agnostic, Foundry VTT V13/V14.
+The people and places of your story, revealed when you choose. Players keep a gallery of everyone they have met, with cards and notes, and arrange them on their own **Bonds** wheel; the GM shows cards to players like handouts and plays full-screen videos for the whole table. System-agnostic, Foundry VTT V13/V14.
+
+## Install
+Manifest URL: `https://github.com/daember-rpg/persona/releases/latest/download/module.json`
 
 Third module of the Triad suite (Triad · First Strike · Persona). Works on its own as a window, or as a tab in Triad's tray.
 
@@ -8,7 +11,8 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Scene control**: masks button in the Token controls.
 - **Keybinding**: `Alt+P` (editable in Configure Controls).
 - **Triad**: a masks tab in the tray (setting *Show as a Triad tab*). A dot appears when a player has something new.
-- API: `game.modules.get("persona").api` → `open()`, `close()`, `toggle()`, `openCard(id)`, `playVideo(path, title, subtitle)`, `stopVideo()`.
+- **Bonds**: the circle-nodes button in the panel header (in the window and in the Triad tab). Optional keybinding in Configure Controls.
+- API: `game.modules.get("persona").api` → `open()`, `close()`, `toggle()`, `openCard(id)`, `openBonds(userId?)`, `playVideo(path, title, subtitle)`, `stopVideo()`.
 
 ## GM: the Director
 - **Add** people and places by dragging an **Actor** (name + portrait), a **Journal entry or page** (name + text + first image page) or a **Scene** (place) onto the panel, or with **+**.
@@ -22,6 +26,17 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Show (handout)**: *Show* on a row (or *Show to* on the card) opens that card on the screens of everyone or one player, like a handout. Their face and name are revealed to them first, so the card stays in their gallery.
 - **Video**: give an entry an mp4/webm and press *Video*, or the film button to play any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
 
+## Bonds: each player's relationship wheel
+Inspired by the *People* screen of Final Fantasy XVI.
+- **Centre**: the player's character. **Inner ring**: the rest of the party, always there and always close.
+- **Slices**: groups the player creates — a kingdom, the Order, enemies, "don't trust". Name and colour are theirs; rotate or delete them from the slice label. *Start from the Persona folders* creates one slice per folder they can see.
+- **Rings**: distance. Close (inner), Known, Distant (outer). Drag a portrait from *Not placed yet* into a slice and ring; drag it back to the list (or past the rim) to take it off.
+- **Links**: *Link*, then click two portraits (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link icon).
+- **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
+- **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
+- **Private**: each player sees only their own wheel. The GM can open anyone's, read-only, from the player chips.
+- **Timeline**: the GM presses *Record moment* (e.g. at the end of a session). It saves every wheel and every status at that point. Players click a moment on the timeline to see their wheel as it was then — who was still alive, who they hadn't met yet.
+
 ## Players: the gallery
 - People and places they know, with **New** marks and a notice when the GM reveals something. An eye marks things only they know.
 - **Card** (X, Esc or click outside to close): portrait, name, title, groups, story, secret (when uncovered), *Watch again* for linked videos (just for them).
@@ -32,7 +47,7 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - A GM online for party notes.
 
 ## Data
-World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`. Per user (flags): `seen`, `notes`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
+World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`. Per user (flags, written by the player): `seen`, `notes`, `bonds`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
 
 ## Structure
 ```
@@ -49,9 +64,14 @@ scripts/
   editor.js      GM entry editor
   video.js       synced full-screen video
   toasts.js      reveal notices
+  bonds/
+    model.js     Bonds data and geometry (pure, no Foundry)
+    view.js      the wheel (framework-free DOM, shared with the preview)
+    app.js       Bonds window, Foundry adapter, moments
 templates/       panel, card, editor + partials
 styles/          persona.css (Embermark)
 lang/            en, pt-BR
+dev/             bonds-preview.html (standalone preview, not shipped) and its build script
 ```
 
 ## Credits

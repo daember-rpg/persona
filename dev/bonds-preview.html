@@ -1,0 +1,3828 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persona Bonds Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+
+/* ==========================================================================
+   Persona — Embermark design language
+   Spacing in multiples of 8; Cinzel for display, Spectral for text.
+   ========================================================================== */
+
+:root {
+    --dp-charcoal: #1c1a17;
+    --dp-charcoal-2: #25221e;
+    --dp-charcoal-3: #302b26;
+    --dp-night: #0f0e0c;
+    --dp-line: rgba(234, 223, 196, 0.12);
+    --dp-line-strong: rgba(234, 223, 196, 0.24);
+    --dp-parchment: #eadfc4;
+    --dp-parchment-dim: #b9ab8d;
+    --dp-parchment-faint: #857a65;
+    --dp-clay: #b4643e;
+    --dp-clay-light: #d68a5c;
+    --dp-clay-soft: rgba(180, 100, 62, 0.22);
+    --dp-moss: #74864a;
+    --dp-moss-soft: rgba(116, 134, 74, 0.25);
+    --dp-ember: #c8452f;
+    --dp-ember-soft: rgba(200, 69, 47, 0.2);
+    --dp-gold: #c9a35a;
+    --dp-scrim: rgba(10, 9, 8, 0.72);
+    --dp-display: "Cinzel", "Palatino Linotype", "Book Antiqua", serif;
+    --dp-body: "Spectral", Georgia, "Times New Roman", serif;
+    --dp-radius: 6px;
+    --dp-1: 8px;
+    --dp-2: 16px;
+    --dp-3: 24px;
+    --dp-4: 32px;
+}
+
+/* Reset Foundry's generic control styles inside our UI. */
+:where(.persona) button {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--dp-body);
+}
+
+:where(.persona) button:focus-visible {
+    outline: 2px solid var(--dp-clay-light);
+    outline-offset: 2px;
+}
+
+:where(.persona) button:hover,
+:where(.persona) button:focus {
+    background: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+/* Foundry's own button rules can win over the reset above; set layout explicitly. */
+.persona .persona-chip,
+.persona .persona-mini,
+.persona .persona-button,
+.persona .persona-icon-btn,
+.persona .persona-cell,
+.persona .persona-card__close,
+.persona .persona-video__close,
+.persona .persona-note__delete,
+.persona .persona-chip-remove,
+.persona .persona-tabs button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+.persona .persona-chip > *,
+.persona .persona-mini > * {
+    flex: none;
+}
+
+:where(.persona) button:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+
+.persona {
+    font-family: var(--dp-body);
+    color: var(--dp-parchment);
+}
+
+.persona *, .persona *::before, .persona *::after {
+    box-sizing: border-box;
+}
+
+.persona h2, .persona h3 {
+    margin: 0;
+    border: 0;
+    text-wrap: balance;
+}
+
+.persona-eyebrow {
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dp-clay-light);
+}
+
+.persona-hint {
+    margin: 0;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    font-size: 12px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-empty-line {
+    margin: 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-row__spacer {
+    flex: 1;
+}
+
+/* ---------- Shared controls ---------- */
+
+.persona .persona-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.persona .persona-chip {
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--dp-parchment-dim);
+    white-space: nowrap;
+}
+
+.persona .persona-chip i {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.persona .persona-chip:hover {
+    border-color: var(--dp-clay);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-chip.is-active {
+    border-color: var(--dp-clay);
+    background: var(--dp-clay-soft);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-chip.is-static {
+    cursor: default;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.persona-chip__count {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-mini {
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid var(--dp-line);
+    border-radius: 4px;
+    background: var(--dp-charcoal-2);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+    white-space: nowrap;
+}
+
+.persona .persona-mini:hover:not(:disabled) {
+    border-color: var(--dp-clay);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-mini.is-on {
+    border-color: var(--dp-clay);
+    background: var(--dp-clay-soft);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-mini--icon {
+    width: 26px;
+    padding: 0;
+}
+
+.persona .persona-button {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: var(--dp-radius);
+    background: var(--dp-clay);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dp-night);
+}
+
+.persona .persona-button:hover {
+    background: var(--dp-clay-light);
+}
+
+.persona .persona-button--danger {
+    background: transparent;
+    border: 1px solid var(--dp-ember);
+    color: #e58a74;
+}
+
+.persona .persona-button--danger:hover {
+    background: var(--dp-ember-soft);
+}
+
+.persona .persona-icon-btn {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    color: var(--dp-parchment-dim);
+    font-size: 13px;
+}
+
+.persona .persona-icon-btn:hover {
+    border-color: var(--dp-clay);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-icon-btn.is-on {
+    border-color: var(--dp-clay);
+    background: var(--dp-clay-soft);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-icon-btn--accent {
+    background: var(--dp-clay);
+    border-color: var(--dp-clay);
+    color: var(--dp-night);
+}
+
+.persona .persona-icon-btn--accent:hover {
+    background: var(--dp-clay-light);
+    color: var(--dp-night);
+}
+
+.persona-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--dp-ember);
+    color: var(--dp-parchment);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+.persona input[type="text"],
+.persona input[type="search"],
+.persona textarea {
+    width: 100%;
+    margin: 0;
+    padding: 6px 10px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+    color: var(--dp-parchment);
+    font-family: var(--dp-body);
+    font-size: 14px;
+    box-shadow: none;
+}
+
+.persona input:focus,
+.persona textarea:focus {
+    outline: none;
+    border-color: var(--dp-clay);
+    box-shadow: 0 0 0 1px var(--dp-clay);
+}
+
+.persona textarea {
+    resize: vertical;
+    min-height: 64px;
+    line-height: 1.45;
+}
+
+/* Every view of a portrait uses the framing chosen in the editor. */
+.persona img.persona-fit {
+    object-fit: cover;
+    object-position: var(--fx, 50%) var(--fy, 20%);
+    transform: scale(var(--zoom, 1));
+    transform-origin: var(--fx, 50%) var(--fy, 20%);
+}
+
+/* ==========================================================================
+   Panel (own window or Triad tab)
+   ========================================================================== */
+
+.persona-host {
+    height: 100%;
+}
+
+.triad-dock[data-dock="persona"] {
+    padding: 0;
+    overflow: hidden;
+}
+
+.persona-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--dp-charcoal);
+}
+
+.persona-head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: var(--dp-2) var(--dp-2) 12px;
+    border-bottom: 1px solid var(--dp-line);
+}
+
+.persona-head__title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--dp-1);
+}
+
+.persona-head__title h2 {
+    font-family: var(--dp-display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--dp-parchment);
+}
+
+.persona-head__tools {
+    display: flex;
+    gap: 6px;
+}
+
+.persona-search {
+    display: flex;
+    align-items: center;
+    gap: var(--dp-1);
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-search input {
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.persona .persona-search input:focus {
+    box-shadow: none;
+}
+
+.persona-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--dp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--dp-charcoal-3) transparent;
+}
+
+.persona-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-2);
+}
+
+.persona-section__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--dp-1);
+    padding: var(--dp-4) var(--dp-2);
+    text-align: center;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-empty i {
+    font-size: 28px;
+    color: var(--dp-clay);
+    opacity: 0.6;
+}
+
+.persona-empty p {
+    margin: 0;
+    max-width: 30ch;
+    font-style: italic;
+}
+
+/* ---------- Player gallery ---------- */
+
+.persona-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px;
+}
+
+.persona-gallery--places {
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+}
+
+.persona .persona-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 6px;
+    min-width: 0;
+    text-align: left;
+}
+
+.persona-tile__img,
+.persona .persona-row__img,
+.persona-card__art,
+.persona-toast img {
+    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+}
+
+.persona-tile__img {
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.persona-tile--place .persona-tile__img {
+    aspect-ratio: 16 / 9;
+}
+
+.persona-tile__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 0;
+    display: block;
+}
+
+.persona-tile:hover .persona-tile__img {
+    transform: translateY(-2px);
+    border-color: var(--dp-clay-light);
+}
+
+.persona-tile__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--dp-parchment);
+}
+
+.persona-tile__name.is-unknown {
+    font-family: var(--dp-display);
+    letter-spacing: 0.2em;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-tile__new {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--dp-ember);
+    font-family: var(--dp-display);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-parchment);
+}
+
+.persona-tile__private {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--dp-scrim);
+    font-size: 10px;
+    color: var(--dp-gold);
+}
+
+/* ---------- GM director ---------- */
+
+.persona-audience {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    padding: 12px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona-audience p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding-bottom: var(--dp-2);
+    border-bottom: 1px solid var(--dp-line);
+}
+
+.persona-row:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.persona .persona-row__img {
+    width: 48px;
+    height: 64px;
+    overflow: hidden;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 4px;
+}
+
+.persona-row__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 0;
+}
+
+.persona-row__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    min-width: 0;
+}
+
+.persona-row__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.persona-row__name small {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-row__groups {
+    font-size: 12px;
+    color: var(--dp-parchment-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.persona-layers {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.persona .persona-layer {
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 2px 4px 3px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-layer > span:first-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.persona .persona-layer.is-all {
+    border-color: var(--dp-moss);
+    background: var(--dp-moss-soft);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-layer.is-some {
+    border-color: var(--dp-gold);
+    border-style: dashed;
+    color: var(--dp-parchment);
+}
+
+.persona-layer__who {
+    display: flex;
+    gap: 3px;
+    min-height: 5px;
+}
+
+.persona-layer__who i {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--dp-charcoal-3);
+}
+
+.persona-layer__who i.is-on {
+    background: var(--dp-moss);
+}
+
+.is-all .persona-layer__who i.is-on {
+    background: var(--dp-clay-light);
+}
+
+.persona-row__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.persona-drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dp-1);
+    padding: 12px;
+    border: 1px dashed var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+    text-align: center;
+}
+
+.persona-drop.is-over {
+    border-color: var(--dp-clay);
+    background: var(--dp-clay-soft);
+    color: var(--dp-parchment);
+}
+
+/* ---------- Folders ---------- */
+
+.persona .persona-folder {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--dp-1);
+    width: 100%;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--dp-line);
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dp-parchment);
+}
+
+.persona .persona-folder:hover {
+    color: var(--dp-clay-light);
+}
+
+.persona-folder i {
+    font-size: 11px;
+    color: var(--dp-clay-light);
+}
+
+.persona .persona-folder .persona-folder__chevron {
+    width: 12px;
+    color: var(--dp-parchment-faint);
+    transition: transform 0.2s ease;
+}
+
+.persona-folder.is-collapsed .persona-folder__chevron {
+    transform: rotate(-90deg);
+}
+
+.persona-folder__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.persona-folder__count {
+    font-family: var(--dp-body);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-2);
+}
+
+/* ---------- Reveal status (row) ---------- */
+
+.persona .persona-status {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) 14px;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 4px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona .persona-status:hover {
+    border-color: var(--dp-clay);
+}
+
+.persona-status--static {
+    cursor: default;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona-status__layer {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-status__layer i {
+    font-size: 10px;
+}
+
+.persona-status__layer > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.persona-status__layer b {
+    position: absolute;
+    top: -7px;
+    right: -3px;
+    padding: 0 4px;
+    border-radius: 6px;
+    background: var(--dp-gold);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--dp-night);
+}
+
+.persona-status__layer.is-all {
+    background: var(--dp-moss-soft);
+    color: var(--dp-parchment);
+}
+
+.persona-status__layer.is-all i {
+    color: #a9bd78;
+}
+
+.persona-status__layer.is-some {
+    background: rgba(201, 163, 90, 0.16);
+    color: var(--dp-parchment);
+}
+
+.persona-status__layer.is-some i {
+    color: var(--dp-gold);
+}
+
+.persona-status__layer.is-disabled {
+    opacity: 0.35;
+}
+
+.persona .persona-status .persona-status__chevron {
+    justify-self: center;
+    font-size: 10px;
+    color: var(--dp-parchment-faint);
+    transition: transform 0.2s ease;
+}
+
+.persona-row.is-open .persona-status__chevron {
+    transform: rotate(180deg);
+}
+
+.persona-row.is-open .persona-status {
+    border-color: var(--dp-clay);
+}
+
+/* ---------- Reveal grid ---------- */
+
+.persona-reveal {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    padding: 12px;
+    border: 1px solid var(--dp-clay);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona-reveal__scroll {
+    overflow-x: auto;
+}
+
+.persona-reveal__grid {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: separate;
+    border-spacing: 4px;
+    background: none;
+    font-size: 12px;
+}
+
+.persona-reveal__grid tr,
+.persona-reveal__grid thead,
+.persona-reveal__grid tbody {
+    background: none !important;
+    border: 0;
+}
+
+.persona-reveal__grid th,
+.persona-reveal__grid td {
+    padding: 0;
+    border: 0;
+    text-align: center;
+    background: none;
+}
+
+.persona-reveal__grid tbody th {
+    padding-right: 4px;
+    text-align: left;
+    font-weight: 400;
+    white-space: nowrap;
+    color: var(--dp-parchment-dim);
+}
+
+.persona-reveal__grid thead th {
+    font-family: var(--dp-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-reveal__grid tr.is-disabled th {
+    opacity: 0.4;
+}
+
+.persona-reveal__all {
+    padding-right: 6px !important;
+    border-right: 1px solid var(--dp-line) !important;
+}
+
+.persona-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--who, var(--dp-parchment-faint));
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dp-night);
+}
+
+.persona .persona-cell {
+    width: 28px;
+    height: 26px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-cell:hover:not(:disabled) {
+    border-color: var(--dp-clay-light);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-cell.is-on {
+    border-color: var(--dp-moss);
+    background: var(--dp-moss);
+    color: var(--dp-night);
+}
+
+.persona .persona-cell.is-some {
+    border-color: var(--dp-gold);
+    border-style: dashed;
+    color: var(--dp-gold);
+}
+
+.persona-reveal__quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.persona-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- Show a card to players (handout) ---------- */
+
+.persona-share {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    padding: 12px;
+    border: 1px solid var(--dp-clay);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona-share--card {
+    padding: 10px 12px;
+}
+
+/* ==========================================================================
+   Card
+   ========================================================================== */
+
+.persona-card-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: var(--dp-3);
+    background: var(--dp-scrim);
+}
+
+.persona-card-layer[hidden] {
+    display: none;
+}
+
+/*
+ * Person: the card is as tall as the portrait (3:4) and the text scrolls beside it,
+ * so the picture is never stretched or padded. Place: a 16:9 banner on top.
+ */
+.persona-card {
+    --card-h: min(640px, calc(100vh - 48px));
+    position: relative;
+    width: min(calc(var(--card-h) * 3 / 4 + 460px), 100%);
+    height: var(--card-h);
+    display: grid;
+    grid-template-columns: calc(var(--card-h) * 3 / 4) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 10px;
+    background: var(--dp-charcoal);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    animation: persona-rise 0.28s ease-out;
+}
+
+.persona-card--place {
+    width: min(820px, 100%);
+    height: auto;
+    max-height: calc(100vh - 48px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+@keyframes persona-rise {
+    from { transform: translateY(12px); opacity: 0.4; }
+    to { transform: none; opacity: 1; }
+}
+
+.persona .persona-card__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 50%;
+    background: var(--dp-charcoal-2);
+    color: var(--dp-parchment-dim);
+}
+
+.persona .persona-card__close:hover {
+    border-color: var(--dp-clay-light);
+    color: var(--dp-parchment);
+}
+
+.persona-card__art {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 10px 0 0 10px;
+}
+
+.persona-card--place .persona-card__art {
+    height: auto;
+    border-radius: 10px 10px 0 0;
+}
+
+.persona-card__frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.persona-card--place .persona-card__frame {
+    height: auto;
+    aspect-ratio: 16 / 9;
+}
+
+.persona-card__frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Soft edge where the picture meets the text. */
+.persona-card__art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent 82%, rgba(28, 26, 23, 0.6));
+}
+
+.persona-card--place .persona-card__art::after {
+    background: linear-gradient(transparent 70%, var(--dp-charcoal));
+}
+
+.persona .persona-card__play {
+    position: absolute;
+    left: var(--dp-2);
+    bottom: var(--dp-2);
+    z-index: 1;
+}
+
+.persona-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-2);
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--dp-3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--dp-charcoal-3) transparent;
+}
+
+.persona-card h3 {
+    padding-right: 40px;
+    font-family: var(--dp-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color: var(--dp-parchment);
+}
+
+.persona-card h3.is-unknown {
+    letter-spacing: 0.3em;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-card__title {
+    margin: -10px 0 0;
+    font-style: italic;
+    color: var(--dp-parchment-dim);
+}
+
+.persona-card__summary {
+    max-width: 62ch;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--dp-parchment);
+}
+
+.persona-card__summary h1,
+.persona-card__summary h2,
+.persona-card__summary h3,
+.persona-card__summary h4 {
+    margin: 16px 0 8px;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-clay-light);
+}
+
+.persona-card__summary p { margin: 0 0 8px; }
+.persona-card__summary ul { margin: 0 0 8px; padding-left: 18px; }
+.persona-card__summary a { color: var(--dp-clay-light); }
+
+.persona-card__summary img {
+    float: none !important;
+    display: block;
+    max-width: 100%;
+    max-height: 260px;
+    margin: 8px 0;
+    border-radius: var(--dp-radius);
+}
+
+.persona-card__summary > :first-child { margin-top: 0; }
+.persona-card__summary > :last-child { margin-bottom: 0; }
+.persona-card__summary img { max-width: 100%; height: auto; border: 0; }
+
+.persona-locked {
+    margin: 0;
+    padding: 10px 12px;
+    display: flex;
+    gap: var(--dp-1);
+    align-items: baseline;
+    border: 1px dashed var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    font-size: 14px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-secret {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--dp-ember);
+    border-radius: var(--dp-radius);
+    background: var(--dp-ember-soft);
+}
+
+.persona-secret .persona-eyebrow {
+    color: #e58a74;
+}
+
+.persona-secret p { margin: 0; }
+
+.persona-audit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.persona-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+}
+
+.persona-links__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: var(--dp-1);
+}
+
+.persona .persona-link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    min-width: 0;
+    font-size: 12px;
+    text-align: left;
+}
+
+.persona-link img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 4px;
+    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+}
+
+.persona-link:hover img {
+    border-color: var(--dp-clay-light);
+}
+
+.persona-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.persona-link b {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--dp-ember);
+    font-family: var(--dp-display);
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.persona-link.is-hidden img {
+    filter: brightness(0.4) grayscale(0.6);
+}
+
+.persona-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.persona-tabs {
+    display: flex;
+    gap: var(--dp-2);
+    border-bottom: 1px solid var(--dp-line);
+}
+
+.persona .persona-tabs button {
+    margin-bottom: -1px;
+    padding: 6px 0;
+    border-bottom: 2px solid transparent;
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-tabs button[aria-selected="true"] {
+    border-bottom-color: var(--dp-clay);
+    color: var(--dp-parchment);
+}
+
+.persona-note {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: var(--dp-1);
+    align-items: start;
+    font-size: 14px;
+}
+
+.persona-note__who {
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--who, var(--dp-parchment-faint));
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dp-night);
+}
+
+.persona-note__text p {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.persona-note__text span {
+    font-size: 12px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-note__delete {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-note__delete:hover {
+    color: #e58a74;
+    background: var(--dp-ember-soft);
+}
+
+.persona-note-form {
+    display: flex;
+    gap: 6px;
+}
+
+.persona-video__tag {
+    align-self: center;
+    padding: 0 6px;
+    font-family: var(--dp-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-clay-light);
+}
+
+/* ==========================================================================
+   Video
+   ========================================================================== */
+
+.persona-video {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: grid;
+    place-items: center;
+    background: #000;
+    container-type: size;
+}
+
+.persona-video[hidden] {
+    display: none;
+}
+
+.persona-video__box {
+    position: relative;
+    width: min(100cqw, calc(100cqh * 16 / 9));
+    aspect-ratio: 16 / 9;
+}
+
+.persona-video__box video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    background: #000;
+}
+
+.persona-video__title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.persona-video__title[hidden] {
+    display: none;
+}
+
+.persona-video__title.is-in {
+    animation: persona-title 6s ease-in-out forwards;
+}
+
+.persona-video__title span {
+    font-family: var(--dp-display);
+    font-size: clamp(18px, 3.4cqw, 48px);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dp-parchment);
+    text-shadow: 0 2px 18px #000;
+}
+
+.persona-video__title small {
+    font-size: clamp(12px, 1.5cqw, 22px);
+    font-style: italic;
+    color: var(--dp-parchment-dim);
+    text-shadow: 0 1px 8px #000;
+}
+
+@keyframes persona-title {
+    0%, 12% { opacity: 0; transform: translateY(8px); }
+    30%, 75% { opacity: 1; transform: none; }
+    100% { opacity: 0; }
+}
+
+.persona-video__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.persona-video__progress i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--dp-clay);
+}
+
+.persona .persona-video__close {
+    position: absolute;
+    top: var(--dp-2);
+    right: var(--dp-2);
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 50%;
+    background: rgba(28, 26, 23, 0.85);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-video__close[hidden],
+.persona .persona-video__unmute[hidden] {
+    display: none;
+}
+
+.persona .persona-video__unmute {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: var(--dp-clay);
+    color: var(--dp-night);
+    font-weight: 600;
+}
+
+.persona-video__tools {
+    position: absolute;
+    left: 50%;
+    bottom: var(--dp-2);
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: 10px;
+    background: rgba(28, 26, 23, 0.92);
+    opacity: 0.25;
+    transition: opacity 0.3s ease;
+}
+
+.persona-video:hover .persona-video__tools {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Toasts
+   ========================================================================== */
+
+.persona-toasts {
+    position: fixed;
+    top: 72px;
+    right: calc(var(--persona-safe-right, 320px) + 4px);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    width: min(300px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.persona .persona-toast {
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 8px 12px 8px 8px;
+    border: 1px solid var(--dp-clay);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+    text-align: left;
+    color: var(--dp-parchment);
+    pointer-events: auto;
+    animation: persona-rise 0.3s ease-out;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.persona-toast.is-leaving {
+    opacity: 0;
+    transform: translateX(12px);
+}
+
+.persona-toast img {
+    width: 34px;
+    height: 44px;
+    flex: none;
+    object-fit: cover;
+    border: 0;
+    border-radius: 3px;
+}
+
+.persona-toast b {
+    display: block;
+    font-family: var(--dp-display);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-clay-light);
+}
+
+/* ==========================================================================
+   Editor (Foundry window)
+   ========================================================================== */
+
+.persona-editor .window-content {
+    padding: 0;
+    background: var(--dp-charcoal);
+}
+
+.persona-editor__root {
+    display: flex;
+    flex-direction: column;
+}
+
+.persona-editor__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-3);
+    padding: var(--dp-3);
+}
+
+.persona-editor__top {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: var(--dp-2);
+}
+
+.persona-editor__framing {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-1);
+    width: 160px;
+}
+
+.persona-framer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border: 1px solid var(--dp-line-strong);
+    border-radius: var(--dp-radius);
+    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+    cursor: grab;
+    touch-action: none;
+}
+
+.persona-framer.is-place {
+    aspect-ratio: 16 / 9;
+}
+
+.persona-framer.is-dragging {
+    cursor: grabbing;
+    border-color: var(--dp-clay);
+}
+
+.persona-framer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+.persona-framer__hint {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+    background: rgba(15, 14, 12, 0.75);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.persona-framer:hover .persona-framer__hint {
+    opacity: 1;
+}
+
+.persona-zoom {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-zoom input {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--dp-clay);
+}
+
+.persona-editor__identity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-2);
+    min-width: 0;
+}
+
+.persona-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.persona-label {
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dp-parchment-dim);
+}
+
+.persona-label small {
+    margin-left: 6px;
+    font-family: var(--dp-body);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-radio {
+    display: flex;
+    gap: var(--dp-2);
+    font-size: 14px;
+}
+
+.persona-radio label,
+.persona-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--dp-parchment);
+}
+
+.persona-linked {
+    display: flex;
+    align-items: center;
+    gap: var(--dp-1);
+    padding: 6px 6px 6px 10px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+}
+
+.persona-linked__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.persona-inline {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.persona-chip-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+
+.persona .persona-chip-remove {
+    width: 18px;
+    height: 18px;
+    margin-left: -4px;
+    border-radius: 50%;
+    font-size: 9px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .persona-chip-remove:hover {
+    color: #e58a74;
+}
+
+.persona-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.persona-icons__option {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--dp-line);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--dp-parchment-faint);
+    cursor: pointer;
+}
+
+.persona-icons__option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.persona-icons__option:has(input:checked) {
+    border-color: var(--dp-clay);
+    background: var(--dp-clay-soft);
+    color: var(--dp-parchment);
+}
+
+.persona-editor__summary {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 8px 12px;
+    border: 1px solid var(--dp-line);
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dp-parchment-dim);
+}
+
+.persona-editor__summary img { float: none !important; display: block; max-width: 100%; max-height: 160px; border: 0; }
+.persona-editor__summary h1, .persona-editor__summary h2, .persona-editor__summary h3 { margin: 12px 0 6px; border: 0; font-family: var(--dp-display); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dp-clay-light); }
+.persona-editor__summary > :first-child { margin-top: 0; }
+.persona-editor__summary > :last-child { margin-bottom: 0; }
+
+.persona-editor__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--dp-1);
+    padding: 12px var(--dp-3);
+    border-top: 1px solid var(--dp-line);
+    background: var(--dp-charcoal-2);
+}
+
+/* Standalone window */
+.persona-window .window-content {
+    padding: 0;
+    background: var(--dp-charcoal);
+}
+
+/* ==========================================================================
+   Small screens and motion
+   ========================================================================== */
+
+@media (max-width: 760px) {
+    .persona-card {
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 48px);
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+    .persona-card__art {
+        height: auto;
+        border-radius: 10px 10px 0 0;
+    }
+    .persona-card__frame {
+        height: auto;
+        aspect-ratio: 3 / 4;
+        max-height: 50vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .persona *,
+    .persona *::before,
+    .persona *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Small linked portraits keep the focus point but not the zoom (no clipping box around them). */
+.persona .persona-link img.persona-fit {
+    transform: none;
+}
+
+/* ==========================================================================
+   Status (alive / dead / missing)
+   ========================================================================== */
+
+.persona-tile.is-dead .persona-tile__img img,
+.persona-card.is-dead .persona-card__frame img {
+    filter: grayscale(1) brightness(0.7);
+}
+
+.persona-tile.is-missing .persona-tile__img img,
+.persona-card.is-missing .persona-card__frame img {
+    filter: grayscale(0.6) sepia(0.25) brightness(0.85);
+}
+
+.persona-tile__status {
+    position: absolute;
+    bottom: 26px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--dp-scrim);
+    border: 1px solid var(--dp-line-strong);
+    font-size: 10px;
+    color: var(--dp-parchment);
+}
+
+.persona-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-family: var(--dp-display);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    background: var(--dp-charcoal-3);
+    color: var(--dp-parchment-dim);
+}
+
+.persona-status-tag.is-dead { background: rgba(234, 223, 196, 0.1); color: var(--dp-parchment); }
+.persona-status-tag.is-missing { background: rgba(201, 163, 90, 0.18); color: var(--dp-gold); }
+.persona-status-tag--card { margin-top: 6px; }
+
+/* ==========================================================================
+   Bonds — the relationship wheel
+   ========================================================================== */
+
+.persona-bonds-window .window-content {
+    padding: 0;
+    overflow: hidden;
+    background: var(--dp-night);
+}
+
+.persona-bonds-host {
+    position: relative;
+    height: 100%;
+}
+
+.persona.bonds-host {
+    font-family: var(--dp-body);
+    color: var(--dp-parchment);
+}
+
+.bonds {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100%;
+    background:
+        radial-gradient(ellipse at 42% 52%, rgba(180, 100, 62, 0.14), transparent 60%),
+        linear-gradient(160deg, #1d1915, var(--dp-night) 70%);
+    outline: none;
+    user-select: none;
+}
+
+/* ---------- Bar ---------- */
+
+.bonds-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--dp-2);
+    padding: 12px var(--dp-2) 12px var(--dp-3);
+    border-bottom: 1px solid var(--dp-line);
+    background: rgba(28, 26, 23, 0.85);
+}
+
+.bonds-bar__title h2 {
+    margin: 2px 0 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--dp-parchment);
+}
+
+.bonds-bar__title h2 small {
+    margin-left: 6px;
+    font-family: var(--dp-body);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-players {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.bonds-bar__tools {
+    display: flex;
+    gap: var(--dp-1);
+    margin-left: auto;
+}
+
+.persona .bonds-tool {
+    background: transparent;
+    border: 1px solid var(--dp-line-strong);
+    color: var(--dp-parchment-dim);
+    font-weight: 500;
+}
+
+.persona .bonds-tool:hover {
+    background: var(--dp-clay-soft);
+    border-color: var(--dp-clay);
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-tool.is-on {
+    background: var(--dp-clay-soft);
+    border-color: var(--dp-clay-light);
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-tool--accent {
+    background: var(--dp-clay);
+    border-color: var(--dp-clay);
+    color: var(--dp-night);
+}
+
+.persona .bonds-tool--accent:hover {
+    background: var(--dp-clay-light);
+    color: var(--dp-night);
+}
+
+/* ---------- Main: viewport + drawer ---------- */
+
+.bonds-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 232px;
+    min-height: 0;
+}
+
+.bonds-viewport {
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+}
+
+.bonds-viewport.is-panning { cursor: grabbing; }
+
+.bonds-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1000px;
+    height: 1000px;
+    transform-origin: 0 0;
+}
+
+.bonds-svg {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+}
+
+.bonds-grid { stroke: rgba(234, 223, 196, 0.05); stroke-width: 1; fill: none; }
+.bonds-ring { stroke: rgba(234, 223, 196, 0.16); stroke-width: 1; fill: none; }
+.bonds-ring--party { stroke: rgba(214, 138, 92, 0.45); stroke-width: 1.5; }
+.bonds-ring--self { stroke: rgba(201, 163, 90, 0.5); }
+.bonds-party-band { stroke: rgba(180, 100, 62, 0.16); fill: none; }
+.bonds-party-label { font-family: var(--dp-display); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; fill: var(--dp-clay-light); opacity: 0.8; }
+
+.bonds-sector { stroke-width: 1.5; stroke-opacity: 0.7; }
+.bonds-divider { fill: none; stroke-width: 1; stroke-opacity: 0.35; stroke-dasharray: 3 5; }
+.bonds-cell { fill: transparent; transition: fill 0.12s ease; }
+.bonds-cell.is-target { fill: rgba(234, 223, 196, 0.16); stroke: var(--dp-parchment); stroke-width: 1.5; stroke-dasharray: 4 4; }
+
+.bonds-sector-label {
+    font-family: var(--dp-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    paint-order: stroke;
+    stroke: rgba(15, 14, 12, 0.8);
+    stroke-width: 3px;
+}
+
+.bonds.is-editable .bonds-sector-label { cursor: pointer; }
+.bonds.is-editable .bonds-sector-label:hover { filter: brightness(1.35); text-decoration: underline; }
+
+.bonds-empty-ring { fill: none; stroke: rgba(234, 223, 196, 0.18); stroke-width: 2; stroke-dasharray: 6 8; }
+.bonds-empty-text { font-family: var(--dp-display); font-size: 18px; letter-spacing: 0.12em; fill: var(--dp-parchment-faint); }
+
+.bonds-link { fill: none; stroke-width: 2.5; stroke-opacity: 0.85; stroke-linecap: round; }
+.bonds-rubber { fill: none; stroke: var(--dp-parchment); stroke-width: 2; stroke-dasharray: 6 6; opacity: 0.7; pointer-events: none; }
+.bonds:not(.is-linking) .bonds-rubber { display: none; }
+
+/* ---------- Portraits ---------- */
+
+.bonds-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.persona .bonds-node {
+    position: absolute;
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: -28px 0 0 -28px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--c, var(--dp-parchment-dim));
+    background: var(--dp-charcoal-3);
+    box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85), 0 4px 14px rgba(0, 0, 0, 0.55);
+    pointer-events: auto;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.persona .bonds-node > img {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.persona .bonds-node:hover,
+.persona .bonds-node:focus-visible {
+    z-index: 5;
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85), 0 0 18px var(--c, var(--dp-clay));
+}
+
+.bonds.is-editable:not(.is-linking) .bonds-node--entry { cursor: grab; }
+.bonds.is-linking .bonds-node { cursor: crosshair; }
+
+.persona .bonds-node--self {
+    width: 108px;
+    height: 108px;
+    margin: -54px 0 0 -54px;
+    border: 3px solid var(--dp-gold);
+    box-shadow: 0 0 0 4px rgba(15, 14, 12, 0.9), 0 0 32px rgba(201, 163, 90, 0.35);
+}
+
+.persona .bonds-node--party {
+    width: 68px;
+    height: 68px;
+    margin: -34px 0 0 -34px;
+    border-color: var(--dp-clay-light);
+}
+
+.persona .bonds-node.is-picked {
+    z-index: 6;
+    box-shadow: 0 0 0 3px var(--dp-parchment), 0 0 24px var(--dp-parchment);
+}
+
+.persona .bonds-node.is-lifted { opacity: 0.25; }
+
+.persona .bonds-node.is-dead > img { filter: grayscale(1) brightness(0.62); }
+.persona .bonds-node.is-dead { border-color: rgba(234, 223, 196, 0.35); }
+.persona .bonds-node.is-missing > img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
+.persona .bonds-node.is-missing { border-style: dashed; }
+
+.bonds-node__mark {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--dp-night);
+    border: 1px solid var(--dp-line-strong);
+    font-size: 10px;
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-node.is-new::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--dp-ember);
+    box-shadow: 0 0 0 2px var(--dp-night);
+}
+
+.bonds-node__name {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(min(2.2, max(1, var(--inv, 1))));
+    transform-origin: 50% 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(15, 14, 12, 0.92);
+    border: 1px solid var(--dp-line-strong);
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    color: var(--dp-parchment);
+    pointer-events: none;
+}
+
+.bonds-node__name small {
+    font-family: var(--dp-body);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-node__name .bonds-node__status { color: var(--dp-gold); text-transform: uppercase; letter-spacing: 0.1em; font-size: 9px; }
+
+.bonds-node:hover .bonds-node__name,
+.bonds-node:focus-visible .bonds-node__name { display: flex; }
+.bonds.is-dragging .bonds-node__name { display: none !important; }
+
+.persona .bonds-marker {
+    position: absolute;
+    scale: min(1.6, max(1, var(--inv, 1)));
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border-radius: 50%;
+    background: var(--dp-night);
+    border: 1.5px solid var(--c);
+    font-size: 11px;
+    color: var(--c);
+    pointer-events: auto;
+    cursor: default;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.persona .bonds-marker[data-action] { cursor: pointer; }
+.persona .bonds-marker[data-action]:hover { transform: scale(1.15); background: var(--c); color: var(--dp-night); }
+
+.bonds-ghost {
+    position: fixed;
+    z-index: 10000;
+    width: 64px;
+    height: 64px;
+    margin: -32px 0 0 -32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--dp-parchment);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+}
+
+.bonds-ghost img { width: 100%; height: 100%; border: 0; object-fit: cover; }
+
+/* ---------- Overlays on the viewport ---------- */
+
+.bonds-banner {
+    position: absolute;
+    top: var(--dp-2);
+    left: var(--dp-2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 14px;
+    border-radius: 999px;
+    background: rgba(28, 26, 23, 0.92);
+    border: 1px solid var(--dp-gold);
+    font-size: 13px;
+    white-space: nowrap;
+    color: var(--dp-parchment);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.bonds-banner > i { color: var(--dp-gold); }
+.bonds-banner--link { border-color: var(--dp-clay-light); }
+.bonds-banner--link > i { color: var(--dp-clay-light); }
+.bonds-banner--quiet { border-color: var(--dp-line-strong); padding-right: 14px; color: var(--dp-parchment-dim); }
+.bonds-banner--quiet > i { color: var(--dp-parchment-faint); }
+
+.bonds-legend {
+    position: absolute;
+    left: var(--dp-2);
+    bottom: var(--dp-2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--dp-radius);
+    background: rgba(15, 14, 12, 0.72);
+    border: 1px solid var(--dp-line);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+    pointer-events: none;
+}
+
+.bonds-legend__rings,
+.bonds-legend__types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    max-width: 280px;
+}
+
+.bonds-legend__rings b {
+    display: inline-grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    border-radius: 50%;
+    border: 1px solid var(--dp-line-strong);
+    font-size: 10px;
+    color: var(--dp-parchment);
+}
+
+.bonds-legend__types span { display: inline-flex; align-items: center; gap: 5px; }
+.bonds-legend__types i { color: var(--c); }
+
+.bonds-zoom {
+    position: absolute;
+    right: var(--dp-2);
+    bottom: var(--dp-2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.persona .bonds-zoom .persona-icon-btn { background: rgba(15, 14, 12, 0.8); }
+
+/* ---------- Drawer: people not on the wheel ---------- */
+
+.bonds-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: var(--dp-2);
+    border-left: 1px solid var(--dp-line);
+    background: rgba(28, 26, 23, 0.82);
+    overflow-y: auto;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bonds-drawer.is-target {
+    background: rgba(200, 69, 47, 0.14);
+    box-shadow: inset 0 0 0 2px var(--dp-ember);
+}
+
+.bonds-drawer__head { display: flex; align-items: center; justify-content: space-between; }
+
+.bonds-drawer__count {
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-size: 12px;
+    text-align: center;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-drawer__tip,
+.bonds-drawer__hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--dp-parchment-faint);
+}
+
+.bonds-drawer__hint { display: flex; gap: 8px; align-items: baseline; }
+
+.persona .bonds-drawer__start { width: 100%; height: auto; min-height: 34px; padding: 8px 12px; white-space: normal; line-height: 1.3; justify-content: flex-start; text-align: left; }
+
+.bonds-drawer__list { display: flex; flex-direction: column; gap: 6px; }
+
+.bonds-loose {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 6px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line);
+    background: var(--dp-charcoal-2);
+    cursor: pointer;
+}
+
+.bonds.is-editable .bonds-loose { cursor: grab; }
+.bonds-loose:hover { border-color: var(--dp-clay); }
+.bonds-loose.is-lifted { opacity: 0.3; }
+
+.bonds-loose__img {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--dp-line-strong);
+}
+
+.bonds-loose__img img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-loose.is-dead .bonds-loose__img img { filter: grayscale(1) brightness(0.65); }
+.bonds-loose.is-missing .bonds-loose__img img { filter: grayscale(0.6) sepia(0.3); }
+.bonds-loose.is-new .bonds-loose__img { box-shadow: 0 0 0 2px var(--dp-ember); }
+
+.bonds-loose__name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--dp-parchment);
+}
+
+.bonds-loose__name small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--dp-parchment-faint); }
+
+/* ---------- Timeline ---------- */
+
+.bonds-timeline {
+    display: flex;
+    align-items: center;
+    gap: var(--dp-2);
+    padding: 10px var(--dp-3);
+    border-top: 1px solid var(--dp-line);
+    background: rgba(28, 26, 23, 0.9);
+}
+
+.bonds-timeline.is-empty { gap: 10px; font-size: 12px; color: var(--dp-parchment-faint); }
+
+.bonds-track {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 4px 2px 2px;
+}
+
+.bonds-track::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 11px;
+    height: 2px;
+    background: linear-gradient(90deg, #4f7a8a, var(--dp-clay) 80%, var(--dp-ember));
+    opacity: 0.6;
+}
+
+.persona .bonds-tick {
+    position: relative;
+    flex: 1 0 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+}
+
+.bonds-tick__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--dp-night);
+    border: 2px solid var(--dp-parchment-faint);
+    transform: rotate(45deg);
+    border-radius: 3px;
+    transition: transform 0.15s ease;
+}
+
+.bonds-tick__label {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-tick:hover .bonds-tick__dot { border-color: var(--dp-parchment); }
+.persona .bonds-tick.is-active .bonds-tick__dot { background: var(--dp-gold); border-color: var(--dp-gold); transform: rotate(45deg) scale(1.2); }
+.persona .bonds-tick.is-active .bonds-tick__label { color: var(--dp-parchment); }
+.persona .bonds-tick--now .bonds-tick__label { font-family: var(--dp-display); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ---------- Popovers ---------- */
+
+.bonds-pop {
+    position: absolute;
+    z-index: 20;
+    width: 300px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--dp-charcoal);
+    border: 1px solid var(--dp-line-strong);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+}
+
+.bonds-form { display: flex; flex-direction: column; gap: 10px; }
+.bonds-form .persona-eyebrow i { margin: 0 4px; }
+
+.bonds-form input[type="text"] {
+    height: 34px;
+    padding: 0 10px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line-strong);
+    background: var(--dp-night);
+    font-family: var(--dp-body);
+    font-size: 14px;
+    color: var(--dp-parchment);
+}
+
+.bonds-form input[type="text"]:focus { outline: none; border-color: var(--dp-clay-light); box-shadow: none; }
+
+.bonds-form__row { display: flex; align-items: center; gap: 6px; }
+.bonds-form__spacer { flex: 1; }
+
+.bonds-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.persona .bonds-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.persona .bonds-swatch.is-on { box-shadow: 0 0 0 2px var(--dp-charcoal), 0 0 0 4px var(--dp-parchment); }
+
+.bonds-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+
+.persona .bonds-type {
+    justify-content: flex-start;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: var(--dp-radius);
+    border: 1px solid var(--dp-line);
+    background: var(--dp-charcoal-2);
+    font-size: 13px;
+    color: var(--dp-parchment);
+}
+
+.persona .bonds-type i { width: 16px; color: var(--c); text-align: center; }
+.persona .bonds-type:hover { border-color: var(--c); }
+.persona .bonds-type.is-on { border-color: var(--c); background: var(--dp-charcoal-3); }
+
+.persona .bonds-danger { color: #e58a74; }
+.persona .bonds-danger:hover:not(:disabled) { border-color: var(--dp-ember); color: #f0a08b; }
+.persona .persona-mini:disabled { opacity: 0.35; cursor: default; }
+
+@media (max-width: 760px) {
+    .bonds-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 150px; }
+    .bonds-drawer { border-left: 0; border-top: 1px solid var(--dp-line); }
+}
+
+/* Preview chrome (not part of the module) */
+:root { color-scheme: dark; }
+html, body { margin: 0; height: 100%; background: #0b0a09; }
+body { font-family: var(--dp-body); color: var(--dp-parchment); }
+.pv { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+.pv-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 10px 16px; background: #151310; border-bottom: 1px solid var(--dp-line); font-size: 13px; }
+.pv-bar b { font-family: var(--dp-display); letter-spacing: .08em; }
+.pv-bar label { display: inline-flex; gap: 6px; align-items: center; color: var(--dp-parchment-dim); }
+.pv-bar select, .pv-bar button { font: inherit; background: var(--dp-charcoal-2); color: var(--dp-parchment); border: 1px solid var(--dp-line-strong); border-radius: 4px; padding: 4px 8px; }
+.pv-bar button { cursor: pointer; }
+.pv-note { margin-left: auto; color: var(--dp-parchment-faint); font-size: 12px; }
+.pv-stage { padding: 16px; min-height: 0; }
+.pv-window { height: 100%; max-width: 1180px; margin: 0 auto; border: 1px solid var(--dp-line-strong); border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: 30px minmax(0, 1fr); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.pv-titlebar { display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #23201c; font-family: var(--dp-display); font-size: 13px; color: var(--dp-parchment-dim); }
+.pv-card { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(10,9,8,.72); z-index: 50; }
+.pv-card[hidden] { display: none; }
+.pv-card article { display: grid; grid-template-columns: 220px 300px; background: var(--dp-charcoal); border: 1px solid var(--dp-line-strong); border-radius: 10px; overflow: hidden; }
+.pv-card img { width: 220px; height: 290px; object-fit: cover; display: block; }
+.pv-card .body { padding: 20px; }
+.pv-card h3 { margin: 4px 0; font-family: var(--dp-display); font-size: 22px; border: 0; }
+.pv-card p { color: var(--dp-parchment-dim); font-size: 14px; }
+@media (max-width: 760px) { .pv-stage { padding: 0; } .pv-window { border-radius: 0; } .pv-note { display: none; } }
+</style></head>
+<body>
+<div class="pv">
+  <div class="pv-bar">
+    <b>Persona · Bonds</b>
+    <label>Ver como <select id="pv-role"></select></label>
+    <label>Idioma <select id="pv-lang"><option value="pt-BR">Português</option><option value="en">English</option></select></label>
+    <button type="button" id="pv-reset">Resetar dados</button>
+    <span class="pv-note">Prévia: os mesmos arquivos do módulo, com dados de exemplo.</span>
+  </div>
+  <div class="pv-stage"><div class="pv-window"><div class="pv-titlebar"><i class="fa-solid fa-circle-nodes"></i><span id="pv-title">Laços</span></div><div id="bonds-root" class="persona-bonds-host"></div></div></div>
+</div>
+<div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
+<script>
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Eyebrow":"Who's who to you","ReadOnlyEyebrow":"A player's wheel","Party":"Party","Unnamed":"Unnamed","Link":"Link","LinkHint":"Draw a relation between two portraits","LinkPickFirst":"Pick the first portrait","LinkPickSecond":"Now pick who they are linked to","Done":"Done","AddSector":"Slice","NewSector":"New slice","EditSector":"Edit slice","SectorPlaceholder":"Kingdom, allies, enemies…","MoveLeft":"Move counter-clockwise","MoveRight":"Move clockwise","DeleteSector":"Delete slice (people go back to the list)","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait into a slice. Closer to the centre, closer to you.","SectorFirst":"Create a slice first, then drag people into it.","FromFolders":"Start from the Persona folders","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Create a slice to start your wheel","EmptyWheelReadOnly":"This wheel is still empty","GMReadOnly":"Read-only — players arrange their own wheel","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"}}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Eyebrow":"Quem é quem para você","ReadOnlyEyebrow":"Roda de um jogador","Party":"Grupo","Unnamed":"Sem nome","Link":"Ligar","LinkHint":"Desenhe uma relação entre dois retratos","LinkPickFirst":"Escolha o primeiro retrato","LinkPickSecond":"Agora escolha com quem ele se liga","Done":"Pronto","AddSector":"Fatia","NewSector":"Nova fatia","EditSector":"Editar fatia","SectorPlaceholder":"Reino, aliados, inimigos…","MoveLeft":"Mover no sentido anti-horário","MoveRight":"Mover no sentido horário","DeleteSector":"Apagar fatia (as pessoas voltam para a lista)","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para uma fatia. Mais perto do centro, mais perto de você.","SectorFirst":"Crie uma fatia primeiro e depois arraste as pessoas para ela.","FromFolders":"Começar pelas pastas do Persona","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Crie uma fatia para começar sua roda","EmptyWheelReadOnly":"Esta roda ainda está vazia","GMReadOnly":"Só leitura — cada jogador monta a própria roda","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"}}}}};
+/**
+ * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
+ *
+ * Pure data and geometry: no Foundry globals here, so the same code runs in the module,
+ * in the standalone preview and in tests.
+ *
+ * A player's wheel (stored in their own user flags):
+ *   { v, sectors: [{ id, label, color }], placements: [{ id, sector, ring }], links: [{ id, a, b, type }] }
+ * - sectors: groups the player creates (a kingdom, "enemies", "don't trust"…), shown as slices.
+ * - placements: a known person (Persona entry id) in a slice, at a distance ring (1 close … 3 distant).
+ *   The order of the array is the order inside each slice and ring.
+ * - links: a relation between two portraits. Node ids are entry ids, "self" or "u:<userId>" (party).
+ * Everything is an array so a Foundry flag update replaces it whole (objects would be merged).
+ */
+
+const SELF = "self";
+const PARTY_PREFIX = "u:";
+
+const RINGS = [1, 2, 3];
+
+const STATUSES = ["alive", "dead", "missing"];
+
+const LINK_TYPES = [
+    { id: "ally", icon: "fa-solid fa-handshake", color: "#8fa35a", directed: false },
+    { id: "family", icon: "fa-solid fa-house", color: "#d9c79e", directed: false },
+    { id: "love", icon: "fa-solid fa-heart", color: "#d0708f", directed: false },
+    { id: "rival", icon: "fa-solid fa-bolt", color: "#c9a35a", directed: false },
+    { id: "enemy", icon: "fa-solid fa-burst", color: "#d4553c", directed: false },
+    { id: "serves", icon: "fa-solid fa-crown", color: "#d68a5c", directed: true },
+    { id: "betrayed", icon: "fa-solid fa-heart-crack", color: "#a33a2a", directed: true }
+];
+
+/** Slice colours: Embermark tones, readable on the dark wheel. */
+const SECTOR_COLORS = ["#b4643e", "#74864a", "#4f7a8a", "#8a5a8f", "#c9a35a", "#c8452f", "#5d6b9a", "#857a65"];
+
+/** Logical canvas, scaled to fit the window. */
+const GEOMETRY = {
+    size: 1000,
+    center: 500,
+    selfRadius: 54,
+    partyRadius: 132,
+    partyBand: [92, 172],
+    ringBands: [[180, 272], [272, 364], [364, 456]],
+    labelRadius: 478,
+    nodeArc: 66,          // arc length one portrait needs on its ring
+    minSector: 0.42,      // radians
+    gap: 0.035            // radians between slices
+};
+
+const uid = () => Math.random().toString(36).slice(2, 12);
+const clampRing = ring => Math.min(3, Math.max(1, Math.round(Number(ring) || 2)));
+
+/* -------------------------------------------- */
+/*  Normalizing                                 */
+/* -------------------------------------------- */
+
+function emptyBonds() {
+    return { v: 1, sectors: [], placements: [], links: [] };
+}
+
+function normalizeBonds(raw) {
+    const out = emptyBonds();
+    if (!raw || typeof raw !== "object") return out;
+    const sectorIds = new Set();
+    for (const s of Array.isArray(raw.sectors) ? raw.sectors : []) {
+        if (!s?.id || sectorIds.has(s.id)) continue;
+        sectorIds.add(s.id);
+        out.sectors.push({
+            id: String(s.id),
+            label: String(s.label ?? "").slice(0, 60),
+            color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : SECTOR_COLORS[out.sectors.length % SECTOR_COLORS.length]
+        });
+    }
+    const placed = new Set();
+    for (const p of Array.isArray(raw.placements) ? raw.placements : []) {
+        if (!p?.id || placed.has(p.id) || !sectorIds.has(p.sector)) continue;
+        placed.add(p.id);
+        out.placements.push({ id: String(p.id), sector: String(p.sector), ring: clampRing(p.ring) });
+    }
+    const types = new Set(LINK_TYPES.map(t => t.id));
+    const pairs = new Set();
+    for (const l of Array.isArray(raw.links) ? raw.links : []) {
+        if (!l?.a || !l?.b || l.a === l.b) continue;
+        const key = [l.a, l.b].sort().join("|");
+        if (pairs.has(key)) continue;
+        pairs.add(key);
+        out.links.push({ id: String(l.id ?? uid()), a: String(l.a), b: String(l.b), type: types.has(l.type) ? l.type : "ally" });
+    }
+    return out;
+}
+
+/* -------------------------------------------- */
+/*  Edits (pure: each returns a new wheel)      */
+/* -------------------------------------------- */
+
+const copy = bonds => normalizeBonds(JSON.parse(JSON.stringify(bonds ?? emptyBonds())));
+
+function addSector(bonds, { label, color } = {}) {
+    const next = copy(bonds);
+    const id = uid();
+    next.sectors.push({ id, label: String(label ?? "").trim().slice(0, 60), color: color ?? SECTOR_COLORS[next.sectors.length % SECTOR_COLORS.length] });
+    return { bonds: normalizeBonds(next), id };
+}
+
+function updateSector(bonds, id, changes) {
+    const next = copy(bonds);
+    const sector = next.sectors.find(s => s.id === id);
+    if (sector) {
+        if (changes.label !== undefined) sector.label = String(changes.label).trim().slice(0, 60);
+        if (changes.color) sector.color = changes.color;
+    }
+    return normalizeBonds(next);
+}
+
+/** Moves a slice one step around the wheel (-1 counter-clockwise, +1 clockwise). */
+function moveSector(bonds, id, step) {
+    const next = copy(bonds);
+    const i = next.sectors.findIndex(s => s.id === id);
+    const j = i + step;
+    if (i < 0 || j < 0 || j >= next.sectors.length) return next;
+    [next.sectors[i], next.sectors[j]] = [next.sectors[j], next.sectors[i]];
+    return next;
+}
+
+/** Removes a slice; the people in it go back to the unplaced list. */
+function removeSector(bonds, id) {
+    const next = copy(bonds);
+    next.sectors = next.sectors.filter(s => s.id !== id);
+    return normalizeBonds(next);
+}
+
+/**
+ * Puts a person in a slice and ring, just before `beforeId` (another person in that cell),
+ * or at the end. Moving inside the same cell reorders.
+ */
+function place(bonds, entryId, sector, ring, beforeId = null) {
+    const next = copy(bonds);
+    if (!next.sectors.some(s => s.id === sector)) return next;
+    ring = clampRing(ring);
+    const rest = next.placements.filter(p => p.id !== entryId);
+    const item = { id: entryId, sector, ring };
+    const anchor = beforeId ? rest.findIndex(p => p.id === beforeId && p.sector === sector && p.ring === ring) : -1;
+    if (anchor >= 0) rest.splice(anchor, 0, item);
+    else rest.push(item);
+    next.placements = rest;
+    return normalizeBonds(next);
+}
+
+function unplace(bonds, entryId) {
+    const next = copy(bonds);
+    next.placements = next.placements.filter(p => p.id !== entryId);
+    return next;
+}
+
+/** Creates the link between two nodes, or changes its type if they are already linked. */
+function setLink(bonds, a, b, type) {
+    const next = copy(bonds);
+    if (!a || !b || a === b) return next;
+    const existing = next.links.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    if (existing) {
+        existing.type = type;
+        // A directed link keeps the direction the player just drew.
+        existing.a = a;
+        existing.b = b;
+    } else {
+        next.links.push({ id: uid(), a, b, type });
+    }
+    return normalizeBonds(next);
+}
+
+function removeLink(bonds, id) {
+    const next = copy(bonds);
+    next.links = next.links.filter(l => l.id !== id);
+    return next;
+}
+
+/**
+ * Starts a wheel from the GM's Persona folders the player can see:
+ * one slice per folder, its people on the middle ring.
+ */
+function fromFolders(bonds, folders) {
+    let next = copy(bonds);
+    const placed = new Set(next.placements.map(p => p.id));
+    folders.forEach(folder => {
+        const result = addSector(next, { label: folder.label, color: SECTOR_COLORS[(next.sectors.length) % SECTOR_COLORS.length] });
+        next = result.bonds;
+        for (const id of folder.entryIds) {
+            if (placed.has(id)) continue;
+            placed.add(id);
+            next = place(next, id, result.id, 2);
+        }
+    });
+    return next;
+}
+
+/* -------------------------------------------- */
+/*  Geometry                                    */
+/* -------------------------------------------- */
+
+/** Angle 0 is the top of the wheel, growing clockwise. */
+function polar(r, angle, g = GEOMETRY) {
+    return { x: g.center + r * Math.sin(angle), y: g.center - r * Math.cos(angle) };
+}
+
+function toPolar(x, y, g = GEOMETRY) {
+    const dx = x - g.center;
+    const dy = y - g.center;
+    let angle = Math.atan2(dx, -dy);
+    if (angle < 0) angle += Math.PI * 2;
+    return { r: Math.hypot(dx, dy), angle };
+}
+
+const ringMid = (ring, g) => (g.ringBands[ring - 1][0] + g.ringBands[ring - 1][1]) / 2;
+
+/**
+ * Lays the wheel out.
+ * @param bonds    a normalized wheel
+ * @param visible  Set of entry ids this viewer may see (others are skipped, never drawn)
+ * @param partyIds node ids of the other party members, in order
+ * @returns { sectors, nodes: Map(id → {x, y, angle, ring, sector}), self, party }
+ */
+function layout(bonds, visible, partyIds = [], g = GEOMETRY) {
+    const TAU = Math.PI * 2;
+    const placements = bonds.placements.filter(p => visible.has(p.id));
+    const count = (sector, ring) => placements.filter(p => p.sector === sector && p.ring === ring).length;
+
+    // How wide each slice needs to be for its fullest ring.
+    const needs = bonds.sectors.map(s => Math.max(g.minSector, ...RINGS.map(ring => count(s.id, ring) * (g.nodeArc / ringMid(ring, g)))));
+    const n = bonds.sectors.length;
+    const available = TAU - n * g.gap;
+    const total = needs.reduce((a, b) => a + b, 0);
+    const widths = total <= available
+        ? needs.map(w => w + (available - total) / Math.max(1, n))
+        : needs.map(w => w * (available / total));
+
+    const sectors = [];
+    let cursor = n > 1 ? -widths[0] / 2 : -available / 2; // first slice centred at the top
+    bonds.sectors.forEach((s, i) => {
+        const start = cursor + g.gap / 2;
+        const end = start + widths[i];
+        cursor = end + g.gap / 2;
+        sectors.push({ ...s, index: i, start, end, mid: (start + end) / 2 });
+    });
+
+    const nodes = new Map();
+    for (const sector of sectors) {
+        for (const ring of RINGS) {
+            const cell = placements.filter(p => p.sector === sector.id && p.ring === ring);
+            const r = ringMid(ring, g);
+            const span = sector.end - sector.start;
+            const step = g.nodeArc / r;
+            // Cluster in the middle of the slice, spreading out only when needed.
+            const used = Math.min(span, cell.length * step);
+            const first = sector.mid - used / 2;
+            cell.forEach((p, i) => {
+                const angle = first + (i + 0.5) * (used / cell.length);
+                nodes.set(p.id, { ...polar(r, angle, g), angle, ring, sector: sector.id, r });
+            });
+        }
+    }
+
+    const party = partyIds.map((id, i) => {
+        const angle = partyIds.length === 1 ? Math.PI : (i / partyIds.length) * TAU + Math.PI / partyIds.length;
+        const point = { ...polar(g.partyRadius, angle, g), angle, r: g.partyRadius, id };
+        nodes.set(id, point);
+        return point;
+    });
+    const self = { x: g.center, y: g.center, angle: 0, r: 0, id: SELF };
+    nodes.set(SELF, self);
+
+    return { sectors, nodes, party, self };
+}
+
+const norm = a => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+/** True when `angle` lies inside a slice (both may wrap past the top). */
+function inSector(angle, sector) {
+    const span = sector.end - sector.start;
+    return norm(angle - sector.start) <= span;
+}
+
+/**
+ * Where a drop lands: { kind: "cell", sector, ring, before } inside the wheel (`before`: the
+ * person the dropped one goes in front of, or null for the end),
+ * { kind: "out" } past the outer edge (unplace), or { kind: "none" } over the centre/party.
+ */
+function hitTest(x, y, laid, bonds, visible, draggedId = null, g = GEOMETRY) {
+    const { r, angle } = toPolar(x, y, g);
+    const outer = g.ringBands[2][1];
+    if (r > outer + 24) return { kind: "out" };
+    if (r < g.ringBands[0][0]) return { kind: "none" };
+    if (!laid.sectors.length) return { kind: "none" };
+    const ring = r < g.ringBands[0][1] ? 1 : r < g.ringBands[1][1] ? 2 : 3;
+    let sector = laid.sectors.find(s => inSector(angle, s));
+    if (!sector) {
+        // In a gap: the nearest slice edge.
+        const dist = s => Math.min(Math.abs(norm(angle - s.start)), Math.abs(norm(s.start - angle)),
+            Math.abs(norm(angle - s.end)), Math.abs(norm(s.end - angle)));
+        sector = [...laid.sectors].sort((a, b) => dist(a) - dist(b))[0];
+    }
+    // Who it goes in front of, by angle.
+    const cell = bonds.placements.filter(p => p.sector === sector.id && p.ring === ring && p.id !== draggedId && visible.has(p.id));
+    const rel = a => norm(a - sector.start);
+    const target = rel(angle);
+    const before = cell.find(p => {
+        const node = laid.nodes.get(p.id);
+        return node && rel(node.angle) > target;
+    });
+    return { kind: "cell", sector: sector.id, ring, before: before?.id ?? null };
+}
+
+/* -------------------------------------------- */
+/*  SVG path helpers                            */
+/* -------------------------------------------- */
+
+const f = n => Math.round(n * 10) / 10;
+
+/** Annular wedge between two radii and two angles. */
+function wedgePath(r1, r2, a1, a2, g = GEOMETRY) {
+    const large = a2 - a1 > Math.PI ? 1 : 0;
+    const p1 = polar(r2, a1, g), p2 = polar(r2, a2, g), p3 = polar(r1, a2, g), p4 = polar(r1, a1, g);
+    return `M${f(p1.x)} ${f(p1.y)}A${r2} ${r2} 0 ${large} 1 ${f(p2.x)} ${f(p2.y)}L${f(p3.x)} ${f(p3.y)}A${r1} ${r1} 0 ${large} 0 ${f(p4.x)} ${f(p4.y)}Z`;
+}
+
+/** Open arc; reversed so text along it reads left-to-right on the lower half of the wheel. */
+function arcPath(r, a1, a2, g = GEOMETRY) {
+    const mid = norm((a1 + a2) / 2);
+    const bottom = mid > Math.PI / 2 && mid < Math.PI * 1.5;
+    const large = a2 - a1 > Math.PI ? 1 : 0;
+    const s = polar(r, bottom ? a2 : a1, g), e = polar(r, bottom ? a1 : a2, g);
+    return { d: `M${f(s.x)} ${f(s.y)}A${r} ${r} 0 ${large} ${bottom ? 0 : 1} ${f(e.x)} ${f(e.y)}`, bottom };
+}
+
+/**
+ * A gentle curve between two portraits, bowed away from the centre so links don't cross the
+ * self portrait, trimmed by each portrait's radius so arrowheads land on the rim.
+ */
+function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
+    const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
+    const dx = q.x - p.x, dy = q.y - p.y;
+    const len = Math.hypot(dx, dy) || 1;
+    let nx = -dy / len, ny = dx / len;
+    if ((mx - g.center) * nx + (my - g.center) * ny < 0) { nx = -nx; ny = -ny; }
+    const bow = Math.min(60, len * 0.18);
+    const cx = mx + nx * bow, cy = my + ny * bow;
+    const toward = (from, r) => {
+        const vx = cx - from.x, vy = cy - from.y;
+        const d = Math.hypot(vx, vy) || 1;
+        return { x: from.x + (vx / d) * r, y: from.y + (vy / d) * r };
+    };
+    const s = toward(p, rp), e = toward(q, rq);
+    // Midpoint of the quadratic curve, for the relation icon.
+    const ix = 0.25 * s.x + 0.5 * cx + 0.25 * e.x, iy = 0.25 * s.y + 0.5 * cy + 0.25 * e.y;
+    return { d: `M${f(s.x)} ${f(s.y)}Q${f(cx)} ${f(cy)} ${f(e.x)} ${f(e.y)}`, mid: { x: ix, y: iy } };
+}
+
+/**
+ * The Bonds wheel: framework-free DOM view. It knows nothing about Foundry — everything it
+ * needs comes through an adapter, so the module and the standalone preview run the same code.
+ *
+ * adapter = {
+ *   t(key), getModel(), saveBonds(bonds), openCard(entryId),
+ *   selectPlayer(userId), selectMoment(momentId | null), recordMoment(), deleteMoment(momentId)
+ * }
+ * getModel() → {
+ *   editable, isGM, owner: { id, name }, self: { name, img }, party: [{ id, name, img }],
+ *   entries: [{ id, name, title, img, frame, status, isNew }], bonds, folders: [{ label, entryIds }],
+ *   players: [{ id, name }], moments: [{ id, label, ts }], momentId
+ * }
+ */
+
+const G = GEOMETRY;
+const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const NODE_R = { self: 54, party: 34, entry: 28 };
+const DRAG_THRESHOLD = 5;
+
+class BondsView {
+    /** Pan and zoom of the stage; `auto` refits when the window is resized. */
+    #cam = { s: 1, x: 0, y: 0, auto: true };
+    #model = null;
+    #bonds = null;
+    #laid = null;
+    #visible = new Set();
+    #linkMode = false;
+    #linkFrom = null;
+    #gesture = null;
+    #resize = null;
+
+    constructor(host, adapter) {
+        this.host = host;
+        this.adapter = adapter;
+        this.t = key => adapter.t(`PERSONA.Bonds.${key}`);
+        host.classList.add("persona", "bonds-host");
+        host.addEventListener("pointerdown", this.#onPointerDown);
+        host.addEventListener("pointermove", this.#onHover);
+        host.addEventListener("click", this.#onClick);
+        host.addEventListener("wheel", this.#onWheel, { passive: false });
+        host.addEventListener("keydown", this.#onKey);
+        host.addEventListener("submit", this.#onSubmit);
+        this.#resize = new ResizeObserver(() => { if (this.#cam.auto) this.fit(); });
+        this.refresh();
+    }
+
+    destroy() {
+        this.#resize?.disconnect();
+        this.host.removeEventListener("pointerdown", this.#onPointerDown);
+        this.host.removeEventListener("pointermove", this.#onHover);
+        this.host.removeEventListener("click", this.#onClick);
+        this.host.removeEventListener("wheel", this.#onWheel);
+        this.host.removeEventListener("keydown", this.#onKey);
+        this.host.removeEventListener("submit", this.#onSubmit);
+        this.#endGesture();
+    }
+
+    /* -------------------------------------------- */
+    /*  Rendering                                   */
+    /* -------------------------------------------- */
+
+    /** Re-reads the model and redraws (keeps the camera). Skipped mid-drag, redrawn after. */
+    refresh() {
+        if (this.#gesture?.dragging) { this.#gesture.stale = true; return; }
+        this.#model = this.adapter.getModel();
+        this.#bonds = normalizeBonds(this.#model.bonds);
+        if (!this.#model.editable) this.#linkMode = false;
+        this.#render();
+    }
+
+    #entryMap() {
+        return new Map(this.#model.entries.map(e => [e.id, e]));
+    }
+
+    #render() {
+        const m = this.#model;
+        const entries = this.#entryMap();
+        this.#visible = new Set(entries.keys());
+        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id));
+        const placed = new Set(this.#bonds.placements.map(p => p.id));
+        const loose = m.entries.filter(e => !placed.has(e.id));
+        const pop = this.host.querySelector(".bonds-pop");
+        const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
+
+        this.host.innerHTML = `
+        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""}" tabindex="-1">
+            ${this.#renderBar()}
+            <div class="bonds-main">
+                <div class="bonds-viewport" data-viewport>
+                    <div class="bonds-stage" data-stage>
+                        ${this.#renderSvg()}
+                        <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
+                    </div>
+                    ${this.#renderBanner()}
+                    ${this.#renderLegend()}
+                    <div class="bonds-zoom">
+                        <button type="button" class="persona-icon-btn" data-action="zoomIn" aria-label="${esc(this.t("ZoomIn"))}" title="${esc(this.t("ZoomIn"))}"><i class="fa-solid fa-plus" inert></i></button>
+                        <button type="button" class="persona-icon-btn" data-action="zoomOut" aria-label="${esc(this.t("ZoomOut"))}" title="${esc(this.t("ZoomOut"))}"><i class="fa-solid fa-minus" inert></i></button>
+                        <button type="button" class="persona-icon-btn" data-action="fit" aria-label="${esc(this.t("Fit"))}" title="${esc(this.t("Fit"))}"><i class="fa-solid fa-expand" inert></i></button>
+                    </div>
+                </div>
+                ${this.#renderDrawer(loose)}
+            </div>
+            ${this.#renderTimeline()}
+            <div class="bonds-pop" hidden></div>
+        </div>`;
+
+        this.#applyCam();
+        const viewport = this.host.querySelector("[data-viewport]");
+        this.#resize.disconnect();
+        this.#resize.observe(viewport);
+        if (this.#cam.auto) this.fit();
+        if (keepPop) this.#closePop();
+    }
+
+    #renderBar() {
+        const m = this.#model;
+        const players = m.isGM && m.players.length
+            ? `<div class="bonds-players" role="tablist">${m.players.map(p => `
+                <button type="button" class="persona-chip ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}">
+                    <i class="fa-solid fa-user" inert></i><span>${esc(p.name)}</span>
+                </button>`).join("")}</div>`
+            : "";
+        const tools = [];
+        if (m.editable) {
+            tools.push(`<button type="button" class="persona-button bonds-tool ${this.#linkMode ? "is-on" : ""}" data-action="linkMode" aria-pressed="${this.#linkMode}" title="${esc(this.t("LinkHint"))}"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("Link"))}</span></button>`);
+            tools.push(`<button type="button" class="persona-button bonds-tool" data-action="newSector"><i class="fa-solid fa-chart-pie" inert></i><span>${esc(this.t("AddSector"))}</span></button>`);
+        }
+        if (m.isGM && m.players.length) {
+            tools.push(`<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`);
+        }
+        return `
+        <header class="bonds-bar">
+            <div class="bonds-bar__title">
+                <span class="persona-eyebrow">${esc(m.isGM ? this.t("ReadOnlyEyebrow") : this.t("Eyebrow"))}</span>
+                <h2>${esc(this.t("Title"))}${m.owner?.name ? ` <small>${esc(m.owner.name)}</small>` : ""}</h2>
+            </div>
+            ${players}
+            <div class="bonds-bar__tools">${tools.join("")}</div>
+        </header>`;
+    }
+
+    #renderSvg() {
+        const m = this.#model;
+        const laid = this.#laid;
+        const C = G.center;
+        const outer = G.ringBands[2][1];
+        const inner = G.ringBands[0][0];
+        const parts = [];
+
+        // Gradients per slice colour, brightest near the party, fading outward.
+        const defs = [`<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#3a2a22"/><stop offset="0.55" stop-color="#211d19"/><stop offset="1" stop-color="#14120f" stop-opacity="0"/></radialGradient>`];
+        const colors = [...new Set(laid.sectors.map(s => s.color))];
+        colors.forEach((color, i) => defs.push(`<radialGradient id="bonds-g${i}" gradientUnits="userSpaceOnUse" cx="${C}" cy="${C}" r="${outer}"><stop offset="${(inner / outer).toFixed(3)}" stop-color="${color}" stop-opacity="0.42"/><stop offset="0.7" stop-color="${color}" stop-opacity="0.16"/><stop offset="1" stop-color="${color}" stop-opacity="0.05"/></radialGradient>`));
+        for (const type of LINK_TYPES.filter(t => t.directed)) {
+            defs.push(`<marker id="bonds-arrow-${type.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${type.color}"/></marker>`);
+        }
+        const gradient = color => `url(#bonds-g${colors.indexOf(color)})`;
+
+        parts.push(`<circle cx="${C}" cy="${C}" r="${G.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
+        // Fine radial grid, like an astrolabe.
+        const spokes = [];
+        for (let a = 0; a < 360; a += 6) {
+            const p = polar(inner, a * Math.PI / 180), q = polar(outer, a * Math.PI / 180);
+            spokes.push(`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`);
+        }
+        parts.push(`<path class="bonds-grid" d="${spokes.join("")}"/>`);
+        for (const r of [inner, G.ringBands[0][1], G.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
+
+        // Slices: a wedge per ring (drop targets), divider arcs, the label along the rim.
+        for (const s of laid.sectors) {
+            parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${gradient(s.color)}" stroke="${s.color}"/>`);
+            for (const ring of RINGS) {
+                const [r1, r2] = G.ringBands[ring - 1];
+                parts.push(`<path class="bonds-cell" data-cell="${esc(s.id)}|${ring}" d="${wedgePath(r1, r2, s.start, s.end)}"/>`);
+            }
+            for (const r of [G.ringBands[0][1], G.ringBands[1][1]]) {
+                parts.push(`<path class="bonds-divider" d="${arcPath(r, s.start, s.end).d}" stroke="${s.color}"/>`);
+            }
+            const arc = arcPath(G.labelRadius, s.start, s.end);
+            const label = s.label || this.t("Unnamed");
+            parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
+            parts.push(`<text class="bonds-sector-label" ${m.editable ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
+        }
+        if (!laid.sectors.length) {
+            parts.push(`<circle class="bonds-empty-ring" cx="${C}" cy="${C}" r="${(inner + outer) / 2}"/>`);
+            parts.push(`<text class="bonds-empty-text" x="${C}" y="${C - (inner + outer) / 2 - 12}" text-anchor="middle">${esc(m.editable ? this.t("EmptyWheel") : this.t("EmptyWheelReadOnly"))}</text>`);
+        }
+
+        // The party ring and the centre.
+        parts.push(`<circle class="bonds-party-band" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0]}"/>`);
+        parts.push(`<circle class="bonds-ring bonds-ring--party" cx="${C}" cy="${C}" r="${G.partyBand[1]}"/>`);
+        parts.push(`<circle class="bonds-ring bonds-ring--self" cx="${C}" cy="${C}" r="${G.partyBand[0]}"/>`);
+        if (m.party.length) {
+            const arc = arcPath(G.partyBand[1] - 10, -0.5, 0.5);
+            parts.push(`<path id="bonds-arc-party" d="${arc.d}" fill="none"/><text class="bonds-party-label"><textPath href="#bonds-arc-party" startOffset="50%" text-anchor="middle">${esc(this.t("Party"))}</textPath></text>`);
+        }
+
+        // Links between portraits.
+        const links = [];
+        for (const link of this.#bonds.links) {
+            const geo = this.#linkGeometry(link);
+            if (!geo) continue;
+            const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
+            links.push(`<path class="bonds-link bonds-link--${type.id}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+        }
+        parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
+
+        return `<svg class="bonds-svg" viewBox="0 0 ${G.size} ${G.size}" width="${G.size}" height="${G.size}" aria-hidden="true"><defs>${defs.join("")}</defs>${parts.join("")}</svg>`;
+    }
+
+    #radiusOf(id) {
+        if (id === SELF) return NODE_R.self;
+        return this.#model.party.some(p => p.id === id) ? NODE_R.party : NODE_R.entry;
+    }
+
+    #linkGeometry(link) {
+        const a = this.#laid.nodes.get(link.a), b = this.#laid.nodes.get(link.b);
+        if (!a || !b) return null;
+        return linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5);
+    }
+
+    #renderNodes(entries) {
+        const m = this.#model;
+        const laid = this.#laid;
+        const sectors = new Map(laid.sectors.map(s => [s.id, s]));
+        const out = [];
+        const picked = id => (this.#linkFrom === id ? "is-picked" : "");
+
+        out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
+            <img src="${esc(m.self.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
+        for (const p of m.party) {
+            const pos = laid.nodes.get(p.id);
+            out.push(`<button type="button" class="bonds-node bonds-node--party ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
+                <img src="${esc(p.img)}" alt="" draggable="false"><span class="bonds-node__name">${esc(p.name)}</span></button>`);
+        }
+        for (const placement of this.#bonds.placements) {
+            const entry = entries.get(placement.id);
+            const pos = laid.nodes.get(placement.id);
+            if (!entry || !pos) continue;
+            const color = sectors.get(placement.sector)?.color ?? SECTOR_COLORS[0];
+            out.push(this.#entryNode(entry, `left:${pos.x}px;top:${pos.y}px;--c:${color}`, picked(entry.id)));
+        }
+        return out.join("");
+    }
+
+    #entryNode(entry, style, extra = "") {
+        const status = entry.status && entry.status !== "alive" ? `is-${entry.status}` : "";
+        const mark = entry.status === "dead" ? `<span class="bonds-node__mark"><i class="fa-solid fa-skull" inert></i></span>`
+            : entry.status === "missing" ? `<span class="bonds-node__mark"><i class="fa-solid fa-question" inert></i></span>` : "";
+        const name = entry.name ?? "???";
+        const statusText = entry.status && entry.status !== "alive" ? this.adapter.t(`PERSONA.Status.${entry.status}`) : "";
+        return `<button type="button" class="bonds-node bonds-node--entry ${status} ${entry.isNew ? "is-new" : ""} ${extra}" data-node="${esc(entry.id)}" data-entry="${esc(entry.id)}" style="${style}" aria-label="${esc(name)}">
+            <img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false">${mark}
+            <span class="bonds-node__name">${esc(name)}${entry.title ? `<small>${esc(entry.title)}</small>` : ""}${statusText ? `<small class="bonds-node__status">${esc(statusText)}</small>` : ""}</span></button>`;
+    }
+
+    #renderLinkMarkers() {
+        const editable = this.#model.editable;
+        return this.#bonds.links.map(link => {
+            const geo = this.#linkGeometry(link);
+            if (!geo) return "";
+            const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
+            const label = this.t(`Type.${type.id}`);
+            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
+        }).join("");
+    }
+
+    #renderBanner() {
+        const m = this.#model;
+        const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
+        if (moment) {
+            return `<div class="bonds-banner"><i class="fa-solid fa-clock-rotate-left" inert></i>
+                <span>${esc(this.t("Viewing"))} <b>${esc(moment.label)}</b></span>
+                <button type="button" class="persona-mini" data-action="moment" data-id="">${esc(this.t("BackToNow"))}</button>
+                ${m.isGM ? `<button type="button" class="persona-mini persona-mini--icon" data-action="deleteMoment" data-id="${esc(moment.id)}" title="${esc(this.t("DeleteMoment"))}" aria-label="${esc(this.t("DeleteMoment"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
+            </div>`;
+        }
+        if (this.#linkMode) {
+            return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.#linkFrom ? this.t("LinkPickSecond") : this.t("LinkPickFirst"))}</span>
+                <button type="button" class="persona-mini" data-action="linkMode">${esc(this.t("Done"))}</button></div>`;
+        }
+        if (!m.editable && m.isGM) return `<div class="bonds-banner bonds-banner--quiet"><i class="fa-solid fa-eye" inert></i><span>${esc(this.t("GMReadOnly"))}</span></div>`;
+        return "";
+    }
+
+    #renderLegend() {
+        const rings = [this.t("Ring1"), this.t("Ring2"), this.t("Ring3")];
+        const used = new Set(this.#bonds.links.map(l => l.type));
+        const types = LINK_TYPES.filter(t => used.has(t.id));
+        return `<div class="bonds-legend">
+            <div class="bonds-legend__rings">${rings.map((r, i) => `<span><b>${i + 1}</b>${esc(r)}</span>`).join("")}</div>
+            ${types.length ? `<div class="bonds-legend__types">${types.map(t => `<span style="--c:${t.color}"><i class="${t.icon}" inert></i>${esc(this.t(`Type.${t.id}`))}</span>`).join("")}</div>` : ""}
+        </div>`;
+    }
+
+    #renderDrawer(loose) {
+        const m = this.#model;
+        let body;
+        if (!m.entries.length) {
+            body = `<p class="bonds-drawer__hint"><i class="fa-solid fa-masks-theater" inert></i>${esc(m.isGM ? this.t("NobodyKnownGM") : this.t("NobodyKnown"))}</p>`;
+        } else if (!loose.length) {
+            body = `<p class="bonds-drawer__hint"><i class="fa-solid fa-check" inert></i>${esc(this.t("AllPlaced"))}</p>`;
+        } else {
+            body = `<div class="bonds-drawer__list">${loose.map(e => `
+                <div class="bonds-loose ${e.status && e.status !== "alive" ? `is-${e.status}` : ""} ${e.isNew ? "is-new" : ""}" data-loose="${esc(e.id)}" data-entry="${esc(e.id)}" role="button" tabindex="0">
+                    <span class="bonds-loose__img"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt="" draggable="false"></span>
+                    <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
+                </div>`).join("")}</div>`;
+        }
+        const start = m.editable && !this.#bonds.sectors.length && m.folders.length
+            ? `<button type="button" class="persona-button bonds-drawer__start" data-action="fromFolders"><i class="fa-solid fa-wand-magic-sparkles" inert></i><span>${esc(this.t("FromFolders"))}</span></button>`
+            : "";
+        const hint = m.editable && loose.length
+            ? `<p class="bonds-drawer__tip">${esc(this.#bonds.sectors.length ? this.t("DragHint") : this.t("SectorFirst"))}</p>` : "";
+        return `<aside class="bonds-drawer" data-drawer>
+            <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
+            ${start}${hint}${body}
+        </aside>`;
+    }
+
+    #renderTimeline() {
+        const m = this.#model;
+        if (!m.moments.length && !m.isGM) return "";
+        if (!m.moments.length) return `<footer class="bonds-timeline is-empty"><i class="fa-solid fa-clock-rotate-left" inert></i><span>${esc(this.t("NoMoments"))}</span></footer>`;
+        const ticks = m.moments.map(moment => `
+            <button type="button" class="bonds-tick ${m.momentId === moment.id ? "is-active" : ""}" data-action="moment" data-id="${esc(moment.id)}" title="${esc(moment.label)}">
+                <span class="bonds-tick__dot"></span><span class="bonds-tick__label">${esc(moment.label)}</span>
+            </button>`).join("");
+        return `<footer class="bonds-timeline">
+            <span class="persona-eyebrow">${esc(this.t("Timeline"))}</span>
+            <div class="bonds-track">${ticks}
+                <button type="button" class="bonds-tick bonds-tick--now ${!m.momentId ? "is-active" : ""}" data-action="moment" data-id=""><span class="bonds-tick__dot"></span><span class="bonds-tick__label">${esc(this.t("Now"))}</span></button>
+            </div>
+        </footer>`;
+    }
+
+    /* -------------------------------------------- */
+    /*  Camera                                      */
+    /* -------------------------------------------- */
+
+    #applyCam() {
+        const stage = this.host.querySelector("[data-stage]");
+        if (!stage) return;
+        stage.style.transform = `translate(${this.#cam.x}px, ${this.#cam.y}px) scale(${this.#cam.s})`;
+        // Labels and markers keep a readable size whatever the zoom.
+        stage.style.setProperty("--inv", String(1 / this.#cam.s));
+    }
+
+    fit() {
+        const viewport = this.host.querySelector("[data-viewport]");
+        if (!viewport) return;
+        const { width, height } = viewport.getBoundingClientRect();
+        if (!width || !height) return;
+        const s = Math.min(width, height) / (G.size * 1.04);
+        this.#cam = { s, x: (width - G.size * s) / 2, y: (height - G.size * s) / 2, auto: true };
+        this.#applyCam();
+    }
+
+    #zoomAt(factor, clientX, clientY) {
+        const viewport = this.host.querySelector("[data-viewport]");
+        const rect = viewport.getBoundingClientRect();
+        const px = (clientX ?? rect.left + rect.width / 2) - rect.left;
+        const py = (clientY ?? rect.top + rect.height / 2) - rect.top;
+        const s = Math.min(3, Math.max(0.25, this.#cam.s * factor));
+        const k = s / this.#cam.s;
+        this.#cam = { s, x: px - (px - this.#cam.x) * k, y: py - (py - this.#cam.y) * k, auto: false };
+        this.#applyCam();
+    }
+
+    #toStage(clientX, clientY) {
+        const rect = this.host.querySelector("[data-viewport]").getBoundingClientRect();
+        return { x: (clientX - rect.left - this.#cam.x) / this.#cam.s, y: (clientY - rect.top - this.#cam.y) / this.#cam.s };
+    }
+
+    #onWheel = event => {
+        if (!event.target.closest("[data-viewport]")) return;
+        event.preventDefault();
+        this.#zoomAt(event.deltaY < 0 ? 1.12 : 1 / 1.12, event.clientX, event.clientY);
+    };
+
+    /* -------------------------------------------- */
+    /*  Pointer: drag portraits, pan, link          */
+    /* -------------------------------------------- */
+
+    #onPointerDown = event => {
+        if (event.button !== 0) return;
+        if (event.target.closest(".bonds-pop")) return;
+        const node = event.target.closest("[data-entry]");
+        const viewport = event.target.closest("[data-viewport]");
+        if (node && this.#model.editable && !this.#linkMode) {
+            this.#gesture = { kind: "drag", id: node.dataset.entry, source: node, x0: event.clientX, y0: event.clientY, dragging: false };
+        } else if (viewport && !event.target.closest("button, [data-action]")) {
+            this.#gesture = { kind: "pan", x0: event.clientX, y0: event.clientY, cx: this.#cam.x, cy: this.#cam.y, moved: false };
+        } else {
+            return;
+        }
+        window.addEventListener("pointermove", this.#onPointerMove);
+        window.addEventListener("pointerup", this.#onPointerUp);
+        window.addEventListener("pointercancel", this.#onPointerCancel);
+    };
+
+    #onPointerMove = event => {
+        const g = this.#gesture;
+        if (!g) return;
+        const dx = event.clientX - g.x0, dy = event.clientY - g.y0;
+        if (g.kind === "pan") {
+            if (!g.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+            g.moved = true;
+            this.#cam = { ...this.#cam, x: g.cx + dx, y: g.cy + dy, auto: false };
+            this.#applyCam();
+            this.host.querySelector("[data-viewport]")?.classList.add("is-panning");
+            return;
+        }
+        if (!g.dragging) {
+            if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+            g.dragging = true;
+            g.ghost = this.#makeGhost(g.source);
+            g.source.classList.add("is-lifted");
+            this.host.querySelector(".bonds")?.classList.add("is-dragging");
+        }
+        g.ghost.style.left = `${event.clientX}px`;
+        g.ghost.style.top = `${event.clientY}px`;
+        g.target = this.#dropTarget(event, g.id);
+        this.#highlight(g.target);
+    };
+
+    #onPointerUp = event => {
+        const g = this.#gesture;
+        this.#endGesture();
+        if (!g) return;
+        if (g.kind === "pan") return;
+        if (!g.dragging) return; // a plain click: handled by #onClick
+        g.ghost?.remove();
+        g.source.classList.remove("is-lifted");
+        this.host.querySelector(".bonds")?.classList.remove("is-dragging");
+        this.#highlight(null);
+        this.#suppressClick = true;
+        setTimeout(() => { this.#suppressClick = false; }, 0);
+        const target = this.#dropTarget(event, g.id);
+        if (target.kind === "cell") this.#commit(place(this.#bonds, g.id, target.sector, target.ring, target.before));
+        else if (target.kind === "out") this.#commit(unplace(this.#bonds, g.id));
+        else if (g.stale) this.refresh();
+    };
+
+    #onPointerCancel = () => {
+        const g = this.#gesture;
+        this.#endGesture();
+        if (g?.ghost) g.ghost.remove();
+        g?.source?.classList.remove("is-lifted");
+        this.host.querySelector(".bonds")?.classList.remove("is-dragging");
+        this.#highlight(null);
+        if (g?.stale) this.refresh();
+    };
+
+    #suppressClick = false;
+
+    /** Link mode: a rubber band from the first portrait to the pointer. */
+    #onHover = event => {
+        if (!this.#linkMode || !this.#linkFrom) return;
+        const rubber = this.host.querySelector("[data-rubber]");
+        const from = this.#laid?.nodes.get(this.#linkFrom);
+        if (!rubber || !from) return;
+        const { x, y } = this.#toStage(event.clientX, event.clientY);
+        rubber.setAttribute("d", linkPath(from, { x, y }, this.#radiusOf(this.#linkFrom) + 3, 0).d);
+    };
+
+    #endGesture() {
+        window.removeEventListener("pointermove", this.#onPointerMove);
+        window.removeEventListener("pointerup", this.#onPointerUp);
+        window.removeEventListener("pointercancel", this.#onPointerCancel);
+        this.host.querySelector("[data-viewport]")?.classList.remove("is-panning");
+        this.#gesture = null;
+    }
+
+    #makeGhost(source) {
+        const ghost = document.createElement("div");
+        ghost.className = "persona bonds-ghost";
+        const img = source.querySelector("img");
+        ghost.innerHTML = `<img class="persona-fit" src="${esc(img?.getAttribute("src"))}" style="${esc(img?.getAttribute("style") ?? "")}" alt="">`;
+        document.body.append(ghost);
+        return ghost;
+    }
+
+    /** Over the drawer → unplace; over the wheel → hit test; elsewhere → nothing. */
+    #dropTarget(event, id) {
+        const drawer = this.host.querySelector("[data-drawer]")?.getBoundingClientRect();
+        const inside = r => r && event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+        if (inside(drawer)) return { kind: "out", drawer: true };
+        const viewport = this.host.querySelector("[data-viewport]")?.getBoundingClientRect();
+        if (!inside(viewport)) return { kind: "none" };
+        const { x, y } = this.#toStage(event.clientX, event.clientY);
+        const hit = hitTest(x, y, this.#laid, this.#bonds, this.#visible, id);
+        // Dropping a not-yet-placed person past the rim does nothing.
+        if (hit.kind === "out" && !this.#bonds.placements.some(p => p.id === id)) return { kind: "none" };
+        return hit;
+    }
+
+    #highlight(target) {
+        this.host.querySelectorAll(".bonds-cell.is-target").forEach(el => el.classList.remove("is-target"));
+        this.host.querySelector("[data-drawer]")?.classList.toggle("is-target", target?.kind === "out");
+        if (target?.kind === "cell") {
+            this.host.querySelector(`.bonds-cell[data-cell="${CSS.escape(`${target.sector}|${target.ring}`)}"]`)?.classList.add("is-target");
+        }
+    }
+
+    /* -------------------------------------------- */
+    /*  Clicks                                      */
+    /* -------------------------------------------- */
+
+    #onClick = event => {
+        if (this.#suppressClick) return;
+        if (this.#gesture) return;
+        const pop = this.host.querySelector(".bonds-pop");
+        const inPop = event.target.closest(".bonds-pop");
+
+        const actionEl = event.target.closest("[data-action]");
+        const node = event.target.closest("[data-node]");
+        const loose = event.target.closest("[data-loose]");
+
+        if (pop && !pop.hidden && !inPop && !actionEl?.matches('[data-action="editLink"], [data-action="editSector"], [data-action="newSector"]')) {
+            this.#closePop();
+            if (!node) return;
+        }
+
+        if (actionEl) {
+            const handler = this.#actions[actionEl.dataset.action];
+            if (handler) {
+                event.preventDefault();
+                return handler(actionEl, actionEl.dataset.id, event);
+            }
+        }
+        if (node && this.#linkMode) return this.#pickForLink(node.dataset.node);
+        if (node?.dataset.entry || loose) return this.adapter.openCard((node ?? loose).dataset.entry);
+    };
+
+    #onKey = event => {
+        if (event.key !== "Escape") return;
+        if (!this.host.querySelector(".bonds-pop")?.hidden) { event.stopPropagation(); return this.#closePop(); }
+        if (this.#linkMode) { event.stopPropagation(); this.#linkMode = false; this.#linkFrom = null; return this.#render(); }
+    };
+
+    #actions = {
+        player: (_el, id) => this.adapter.selectPlayer(id),
+        moment: (_el, id) => this.adapter.selectMoment(id || null),
+        deleteMoment: (_el, id) => this.adapter.deleteMoment(id),
+        recordMoment: () => this.adapter.recordMoment(),
+        zoomIn: () => this.#zoomAt(1.2),
+        zoomOut: () => this.#zoomAt(1 / 1.2),
+        fit: () => this.fit(),
+        linkMode: () => {
+            this.#linkMode = !this.#linkMode;
+            this.#linkFrom = null;
+            this.#render();
+        },
+        newSector: el => this.#sectorPop(null, el),
+        editSector: (el, id) => this.#sectorPop(id, el),
+        editLink: (el, id) => this.#linkPop(id, el),
+        fromFolders: () => this.#commit(fromFolders(this.#bonds, this.#model.folders)),
+        // Popover actions
+        popClose: () => this.#closePop(),
+        swatch: el => {
+            el.closest(".bonds-pop").querySelectorAll(".bonds-swatch").forEach(s => s.classList.toggle("is-on", s === el));
+            const input = el.closest("form")?.querySelector('[name="color"]');
+            if (input) input.value = el.dataset.color;
+        },
+        sectorMove: el => {
+            const id = el.closest("[data-sector-form]").dataset.sector;
+            this.#commit(moveSector(this.#bonds, id, Number(el.dataset.step)));
+            this.#closePop();
+        },
+        sectorDelete: el => {
+            const id = el.closest("[data-sector-form]").dataset.sector;
+            this.#commit(removeSector(this.#bonds, id));
+            this.#closePop();
+        },
+        linkType: el => {
+            const { a, b } = el.closest("[data-link-form]").dataset;
+            this.#commit(setLink(this.#bonds, a, b, el.dataset.type));
+            this.#closePop();
+        },
+        linkFlip: el => {
+            const form = el.closest("[data-link-form]");
+            const link = this.#bonds.links.find(l => l.id === form.dataset.link);
+            if (link) this.#commit(setLink(this.#bonds, link.b, link.a, link.type));
+            this.#closePop();
+        },
+        linkDelete: el => {
+            this.#commit(removeLink(this.#bonds, el.closest("[data-link-form]").dataset.link));
+            this.#closePop();
+        }
+    };
+
+    #pickForLink(id) {
+        if (!this.#linkFrom) {
+            this.#linkFrom = id;
+            return this.#render();
+        }
+        if (this.#linkFrom === id) {
+            this.#linkFrom = null;
+            return this.#render();
+        }
+        const a = this.#linkFrom;
+        this.#linkFrom = null;
+        this.#render();
+        const pa = this.#laid.nodes.get(a), pb = this.#laid.nodes.get(id);
+        const mid = linkPath(pa, pb).mid;
+        this.#linkPop(null, null, { a, b: id, at: mid });
+    }
+
+    /* -------------------------------------------- */
+    /*  Popovers                                    */
+    /* -------------------------------------------- */
+
+    #openPop(html, anchor) {
+        const root = this.host.querySelector(".bonds");
+        const pop = this.host.querySelector(".bonds-pop");
+        pop.innerHTML = html;
+        pop.hidden = false;
+        const rootRect = root.getBoundingClientRect();
+        let x, y;
+        if (anchor instanceof Element) {
+            const r = anchor.getBoundingClientRect();
+            x = r.left + r.width / 2 - rootRect.left;
+            y = r.bottom - rootRect.top + 8;
+        } else {
+            const viewport = this.host.querySelector("[data-viewport]").getBoundingClientRect();
+            x = viewport.left - rootRect.left + this.#cam.x + anchor.x * this.#cam.s;
+            y = viewport.top - rootRect.top + this.#cam.y + anchor.y * this.#cam.s + 18;
+        }
+        const w = pop.offsetWidth, h = pop.offsetHeight;
+        x = Math.max(8, Math.min(rootRect.width - w - 8, x - w / 2));
+        if (y + h > rootRect.height - 8) y = Math.max(8, y - h - 40);
+        pop.style.left = `${x}px`;
+        pop.style.top = `${y}px`;
+        pop.querySelector("input[type=text]")?.focus();
+    }
+
+    #closePop() {
+        const pop = this.host.querySelector(".bonds-pop");
+        if (!pop) return;
+        pop.hidden = true;
+        pop.innerHTML = "";
+    }
+
+    #sectorPop(id, anchor) {
+        const sector = id ? this.#bonds.sectors.find(s => s.id === id) : null;
+        const color = sector?.color ?? SECTOR_COLORS[this.#bonds.sectors.length % SECTOR_COLORS.length];
+        const index = sector ? this.#bonds.sectors.indexOf(sector) : -1;
+        const html = `
+        <form class="bonds-form" data-sector-form data-sector="${esc(id ?? "")}">
+            <span class="persona-eyebrow">${esc(sector ? this.t("EditSector") : this.t("NewSector"))}</span>
+            <input type="text" name="label" maxlength="60" value="${esc(sector?.label ?? "")}" placeholder="${esc(this.t("SectorPlaceholder"))}" autocomplete="off">
+            <input type="hidden" name="color" value="${color}">
+            <div class="bonds-swatches">${SECTOR_COLORS.map(c => `<button type="button" class="bonds-swatch ${c === color ? "is-on" : ""}" data-action="swatch" data-color="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+            <div class="bonds-form__row">
+                ${sector ? `
+                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="-1" ${index <= 0 ? "disabled" : ""} title="${esc(this.t("MoveLeft"))}" aria-label="${esc(this.t("MoveLeft"))}"><i class="fa-solid fa-rotate-left" inert></i></button>
+                    <button type="button" class="persona-mini persona-mini--icon" data-action="sectorMove" data-step="1" ${index >= this.#bonds.sectors.length - 1 ? "disabled" : ""} title="${esc(this.t("MoveRight"))}" aria-label="${esc(this.t("MoveRight"))}"><i class="fa-solid fa-rotate-right" inert></i></button>
+                    <button type="button" class="persona-mini persona-mini--icon bonds-danger" data-action="sectorDelete" title="${esc(this.t("DeleteSector"))}" aria-label="${esc(this.t("DeleteSector"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
+                <span class="bonds-form__spacer"></span>
+                <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
+                <button type="submit" class="persona-button">${esc(sector ? this.t("Save") : this.t("Create"))}</button>
+            </div>
+        </form>`;
+        this.#openPop(html, anchor);
+    }
+
+    #linkPop(linkId, anchor, fresh = null) {
+        const link = linkId ? this.#bonds.links.find(l => l.id === linkId) : null;
+        const a = link?.a ?? fresh?.a, b = link?.b ?? fresh?.b;
+        if (!a || !b) return;
+        const name = id => {
+            if (id === SELF) return this.#model.self.name;
+            const party = this.#model.party.find(p => p.id === id);
+            if (party) return party.name;
+            return this.#model.entries.find(e => e.id === id)?.name ?? "???";
+        };
+        const html = `
+        <div class="bonds-form" data-link-form data-link="${esc(link?.id ?? "")}" data-a="${esc(a)}" data-b="${esc(b)}">
+            <span class="persona-eyebrow">${esc(name(a))} <i class="fa-solid fa-arrow-right-long" inert></i> ${esc(name(b))}</span>
+            <div class="bonds-types">${LINK_TYPES.map(t => `
+                <button type="button" class="bonds-type ${link?.type === t.id ? "is-on" : ""}" data-action="linkType" data-type="${t.id}" style="--c:${t.color}">
+                    <i class="${t.icon}" inert></i><span>${esc(this.t(`Type.${t.id}`))}</span>
+                </button>`).join("")}</div>
+            ${link ? `<div class="bonds-form__row">
+                ${LINK_TYPES.find(t => t.id === link.type)?.directed ? `<button type="button" class="persona-mini" data-action="linkFlip"><i class="fa-solid fa-right-left" inert></i><span>${esc(this.t("Flip"))}</span></button>` : ""}
+                <span class="bonds-form__spacer"></span>
+                <button type="button" class="persona-mini bonds-danger" data-action="linkDelete"><i class="fa-solid fa-trash" inert></i><span>${esc(this.t("DeleteLink"))}</span></button>
+            </div>` : ""}
+        </div>`;
+        this.#openPop(html, anchor ?? fresh.at);
+    }
+
+    #onSubmit = event => {
+        const form = event.target.closest("[data-sector-form]");
+        if (!form) return;
+        event.preventDefault();
+        const label = form.querySelector('[name="label"]').value.trim();
+        const color = form.querySelector('[name="color"]').value;
+        if (!label) return form.querySelector('[name="label"]').focus();
+        const id = form.dataset.sector;
+        this.#closePop();
+        if (id) this.#commit(updateSector(this.#bonds, id, { label, color }));
+        else this.#commit(addSector(this.#bonds, { label, color }).bonds);
+    };
+
+    /* -------------------------------------------- */
+
+    /** Shows the change at once, then saves it. */
+    #commit(bonds) {
+        if (!this.#model.editable) return;
+        this.#bonds = normalizeBonds(bonds);
+        this.#model = { ...this.#model, bonds: this.#bonds };
+        this.#render();
+        Promise.resolve(this.adapter.saveBonds(this.#bonds)).catch(error => {
+            console.error("persona | saving bonds failed", error);
+            this.refresh();
+        });
+    }
+}
+
+/* Mock adapter for the Bonds preview: fake players, NPCs, reveals and one recorded moment. */
+(() => {
+    const hue = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+    const avatar = (name, dark = false) => {
+        const h = hue(name);
+        const initials = name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"><defs><radialGradient id="g" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="hsl(${h},45%,${dark ? 30 : 48}%)"/><stop offset="1" stop-color="hsl(${(h + 40) % 360},40%,12%)"/></radialGradient></defs><rect width="120" height="160" fill="url(#g)"/><circle cx="60" cy="58" r="26" fill="hsla(${h},30%,85%,.22)"/><path d="M14 160c4-38 22-58 46-58s42 20 46 58z" fill="hsla(${h},30%,85%,.18)"/><text x="60" y="68" font-family="Cinzel,serif" font-size="26" font-weight="700" text-anchor="middle" fill="hsla(40,60%,92%,.92)">${initials}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    };
+
+    const PLAYERS = [
+        { id: "p1", name: "Ana", character: "Kaelen Vasthorn" },
+        { id: "p2", name: "Bruno", character: "Mira Solenne" },
+        { id: "p3", name: "Caio", character: "Thorne Ashgrave" },
+        { id: "p4", name: "Duda", character: "Ysolde of the Reeds" }
+    ];
+    const ALLP = PLAYERS.map(p => p.id);
+
+    const E = (id, name, title, opts = {}) => ({ id, name, title, img: avatar(name, opts.dark), status: opts.status ?? "alive", known: opts.known ?? ALLP, named: opts.named ?? opts.known ?? ALLP, group: opts.group ?? null, text: opts.text ?? "" });
+    const ENTRIES = [
+        E("e1", "Captain Ilsa Marrow", "Captain of the Embermark guard", { group: "Embermark" }),
+        E("e2", "Lord Aldric Venn", "Regent of Embermark", { group: "Embermark" }),
+        E("e3", "Sister Hesper", "Healer at the Ash Chapel", { group: "Embermark" }),
+        E("e4", "Old Bram", "Innkeeper, The Copper Kettle", { group: "Embermark", status: "dead" }),
+        E("e5", "Veyra the Hollow", "Voice of the Veiled Order", { group: "Veiled Order", dark: true }),
+        E("e6", "Brother Calix", "Archivist of the Order", { group: "Veiled Order" }),
+        E("e7", "Seren Duskmantle", "Envoy of the Order", { group: "Veiled Order", status: "missing" }),
+        E("e8", "The Ashen King", "Lord of Kurdrax", { group: "Kurdrax", dark: true }),
+        E("e9", "Gorrik Ironjaw", "Champion of Kurdrax", { group: "Kurdrax" }),
+        E("e10", "Nyx", "Knife-for-hire", { group: "Kurdrax", known: ["p1", "p3"], named: ["p1"] }),
+        E("e11", "Tamsin Reed", "Ysolde's sister", { known: ["p4", "p1"] }),
+        E("e12", "Master Oduya", "Kaelen's old mentor", { known: ["p1"] }),
+        E("e13", "Hollow Bell Witch", "Rumoured in the marshes", { known: ["p1", "p2"], named: [], dark: true }),
+        E("e14", "Pell", "Street urchin, Lowmarket")
+    ];
+
+    const sample = () => ({
+        v: 1,
+        sectors: [
+            { id: "s1", label: "Embermark", color: "#b4643e" },
+            { id: "s2", label: "Veiled Order", color: "#8a5a8f" },
+            { id: "s3", label: "Enemies", color: "#c8452f" },
+            { id: "s4", label: "My people", color: "#74864a" }
+        ],
+        placements: [
+            { id: "e1", sector: "s1", ring: 1 }, { id: "e2", sector: "s1", ring: 2 }, { id: "e3", sector: "s1", ring: 2 }, { id: "e4", sector: "s1", ring: 3 },
+            { id: "e5", sector: "s2", ring: 2 }, { id: "e6", sector: "s2", ring: 3 }, { id: "e7", sector: "s2", ring: 1 },
+            { id: "e8", sector: "s3", ring: 3 }, { id: "e9", sector: "s3", ring: 2 }, { id: "e10", sector: "s3", ring: 2 },
+            { id: "e12", sector: "s4", ring: 1 }, { id: "e11", sector: "s4", ring: 2 }
+        ],
+        links: [
+            { id: "l1", a: "self", b: "e12", type: "family" },
+            { id: "l2", a: "e9", b: "e8", type: "serves" },
+            { id: "l3", a: "e1", b: "e2", type: "ally" },
+            { id: "l4", a: "self", b: "e9", type: "rival" },
+            { id: "l5", a: "e7", b: "e5", type: "betrayed" },
+            { id: "l6", a: "u:p2", b: "e3", type: "love" }
+        ]
+    });
+
+    const fresh = () => ({
+        role: "p1",
+        entries: JSON.parse(JSON.stringify(ENTRIES)),
+        wheels: { p1: sample(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [{ id: "a", label: "Kurdrax", color: "#c8452f" }], placements: [{ id: "e9", sector: "a", ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        moments: [],
+        momentId: null,
+        gmOwner: "p1"
+    });
+    let S = fresh();
+    // One older moment: before Bram died and before the Order and Nyx were met.
+    const older = sample();
+    older.placements = older.placements.filter(p => !["e5", "e6", "e7", "e10"].includes(p.id));
+    older.sectors = older.sectors.filter(s => s.id !== "s2");
+    older.links = older.links.filter(l => !["l5"].includes(l.id));
+    const seedMoments = () => [{ id: "m1", label: "Sessão 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Sessão 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
+    S.moments = seedMoments();
+
+    let lang = "pt-BR";
+    const t = key => key.split(".").reduce((o, k) => o?.[k], LANG[lang]) ?? key;
+
+    const playerById = id => PLAYERS.find(p => p.id === id);
+    const portrait = p => ({ id: `u:${p.id}`, name: p.character, img: avatar(p.character) });
+
+    const adapter = {
+        t,
+        getModel() {
+            const isGM = S.role === "gm";
+            const ownerId = isGM ? S.gmOwner : S.role;
+            const owner = playerById(ownerId);
+            const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
+            const known = S.entries.filter(e => e.known.includes(ownerId));
+            const groups = [...new Set(known.map(e => e.group).filter(Boolean))];
+            return {
+                isGM,
+                editable: !isGM && !moment,
+                owner: { id: owner.id, name: owner.character },
+                self: { name: owner.character, img: avatar(owner.character) },
+                party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
+                entries: known.map(e => ({
+                    id: e.id,
+                    name: e.named.includes(ownerId) ? e.name : null,
+                    title: e.named.includes(ownerId) ? e.title : "",
+                    img: e.img, frame: "", status: moment?.statuses?.[e.id] ?? e.status,
+                    isNew: !isGM && e.id === "e14"
+                })),
+                bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
+                folders: groups.map(label => ({ label, entryIds: known.filter(e => e.group === label).map(e => e.id) })),
+                players: PLAYERS.map(p => ({ id: p.id, name: `${p.name} · ${p.character}` })),
+                moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
+                momentId: moment?.id ?? null
+            };
+        },
+        saveBonds(bonds) { S.wheels[S.role] = bonds; },
+        openCard(id) {
+            const e = S.entries.find(x => x.id === id);
+            const ownerId = S.role === "gm" ? S.gmOwner : S.role;
+            const named = S.role === "gm" || e.named.includes(ownerId);
+            document.getElementById("pv-card-img").src = e.img;
+            document.getElementById("pv-card-img").style.filter = e.status === "dead" ? "grayscale(1) brightness(.7)" : "";
+            document.getElementById("pv-card-kind").textContent = t("PERSONA.Kind.npc") + (e.status !== "alive" ? ` · ${t(`PERSONA.Status.${e.status}`)}` : "");
+            document.getElementById("pv-card-name").textContent = named ? e.name : "???";
+            document.getElementById("pv-card-title").textContent = named ? e.title : "";
+            document.getElementById("pv-card-text").textContent = lang === "en" ? "This is Persona's card (no Actor sheet). Click outside to close." : "Este é o cartão do Persona (nunca a ficha do ator). Clique fora para fechar.";
+            document.getElementById("pv-card").hidden = false;
+        },
+        selectPlayer(id) { S.gmOwner = id; S.momentId = null; view.refresh(); },
+        selectMoment(id) { S.momentId = id; view.refresh(); },
+        recordMoment() {
+            const label = prompt(t("PERSONA.Bonds.RecordHint"), t("PERSONA.Bonds.MomentDefault").replace("{n}", S.moments.length + 1));
+            if (!label) return;
+            S.moments.push({ id: `m${Date.now()}`, label, ts: Date.now(), wheels: JSON.parse(JSON.stringify(S.wheels)), statuses: Object.fromEntries(S.entries.map(e => [e.id, e.status])) });
+            view.refresh();
+        },
+        deleteMoment(id) { S.moments = S.moments.filter(m => m.id !== id); S.momentId = null; view.refresh(); }
+    };
+
+    const role = document.getElementById("pv-role");
+    role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Mestre (GM)</option>`;
+    role.addEventListener("change", () => { S.role = role.value; S.momentId = null; view.refresh(); });
+    document.getElementById("pv-lang").addEventListener("change", e => {
+        lang = e.target.value;
+        document.getElementById("pv-title").textContent = t("PERSONA.Bonds.Title");
+        view.refresh();
+    });
+    document.getElementById("pv-reset").addEventListener("click", () => { const r = S.role; S = fresh(); S.moments = seedMoments(); S.role = r; view.refresh(); });
+    document.getElementById("pv-card").addEventListener("click", () => { document.getElementById("pv-card").hidden = true; });
+
+    const view = new BondsView(document.getElementById("bonds-root"), adapter);
+    window.__bonds = { view, state: () => S };
+})();
+
+</script>
+</body></html>

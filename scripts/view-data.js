@@ -126,6 +126,9 @@ function buildGallery(list, user, options) {
             name: named ? entry.name : null,
             title: named ? entry.title : "",
             isNew: !seen.has(entry.id),
+            status: entry.kind === "npc" && entry.status !== "alive" ? entry.status : null,
+            statusLabel: entry.kind === "npc" && entry.status !== "alive" ? t(`PERSONA.Status.${entry.status}`) : "",
+            statusIcon: entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question",
             isPrivate: !(entry.reveal.face ?? []).includes(ALL)
         };
     };
@@ -171,6 +174,8 @@ function buildDirector(list, { filter, search, expanded, collapsed, sharing }) {
             frame: frameStyle(entry),
             name: entry.name || t("PERSONA.Unnamed"),
             title: entry.title,
+            status: entry.kind === "npc" && entry.status !== "alive" ? entry.status : null,
+            statusLabel: entry.kind === "npc" && entry.status !== "alive" ? t(`PERSONA.Status.${entry.status}`) : "",
             groups: entry.groups.map(id => groups.get(id)?.label).filter(Boolean).join(" · "),
             hasVideo: !!entry.video,
             hasJournal: !!entry.journalUuid,
@@ -259,6 +264,9 @@ export async function buildCardContext(entry, { tab = "private" } = {}) {
         named,
         name: named ? entry.name : null,
         title: named ? entry.title : "",
+        status: entry.kind === "npc" && entry.status !== "alive" ? entry.status : null,
+        statusLabel: entry.kind === "npc" && entry.status !== "alive" ? t(`PERSONA.Status.${entry.status}`) : "",
+        statusIcon: entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question",
         groups: entry.groups.map(id => groups.get(id)).filter(Boolean),
         summary: showSummary ? await enrich(story) : null,
         secret: showSecret ? await enrich(entry.secret) : null,

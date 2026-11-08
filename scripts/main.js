@@ -13,6 +13,7 @@ import { VideoPlayer } from "./video.js";
 import { Toasts } from "./toasts.js";
 import { syncFromJournal } from "./entries.js";
 import { imageOf } from "./view-data.js";
+import { BondsWindow } from "./bonds/app.js";
 
 const PARTIALS = {
     "persona-director": `${TEMPLATE_ROOT}/partials/director.hbs`,
@@ -21,7 +22,7 @@ const PARTIALS = {
     "persona-row": `${TEMPLATE_ROOT}/partials/row.hbs`
 };
 
-let view, windowApp, card, video, toasts;
+let view, windowApp, card, video, toasts, bonds;
 let triad = null;            // Triad's API when docked
 let lastReveals = new Map(); // entry id -> reveal, to spot what's new for this user
 
@@ -31,6 +32,12 @@ let lastReveals = new Map(); // entry id -> reveal, to spot what's new for this 
 
 Hooks.once("init", () => {
     registerSettings();
+    game.keybindings.register(MODULE_ID, "bonds", {
+        name: "PERSONA.Keybindings.Bonds",
+        editable: [],
+        precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
+        onDown: () => { openBonds(); return true; }
+    });
     game.keybindings.register(MODULE_ID, "toggle", {
         name: "PERSONA.Keybindings.Toggle",
         editable: [{ key: "KeyP", modifiers: ["Alt"] }],
@@ -62,8 +69,10 @@ Hooks.once("ready", () => {
         openCard: id => card.open(id),
         openEditor: id => openEditor(id),
         playEntryVideo: id => playEntryVideo(id),
-        playFile: () => pickAndPlay()
+        playFile: () => pickAndPlay(),
+        openBonds: () => openBonds()
     });
+    bonds = new BondsWindow({ openCard: id => card.open(id) });
     windowApp = new PersonaWindow(view);
 
     video.sync();
@@ -76,10 +85,11 @@ Hooks.once("ready", () => {
     const api = {
         open, close, toggle,
         openCard: id => card.open(id),
+        openBonds: userId => openBonds(userId),
         playVideo: (path, title, subtitle) => VideoPlayer.playForAll({ path, title, subtitle }),
         stopVideo: () => VideoPlayer.stopForAll()
     };
-    game.persona = { api, view, card, video, toasts };
+    game.persona = { api, view, card, video, toasts, bonds };
     game.modules.get(MODULE_ID).api = api;
     Hooks.callAll(`${MODULE_ID}.ready`, api);
 });
@@ -137,6 +147,11 @@ Hooks.on("getSceneControlButtons", controls => {
         onChange: () => toggle()
     };
 });
+
+/** The Bonds wheel: players open their own, the GM opens any player's (read-only). */
+function openBonds(userId = null) {
+    return bonds?.show(userId);
+}
 
 function openEditor(id) {
     const existing = foundry.applications.instances?.get(`persona-editor-${id ?? "new"}`);
@@ -235,10 +250,15 @@ Hooks.on(`${MODULE_ID}.changed`, key => {
             view.requestRender();
             card.refresh();
             updateBadge();
+            bonds?.refresh();
             break;
         case "groups":
             view.requestRender();
             card.refresh();
+            bonds?.refresh();
+            break;
+        case "moments":
+            bonds?.refresh();
             break;
         case "video":
         case "videoVolume":
@@ -260,7 +280,14 @@ Hooks.on("updateUser", (user, changes) => {
         updateBadge();
     }
     if (game.user.isGM && ("name" in changes || "color" in changes || "role" in changes)) view.requestRender();
+    // Bonds: someone's wheel, character or avatar changed.
+    if (changes.flags?.[MODULE_ID] || "character" in changes || "avatar" in changes || "name" in changes || "role" in changes) bonds?.refresh();
 });
-for (const hook of ["createUser", "deleteUser"]) Hooks.on(hook, () => view?.requestRender());
+for (const hook of ["createUser", "deleteUser"]) Hooks.on(hook, () => { view?.requestRender(); bonds?.refresh(); });
+// A party member's portrait or name.
+Hooks.on("updateActor", (actor, changes) => {
+    if (!("img" in changes || "name" in changes)) return;
+    if (game.users.some(u => u.character?.id === actor.id)) bonds?.refresh();
+});
 
 Hooks.on("updateJournalEntryPage", page => syncFromJournal(page));

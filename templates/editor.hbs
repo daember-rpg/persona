@@ -34,6 +34,16 @@
                 <span class="persona-label">{{localize "PERSONA.Entry.TitleField"}}</span>
                 <input type="text" name="title" value="{{entry.title}}" placeholder="{{localize "PERSONA.Entry.TitlePlaceholder"}}" autocomplete="off">
             </label>
+            {{#if isPerson}}
+                <div class="persona-field">
+                    <span class="persona-label">{{localize "PERSONA.Status.Label"}}</span>
+                    <div class="persona-radio">
+                        {{#each statuses as |s|}}
+                            <label><input type="radio" name="status" value="{{s.id}}" {{#if s.selected}}checked{{/if}}> <i class="{{s.icon}}" inert></i> {{s.label}}</label>
+                        {{/each}}
+                    </div>
+                </div>
+            {{/if}}
             <input type="hidden" name="img" value="{{entry.img}}">
         </div>
     </div>

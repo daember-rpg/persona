@@ -77,7 +77,12 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
                 .map(e => ({ id: e.id, name: e.name, selected: entry.places.includes(e.id) })),
             peopleOptions: getEntries().filter(e => e.kind === "npc" && e.id !== entry.id)
                 .map(e => ({ id: e.id, name: e.name, selected: this.#people.has(e.id) })),
-            icons: GROUP_ICONS
+            icons: GROUP_ICONS,
+            statuses: [
+                { id: "alive", icon: "fa-solid fa-heart-pulse" },
+                { id: "dead", icon: "fa-solid fa-skull" },
+                { id: "missing", icon: "fa-solid fa-question" }
+            ].map(s => ({ ...s, label: game.i18n.localize(`PERSONA.Status.${s.id}`), selected: entry.status === s.id }))
         };
     }
 
@@ -161,6 +166,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#entry = normalizeEntry({
             ...this.#entry,
             kind: form.querySelector('[name="kind"]:checked')?.value ?? this.#entry.kind,
+            status: form.querySelector('[name="status"]:checked')?.value ?? this.#entry.status,
             name: value("name"),
             title: value("title"),
             img: value("img"),

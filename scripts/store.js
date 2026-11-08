@@ -117,6 +117,8 @@ export function normalizeEntry(raw = {}) {
         journalUuid: String(raw.journalUuid ?? ""),
         actorUuid: String(raw.actorUuid ?? ""),
         syncJournal: raw.syncJournal !== false,
+        // Alive, dead or missing — set by the GM, shown on cards and in every player's Bonds wheel.
+        status: ["alive", "dead", "missing"].includes(raw.status) ? raw.status : "alive",
         // Framing of the portrait (as players see it): focus point in % and zoom.
         focusX: Number.isFinite(Number(raw.focusX)) ? Math.min(100, Math.max(0, Number(raw.focusX))) : 50,
         focusY: Number.isFinite(Number(raw.focusY)) ? Math.min(100, Math.max(0, Number(raw.focusY))) : 20,

@@ -10,7 +10,8 @@
       "Toggle": "Persona"
     },
     "Keybindings": {
-      "Toggle": "Abrir ou fechar o Persona"
+      "Toggle": "Abrir ou fechar o Persona",
+      "Bonds": "Abrir Laços"
     },
     "Panel": {
       "Director": "Diretor",
@@ -168,6 +169,74 @@
       "ShowTo": "Mostrar para",
       "RevealNote": "O rosto e o nome são revelados para eles, então o card fica na galeria.",
       "Shown": "{name} mostrado para {who}."
+    },
+    "Status": {
+      "Label": "Situação",
+      "alive": "Vivo",
+      "dead": "Morto",
+      "missing": "Desaparecido"
+    },
+    "Bonds": {
+      "Title": "Laços",
+      "Open": "Laços — sua roda de relações",
+      "Eyebrow": "Quem é quem para você",
+      "ReadOnlyEyebrow": "Roda de um jogador",
+    
+      "Party": "Grupo",
+      "Unnamed": "Sem nome",
+      "Link": "Ligar",
+      "LinkHint": "Desenhe uma relação entre dois retratos",
+      "LinkPickFirst": "Escolha o primeiro retrato",
+      "LinkPickSecond": "Agora escolha com quem ele se liga",
+      "Done": "Pronto",
+      "AddSector": "Fatia",
+      "NewSector": "Nova fatia",
+      "EditSector": "Editar fatia",
+      "SectorPlaceholder": "Reino, aliados, inimigos…",
+      "MoveLeft": "Mover no sentido anti-horário",
+      "MoveRight": "Mover no sentido horário",
+      "DeleteSector": "Apagar fatia (as pessoas voltam para a lista)",
+      "Cancel": "Cancelar",
+      "Save": "Salvar",
+      "Create": "Criar",
+      "Flip": "Inverter direção",
+      "DeleteLink": "Remover ligação",
+      "ZoomIn": "Aproximar",
+      "ZoomOut": "Afastar",
+      "Fit": "Enquadrar a roda",
+      "Ring1": "Próximo",
+      "Ring2": "Conhecido",
+      "Ring3": "Distante",
+      "Unplaced": "Ainda fora da roda",
+      "DragHint": "Arraste um retrato para uma fatia. Mais perto do centro, mais perto de você.",
+      "SectorFirst": "Crie uma fatia primeiro e depois arraste as pessoas para ela.",
+      "FromFolders": "Começar pelas pastas do Persona",
+      "AllPlaced": "Todo mundo que você conhece está na roda.",
+      "NobodyKnown": "Ninguém foi revelado para você ainda.",
+      "NobodyKnownGM": "Nada foi revelado para este jogador ainda.",
+      "EmptyWheel": "Crie uma fatia para começar sua roda",
+      "EmptyWheelReadOnly": "Esta roda ainda está vazia",
+      "GMReadOnly": "Só leitura — cada jogador monta a própria roda",
+      "Record": "Gravar momento",
+      "RecordHint": "Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.",
+      "Recorded": "Momento gravado: {label}",
+      "MomentDefault": "Sessão {n}",
+      "Timeline": "Linha do tempo",
+      "Now": "Agora",
+      "Viewing": "Voltando a",
+      "BackToNow": "Voltar para agora",
+      "NoMoments": "Grave um momento no fim de uma sessão para montar a linha do tempo.",
+      "DeleteMoment": "Apagar momento",
+      "DeleteMomentConfirm": "Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.",
+      "Type": {
+        "ally": "Aliado",
+        "family": "Família",
+        "love": "Amor",
+        "rival": "Rival",
+        "enemy": "Inimigo",
+        "serves": "Serve a",
+        "betrayed": "Traiu"
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
-<button type="button" class="persona-tile persona-tile--{{kind}}" data-action="openCard" data-id="{{id}}">
+<button type="button" class="persona-tile persona-tile--{{kind}} {{#if status}}is-{{status}}{{/if}}" data-action="openCard" data-id="{{id}}">
     <span class="persona-tile__img"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></span>
+    {{#if status}}<span class="persona-tile__status" data-tooltip="{{statusLabel}}"><i class="{{statusIcon}}" inert></i></span>{{/if}}
     {{#if isNew}}<span class="persona-tile__new">{{localize "PERSONA.New"}}</span>{{/if}}
     {{#if isPrivate}}<span class="persona-tile__private" data-tooltip="{{localize "PERSONA.OnlyYou"}}"><i class="fa-solid fa-eye" inert></i></span>{{/if}}
     {{#if name}}

@@ -20,6 +20,7 @@ export function registerSettings() {
     hidden("video", foundry.utils.deepClone(DEFAULT_VIDEO));
     hidden("sharedNotes", {});
     hidden("handout", {});
+    hidden("moments", {});
 
     game.settings.register(MODULE_ID, "dockInTriad", {
         name: "PERSONA.Settings.dockInTriad.Name",

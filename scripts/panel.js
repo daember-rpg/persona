@@ -21,8 +21,9 @@ export class PanelView {
     #pending = null;
     #searchTimer = null;
 
-    constructor({ openCard, openEditor, playEntryVideo, playFile }) {
+    constructor({ openCard, openEditor, playEntryVideo, playFile, openBonds }) {
         this.openCard = openCard;
+        this.openBonds = openBonds;
         this.openEditor = openEditor;
         this.playEntryVideo = playEntryVideo;
         this.playFile = playFile;
@@ -132,6 +133,7 @@ export class PanelView {
         },
         playVideo: (_t, id) => this.playEntryVideo(id),
         playFile: () => this.playFile(),
+        openBonds: () => this.openBonds?.(),
         newEntry: () => this.openEditor(null),
         edit: (_t, id) => this.openEditor(id),
         openJournal: async (_t, id) => {
