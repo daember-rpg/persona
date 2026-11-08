@@ -92,7 +92,7 @@
             const groups = [...new Set(known.map(e => e.group).filter(Boolean))];
             return {
                 isGM,
-                editable: !isGM && !moment,
+                editable: !moment,
                 owner: { id: owner.id, name: owner.character },
                 self: { name: owner.character, img: avatar(owner.character) },
                 party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
@@ -110,7 +110,7 @@
                 momentId: moment?.id ?? null
             };
         },
-        saveBonds(bonds) { S.wheels[S.role] = bonds; },
+        saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
         openCard(id) {
             const e = S.entries.find(x => x.id === id);
             const ownerId = S.role === "gm" ? S.gmOwner : S.role;

@@ -181,7 +181,6 @@
       "Open": "Laços — sua roda de relações",
       "Eyebrow": "Quem é quem para você",
       "ReadOnlyEyebrow": "Roda de um jogador",
-    
       "Party": "Grupo",
       "Unnamed": "Sem nome",
       "Link": "Ligar",
@@ -216,7 +215,6 @@
       "NobodyKnownGM": "Nada foi revelado para este jogador ainda.",
       "EmptyWheel": "Crie uma fatia para começar sua roda",
       "EmptyWheelReadOnly": "Esta roda ainda está vazia",
-      "GMReadOnly": "Só leitura — cada jogador monta a própria roda",
       "Record": "Gravar momento",
       "RecordHint": "Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.",
       "Recorded": "Momento gravado: {label}",
@@ -236,7 +234,8 @@
         "enemy": "Inimigo",
         "serves": "Serve a",
         "betrayed": "Traiu"
-      }
+      },
+      "GMEditing": "Editando a roda de {name} — o jogador vê suas mudanças"
     }
   }
 }

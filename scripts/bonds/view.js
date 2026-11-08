@@ -68,8 +68,11 @@ export class BondsView {
     /** Re-reads the model and redraws (keeps the camera). Skipped mid-drag, redrawn after. */
     refresh() {
         if (this.#gesture?.dragging) { this.#gesture.stale = true; return; }
+        const previous = this.#model?.owner?.id;
         this.#model = this.adapter.getModel();
         this.#bonds = normalizeBonds(this.#model.bonds);
+        // Another player's wheel (GM): a half-drawn link belongs to the old one.
+        if (previous !== undefined && previous !== this.#model.owner?.id) this.#linkFrom = null;
         if (!this.#model.editable) this.#linkMode = false;
         this.#render();
     }
@@ -286,7 +289,7 @@ export class BondsView {
             return `<div class="bonds-banner bonds-banner--link"><i class="fa-solid fa-link" inert></i><span>${esc(this.#linkFrom ? this.t("LinkPickSecond") : this.t("LinkPickFirst"))}</span>
                 <button type="button" class="persona-mini" data-action="linkMode">${esc(this.t("Done"))}</button></div>`;
         }
-        if (!m.editable && m.isGM) return `<div class="bonds-banner bonds-banner--quiet"><i class="fa-solid fa-eye" inert></i><span>${esc(this.t("GMReadOnly"))}</span></div>`;
+        if (m.isGM && m.editable && m.owner?.name) return `<div class="bonds-banner bonds-banner--quiet"><i class="fa-solid fa-pen" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.GMEditing").replace("{name}", m.owner.name))}</span></div>`;
         return "";
     }
 

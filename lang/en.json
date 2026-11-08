@@ -181,7 +181,6 @@
       "Open": "Bonds — your relationship wheel",
       "Eyebrow": "Who's who to you",
       "ReadOnlyEyebrow": "A player's wheel",
-    
       "Party": "Party",
       "Unnamed": "Unnamed",
       "Link": "Link",
@@ -216,7 +215,6 @@
       "NobodyKnownGM": "Nothing revealed to this player yet.",
       "EmptyWheel": "Create a slice to start your wheel",
       "EmptyWheelReadOnly": "This wheel is still empty",
-      "GMReadOnly": "Read-only — players arrange their own wheel",
       "Record": "Record moment",
       "RecordHint": "Saves how every player's wheel and every status look right now, so the table can look back later.",
       "Recorded": "Moment recorded: {label}",
@@ -236,7 +234,8 @@
         "enemy": "Enemy",
         "serves": "Serves",
         "betrayed": "Betrayed"
-      }
+      },
+      "GMEditing": "Editing {name}'s wheel — the player sees your changes"
     }
   }
 }

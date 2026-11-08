@@ -2,8 +2,8 @@
  * Bonds in Foundry: the window, the data adapter for the wheel, and moments (timeline snapshots).
  *
  * - A player's wheel lives in their own user flags (`flags.persona.bonds`), which they may write
- *   themselves — no GM relay needed. Each player only ever sees their own wheel; the GM can open
- *   anyone's, read-only.
+ *   themselves — no GM relay needed. Each player only ever sees and edits their own wheel; the GM
+ *   can open and edit anyone's.
  * - The wheel only ever draws people this player can see in Persona (face revealed), through the
  *   same cards: players never touch an Actor or its sheet.
  * - Moments are world data written by the GM: a snapshot of every wheel and every status.
@@ -25,9 +25,16 @@ export function bondsOf(user) {
     return normalizeBonds(user?.getFlag(MODULE_ID, "bonds"));
 }
 
-export function saveOwnBonds(bonds) {
+/** Saves a wheel: players only their own, the GM anyone's. */
+export function saveBonds(userId, bonds) {
+    const user = game.users.get(userId);
+    if (!user || (!game.user.isGM && user.id !== game.user.id)) return Promise.reject(new Error("Not allowed to edit this wheel"));
     // Arrays inside replace whole on update, so removals stick.
-    return game.user.update({ [`flags.${MODULE_ID}.bonds`]: normalizeBonds(bonds) });
+    return user.update({ [`flags.${MODULE_ID}.bonds`]: normalizeBonds(bonds) });
+}
+
+export function saveOwnBonds(bonds) {
+    return saveBonds(game.user.id, bonds);
 }
 
 /** A player as a portrait: their assigned character, else their user avatar. */
@@ -125,7 +132,7 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         return {
             t: key => game.i18n.localize(key),
             getModel: () => this.buildModel(),
-            saveBonds: bonds => saveOwnBonds(bonds),
+            saveBonds: bonds => saveBonds(this.ownerId ?? game.user.id, bonds),
             openCard: id => this.openCard(id),
             selectPlayer: id => { this.ownerId = id; this.momentId = null; this.view?.refresh(); },
             selectMoment: id => { this.momentId = id; this.view?.refresh(); },
@@ -180,7 +187,8 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
 
         return {
             ...base,
-            editable: !isGM && !moment && owner.id === game.user.id,
+            // Moments are read-only; otherwise a player edits their own wheel and the GM edits anyone's.
+            editable: !moment && (isGM || owner.id === game.user.id),
             owner: { id: owner.id, name: self.name },
             self: { name: self.name, img: self.img },
             party: roster.filter(u => u.id !== owner.id).map(persona),

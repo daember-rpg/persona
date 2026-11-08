@@ -34,7 +34,7 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Links**: *Link*, then click two portraits (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link icon).
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
-- **Private**: each player sees only their own wheel. The GM can open anyone's, read-only, from the player chips.
+- **Private**: each player sees and edits only their own wheel. The GM can open and edit anyone's from the player chips (the player sees the changes live).
 - **Timeline**: the GM presses *Record moment* (e.g. at the end of a session). It saves every wheel and every status at that point. Players click a moment on the timeline to see their wheel as it was then — who was still alive, who they hadn't met yet.
 
 ## Players: the gallery
