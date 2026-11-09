@@ -3077,6 +3077,149 @@
 .bonds.is-dense .bonds-link { stroke-opacity: 0.35; }
 .bonds.is-dense.has-focus .bonds-link:not(.is-near) { stroke-opacity: 0.05; }
 
+/* ==========================================================================
+   Bonds — party ring, changes, suspicion, official links, in scene
+   ========================================================================== */
+
+/* Party: engraved band, gold thread, name plates always on. */
+.bonds-party-band { stroke: rgba(180, 100, 62, 0.12); }
+.bonds-party-etch { opacity: 0.9; }
+.bonds-party-thread { fill: none; stroke: var(--dp-gold); stroke-width: 1.5; stroke-opacity: 0.55; stroke-dasharray: 2 6; stroke-linecap: round; }
+
+.bonds-node--party .bonds-node__name,
+.bonds-node--self .bonds-node__name {
+    display: flex;
+    top: calc(100% - 8px);
+    padding: 2px 10px;
+    border-color: rgba(201, 163, 90, 0.45);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+}
+
+.bonds-node--self .bonds-node__name { top: calc(100% - 10px); border-color: var(--dp-gold); font-size: 12px; }
+.bonds-node--party:hover .bonds-node__name small,
+.bonds-node--self .bonds-node__name small { display: none; }
+
+/* Changed since last time: a soft ember halo until acknowledged. */
+.persona .bonds-node.is-changed { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-ember), 0 0 22px rgba(200, 69, 47, 0.6); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .persona .bonds-node.is-changed { animation: bonds-halo 2.4s ease-in-out infinite; }
+    @keyframes bonds-halo { 50% { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-ember), 0 0 6px rgba(200, 69, 47, 0.2); } }
+}
+
+.bonds-changes {
+    position: absolute;
+    top: var(--dp-2);
+    left: var(--dp-2);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 280px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(200, 69, 47, 0.55);
+    background: rgba(28, 26, 23, 0.94);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.bonds-changes__text { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.4; color: var(--dp-parchment-dim); }
+.bonds-changes__text b { font-family: var(--dp-display); font-size: 14px; font-weight: 600; color: var(--dp-parchment); }
+.bonds-changes__faces { display: flex; align-items: center; gap: 6px; }
+
+.persona .bonds-changes__face {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid var(--dp-ember);
+}
+
+.bonds-changes__face img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-changes__face.is-dead img { filter: grayscale(1) brightness(0.65); }
+.bonds-changes__more { font-size: 12px; color: var(--dp-parchment-faint); }
+.persona .bonds-changes .persona-mini { align-self: flex-start; }
+
+/* Suspicion: dashed. Official: inked casing and a seal. Hidden (GM): faded. */
+.bonds-link.is-suspect { stroke-dasharray: 7 7; }
+.bonds-link-casing { fill: none; stroke: rgba(15, 14, 12, 0.85); stroke-width: 7; stroke-linecap: round; }
+.bonds-link.is-official { stroke-width: 3; }
+.bonds-link.is-hidden, .bonds-link-casing.is-hidden { stroke-opacity: 0.35; }
+.bonds.has-focus .bonds-link-casing:not(.is-near) { stroke-opacity: 0.05; }
+
+.persona .bonds-marker.is-suspect { border-style: dashed; }
+.persona .bonds-marker.is-official { border-width: 2px; box-shadow: 0 0 0 2px var(--dp-night), 0 0 0 3px var(--dp-gold); }
+.persona .bonds-marker.is-hidden { opacity: 0.5; }
+
+.bonds-marker__badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    display: grid;
+    place-items: center;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--dp-night);
+    border: 1px solid var(--c);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--dp-parchment);
+}
+
+.bonds-marker__badge.is-seal { border-color: var(--dp-gold); color: var(--dp-gold); font-size: 7px; }
+
+/* Link form */
+.bonds-form--link { width: 100%; }
+.bonds-pop:has(.bonds-form--link) { width: 340px; }
+
+.bonds-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--dp-parchment-faint);
+    cursor: pointer;
+}
+
+.bonds-check input { margin: 2px 0 0; accent-color: var(--dp-clay); }
+.bonds-check span { display: flex; flex-direction: column; gap: 1px; }
+.bonds-check b { font-weight: 600; font-size: 13px; color: var(--dp-parchment); }
+.persona .bonds-form button[type="submit"]:disabled { opacity: 0.4; cursor: default; }
+
+/* Inspector bond rows */
+.bonds-bond.is-suspect { border-left-style: dashed; }
+.bonds-bond__text small { flex-wrap: wrap; }
+.bonds-bond__text em { margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--dp-parchment-dim); white-space: normal; }
+
+.bonds-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-size: 10px;
+    font-style: normal;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-flag.is-official { color: var(--dp-gold); }
+
+/* In scene */
+.persona .bonds-scene.is-on { background: var(--dp-clay); border-color: var(--dp-clay); color: var(--dp-night); }
+.bonds-loose__scene { margin-left: auto; font-size: 12px; color: var(--dp-clay-light); }
+
+/* Party plates sit on the outer side of each companion, away from the centre. */
+.bonds-node--party.is-upper .bonds-node__name { top: auto; bottom: calc(100% - 8px); transform-origin: 50% 100%; }
+
 /* Preview chrome (not part of the module) */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; background: #0b0a09; }
@@ -3113,7 +3256,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>
-const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Party":"Grupo","Unnamed":"Sem nome","NewSector":"Nova categoria","EditSector":"Editar categoria","SectorPlaceholder":"Não confio, nos deve um favor…","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para a roda: cada pessoa vai para a fatia da sua pasta, e o anel onde você solta define a distância. Mais perto do centro, mais perto de você.","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Arraste alguém para a roda para começar","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"NoFolder":"Sem pasta","PlaceAll":"Colocar todos na roda","NewCategoryDrop":"Solte aqui para criar uma categoria sua","TakeOffDrop":"Solte aqui para tirar da roda","Dissolve":"Desfazer","DissolveHint":"Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém.","Players":"Jogadores","TitleOf":"Laços de {name}","SubPlayer":"Clique em alguém para ver os laços. Arraste retratos para montar a roda.","SubGM":"Você está editando a roda de {name}. O jogador vê suas mudanças.","SubPast":"Como estava em {label}. Volte para agora para mudar algo.","LinkPickTarget":"Clique em quem se liga a {name}","Search":"Procurar alguém","You":"Você","Distance":"Distância","PutOnWheel":"Colocar na roda","Bonds":"Laços","NoBondsYet":"Nenhum laço ainda. Ligue esta pessoa a alguém para mostrar a relação.","NoBonds":"Nenhum laço.","LinkTo":"Ligar a alguém","OpenCard":"Abrir cartão","TakeOff":"Tirar da roda","BackToList":"Fora da roda ({n})","Close":"Fechar","EditLink":"Mudar ou remover","TypeDir":{"serves":{"out":"Serve a","in":"Servido por"},"betrayed":{"out":"Traiu","in":"Traído por"}},"FindOnWheel":"Achar na roda","HideDead":"Esconder mortos ({n})","ShowDead":"Mostrar mortos ({n})"},"Arrange":{"Moved":"{name} foi para {group}","Hint":"Arraste para reordenar ou mover para outra pasta"}}}};
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})","Suspected":"Suspicion","SuspectHint":"You think so, but aren't sure yet. Drawn as a dashed line.","Official":"Official","OfficialHint":"Shows on every wheel that knows both people. Players can't change it.","HiddenShort":"Hidden","HiddenHint":"Only you see it, until you untick this.","NotePlaceholder":"Why? (optional, e.g. owes us 50 gold)","SinceLast":"Since you last looked","GotIt":"Got it","ChangeNew1":"{n} new person","ChangeNew":"{n} new people","ChangeDead1":"{n} death","ChangeDead":"{n} deaths","ChangeStatus1":"{n} went missing or came back","ChangeStatus":"{n} went missing or came back","ChangeLinks1":"{n} new revealed bond","ChangeLinks":"{n} new revealed bonds","InScene":"In scene ({n})","InSceneHint":"Only the people with a token on the current scene"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}},"pt-BR":{"PERSONA":{"Title":"Persona","Close":"Fechar","GM":"Mestre","New":"Novo","OnlyYou":"Só você conhece","Unnamed":"Sem nome","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Abrir ou fechar o Persona","Bonds":"Abrir Laços"},"Panel":{"Director":"Diretor","Known":"Pessoas e lugares","Search":"Buscar por nome","Cast":"Elenco","DropHint":"Arraste Actors, entradas ou páginas do Journal, ou Cenas para adicionar","NobodyYet":"Ninguém ainda. O mestre revela pessoas e lugares conforme a história avança.","NothingHere":"Nada neste grupo ainda.","NothingFilter":"Nada corresponde a este filtro."},"Filter":{"All":"Todos","Places":"Lugares"},"Kind":{"npc":"Pessoa","place":"Lugar","people":"Pessoas","places":"Lugares"},"Layer":{"face":"Rosto","name":"Nome","summary":"História","secret":"Segredo"},"Reveal":{"All":"Todos","Everyone":"Todos os jogadores","Nobody":"Escondido de todos","NoPlayers":"Ainda não há contas de jogador neste mundo, então não há para quem revelar.","Edit":"Escolher quem vê o quê","Layer":"Camada","GridHint":"Cada olho mostra ou esconde uma camada para um jogador. Todos vale para a mesa inteira. Mostrar uma camada também mostra as de cima.","ShowAll":"Mostrar tudo para todos","HideAll":"Esconder de todos"},"Card":{"Open":"Abrir card","Secret":"Segredo descoberto","LittleKnown":"Vocês ainda não sabem muito sobre essa pessoa.","Unknown":"Vocês ainda não sabem quem é.","PeopleHere":"Pessoas aqui","SeenAt":"Lugares","WhoKnows":"O que os jogadores sabem"},"Notes":{"Mine":"Minhas notas","Party":"Notas do grupo","MinePlaceholder":"Só você vê isto.","MineHint":"Só você vê. Salvo enquanto você digita.","PartyPlaceholder":"Escrever para o grupo","Send":"Enviar","None":"Nenhuma nota do grupo ainda.","Delete":"Apagar nota"},"Video":{"PlayAll":"Tocar para todos","Short":"Vídeo","PlayFile":"Tocar um arquivo de vídeo para todos","Preview":"Ver vídeo","Replay":"Rever vídeo","Pause":"Pausar","Resume":"Continuar","Restart":"Do início","Stop":"Encerrar para todos","Mute":"Sem som","Unmute":"Com som","ForEveryone":"Tocando para todos","JustYou":"Só para você","ClickToPlay":"Clique para tocar com som"},"Toast":{"Face":"Alguém novo","Name":"Nome revelado","Summary":"Você descobriu mais","Secret":"Segredo descoberto"},"Entry":{"New":"Nova pessoa ou lugar","Edit":"Editar","EditTitle":"Editar: {name}","Added":"{name} adicionado ao Persona.","Kind":"Tipo","Name":"Nome","TitleField":"Título","TitlePlaceholder":"Ferreira, Senhor de Ashford…","PickImage":"Escolher imagem","Journal":"Página do Journal","JournalDrop":"Arraste uma entrada ou página do Journal para ligar","PullJournal":"Copiar o texto de novo","Unlink":"Desligar","SyncJournal":"Atualizar a história quando a página do Journal mudar","OpenJournal":"Abrir no Journal","Summary":"História","SummaryHint":"o que os jogadores leem depois de revelado (aceita HTML)","SecretHint":"revelado à parte","Groups":"Grupos","Video":"Vídeo","VideoHint":"mp4 ou webm, toca em tela cheia","Browse":"Procurar","ClearVideo":"Remover vídeo","Save":"Salvar","Delete":"Apagar","DeleteConfirm":"Apagar {name}? As notas sobre ele também são apagadas.","SummaryFromJournal":"vem da página do Journal; desligue a atualização acima para editar aqui","Places":"Lugares","PlacesHint":"onde essa pessoa vive ou aparece","NoPlaces":"Nenhum lugar ainda. Crie um com o tipo Lugar.","People":"Pessoas aqui","PeopleHint":"aparecem no card deste lugar","NoPeople":"Nenhuma pessoa ainda.","FrameHint":"Arraste a imagem para escolher o que os jogadores veem; aproxime com o controle","Drag":"Arraste para enquadrar","Zoom":"Zoom","ResetFrame":"Restaurar enquadramento"},"Group":{"Add":"Adicionar","Delete":"Apagar grupo","DeleteConfirm":"Apagar o grupo \"{name}\"? Pessoas e lugares continuam; só saem deste grupo.","NewPlaceholder":"Novo grupo: Ashford, Guilda dos Ferreiros, Capítulo 2…","Icon":"Ícone do grupo","None":"Nenhum grupo ainda.","Ungrouped":"Sem grupo","AddedTo":"{name} entrou em {group}."},"Settings":{"dockInTriad":{"Name":"Mostrar como aba do Triad","Hint":"Com o Triad instalado, o Persona abre como aba na bandeja do Triad em vez de janela própria."},"videoVolume":{"Name":"Volume dos vídeos","Hint":"Volume dos vídeos tocados pelo mestre, neste computador."},"revealToasts":{"Name":"Avisos de revelação","Hint":"Mostra um aviso quando o mestre revela alguém ou algo novo para você."}},"Warn":{"NoRelay":"Notas do grupo precisam do módulo socketlib e de um mestre online.","NoSocketlib":"Persona: instale o socketlib para os jogadores escreverem notas do grupo.","ActionFailed":"Não funcionou. O console (F12) tem os detalhes.","JournalMissing":"A página do Journal ligada não existe mais.","DropType":"Solte um Actor, entrada ou página do Journal, ou Cena.","DropJournal":"Solte uma entrada ou página do Journal.","NameRequired":"Dê um nome primeiro."},"Handout":{"Show":"Mostrar","Hint":"Abre este card na tela dos jogadores, como um handout","ShowTo":"Mostrar para","RevealNote":"O rosto e o nome são revelados para eles, então o card fica na galeria.","Shown":"{name} mostrado para {who}."},"Status":{"Label":"Situação","alive":"Vivo","dead":"Morto","missing":"Desaparecido"},"Bonds":{"Title":"Laços","Open":"Laços — sua roda de relações","Party":"Grupo","Unnamed":"Sem nome","NewSector":"Nova categoria","EditSector":"Editar categoria","SectorPlaceholder":"Não confio, nos deve um favor…","Cancel":"Cancelar","Save":"Salvar","Create":"Criar","Flip":"Inverter direção","DeleteLink":"Remover ligação","ZoomIn":"Aproximar","ZoomOut":"Afastar","Fit":"Enquadrar a roda","Ring1":"Próximo","Ring2":"Conhecido","Ring3":"Distante","Unplaced":"Ainda fora da roda","DragHint":"Arraste um retrato para a roda: cada pessoa vai para a fatia da sua pasta, e o anel onde você solta define a distância. Mais perto do centro, mais perto de você.","AllPlaced":"Todo mundo que você conhece está na roda.","NobodyKnown":"Ninguém foi revelado para você ainda.","NobodyKnownGM":"Nada foi revelado para este jogador ainda.","EmptyWheel":"Arraste alguém para a roda para começar","EmptyWheelReadOnly":"Esta roda ainda está vazia","Record":"Gravar momento","RecordHint":"Guarda como estão agora a roda de cada jogador e a situação de cada NPC, para a mesa poder voltar no tempo depois.","Recorded":"Momento gravado: {label}","MomentDefault":"Sessão {n}","Timeline":"Linha do tempo","Now":"Agora","Viewing":"Voltando a","BackToNow":"Voltar para agora","NoMoments":"Grave um momento no fim de uma sessão para montar a linha do tempo.","DeleteMoment":"Apagar momento","DeleteMomentConfirm":"Apagar o momento \"{label}\"? Os jogadores perdem esse ponto da linha do tempo.","Type":{"ally":"Aliado","family":"Família","love":"Amor","rival":"Rival","enemy":"Inimigo","serves":"Serve a","betrayed":"Traiu"},"NoFolder":"Sem pasta","PlaceAll":"Colocar todos na roda","NewCategoryDrop":"Solte aqui para criar uma categoria sua","TakeOffDrop":"Solte aqui para tirar da roda","Dissolve":"Desfazer","DissolveHint":"Desfazer devolve as pessoas às fatias das suas pastas. Uma categoria some sozinha quando fica sem ninguém.","Players":"Jogadores","TitleOf":"Laços de {name}","SubPlayer":"Clique em alguém para ver os laços. Arraste retratos para montar a roda.","SubGM":"Você está editando a roda de {name}. O jogador vê suas mudanças.","SubPast":"Como estava em {label}. Volte para agora para mudar algo.","LinkPickTarget":"Clique em quem se liga a {name}","Search":"Procurar alguém","You":"Você","Distance":"Distância","PutOnWheel":"Colocar na roda","Bonds":"Laços","NoBondsYet":"Nenhum laço ainda. Ligue esta pessoa a alguém para mostrar a relação.","NoBonds":"Nenhum laço.","LinkTo":"Ligar a alguém","OpenCard":"Abrir cartão","TakeOff":"Tirar da roda","BackToList":"Fora da roda ({n})","Close":"Fechar","EditLink":"Mudar ou remover","TypeDir":{"serves":{"out":"Serve a","in":"Servido por"},"betrayed":{"out":"Traiu","in":"Traído por"}},"FindOnWheel":"Achar na roda","HideDead":"Esconder mortos ({n})","ShowDead":"Mostrar mortos ({n})","Suspected":"Suspeita","SuspectHint":"Você acha que sim, mas ainda não tem certeza. Aparece como linha tracejada.","Official":"Oficial","OfficialHint":"Aparece em toda roda que conhece as duas pessoas. Os jogadores não podem mudar.","HiddenShort":"Oculto","HiddenHint":"Só você vê, até desmarcar.","NotePlaceholder":"Por quê? (opcional, ex.: nos deve 50 peças de ouro)","SinceLast":"Desde a última vez","GotIt":"Entendi","ChangeNew1":"{n} pessoa nova","ChangeNew":"{n} pessoas novas","ChangeDead1":"{n} morte","ChangeDead":"{n} mortes","ChangeStatus1":"{n} sumiu ou voltou","ChangeStatus":"{n} sumiram ou voltaram","ChangeLinks1":"{n} laço revelado","ChangeLinks":"{n} laços revelados","InScene":"Em cena ({n})","InSceneHint":"Só quem tem um token na cena atual"},"Arrange":{"Moved":"{name} foi para {group}","Hint":"Arraste para reordenar ou mover para outra pasta"}}}};
 /**
  * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
  *
@@ -3130,6 +3273,8 @@ const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New"
  * - placements: a known person (Persona entry id) at a distance ring (1 close … 3 distant).
  *   The order of the array is the order inside each slice and ring.
  * - links: a relation between two portraits. Node ids are entry ids, "self" or "u:<userId>" (party).
+ *   `note`: one line of why ("owes us 50 gold"); `suspect`: the player thinks so but isn't sure.
+ * Official links (GM, world data) use the same shape between two people, plus `hidden`.
  * Everything is an array so a Foundry flag update replaces it whole (objects would be merged).
  */
 
@@ -3209,7 +3354,32 @@ function normalizeBonds(raw) {
         const key = [l.a, l.b].sort().join("|");
         if (pairs.has(key)) continue;
         pairs.add(key);
-        out.links.push({ id: String(l.id ?? uid()), a: String(l.a), b: String(l.b), type: types.has(l.type) ? l.type : "ally" });
+        out.links.push(normalizeLink(l, types));
+    }
+    return out;
+}
+
+function normalizeLink(l, types = new Set(LINK_TYPES.map(t => t.id))) {
+    return {
+        id: String(l.id ?? uid()),
+        a: String(l.a),
+        b: String(l.b),
+        type: types.has(l.type) ? l.type : "ally",
+        note: String(l.note ?? "").slice(0, 140),
+        suspect: !!l.suspect
+    };
+}
+
+/** The GM's official links: between two people, shown on every wheel that knows both. */
+function normalizeOfficial(raw) {
+    const out = [];
+    const pairs = new Set();
+    for (const l of Array.isArray(raw) ? raw : Object.values(raw ?? {})) {
+        if (!l?.a || !l?.b || l.a === l.b) continue;
+        const key = [l.a, l.b].sort().join("|");
+        if (pairs.has(key)) continue;
+        pairs.add(key);
+        out.push({ ...normalizeLink(l), suspect: false, hidden: !!l.hidden, official: true });
     }
     return out;
 }
@@ -3271,8 +3441,11 @@ function unplace(bonds, entryId) {
     return normalizeBonds(next);
 }
 
-/** Creates the link between two nodes, or changes its type if they are already linked. */
-function setLink(bonds, a, b, type) {
+/**
+ * Creates the link between two nodes, or updates it if they are already linked.
+ * `extra`: { note, suspect } (kept as they were when omitted).
+ */
+function setLink(bonds, a, b, type, extra = {}) {
     const next = copy(bonds);
     if (!a || !b || a === b) return next;
     const existing = next.links.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
@@ -3281,10 +3454,24 @@ function setLink(bonds, a, b, type) {
         // A directed link keeps the direction the player just drew.
         existing.a = a;
         existing.b = b;
+        if (extra.note !== undefined) existing.note = extra.note;
+        if (extra.suspect !== undefined) existing.suspect = extra.suspect;
     } else {
-        next.links.push({ id: uid(), a, b, type });
+        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect });
     }
     return normalizeBonds(next);
+}
+
+/** Same as setLink, for the GM's official list (an array). */
+function setOfficial(list, a, b, type, extra = {}) {
+    const next = normalizeOfficial(list).filter(l => !((l.a === a && l.b === b) || (l.a === b && l.b === a)));
+    const was = normalizeOfficial(list).find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    next.push({ id: was?.id ?? uid(), a, b, type, note: extra.note ?? was?.note ?? "", hidden: extra.hidden ?? was?.hidden ?? false });
+    return normalizeOfficial(next);
+}
+
+function removeOfficial(list, id) {
+    return normalizeOfficial(list).filter(l => l.id !== id);
 }
 
 function removeLink(bonds, id) {
@@ -3535,7 +3722,10 @@ function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
  *   editable, isGM, owner: { id, name }, self: { name, img }, party: [{ id, name, img }],
  *   entries: [{ id, name, title, img, frame, status, isNew, tag }], bonds,
  *   tags: [{ key, label, color }] (Persona folders, in the GM's order — the default slices),
- *   players: [{ id, name }], moments: [{ id, label, ts }], momentId
+ *   players: [{ id, name }], moments: [{ id, label, ts }], momentId,
+ *   official: [{ id, a, b, type, note, hidden }] (GM links this viewer may see),
+ *   changes: { newIds, statusIds, linkIds } | null (since the player last looked),
+ *   inScene: [entryId] | null (people with a token on the current scene)
  * }
  */
 
@@ -3557,6 +3747,7 @@ class BondsView {
     #selected = null;
     #query = "";
     #hideDead = false;
+    #sceneOnly = false;
     #linkFrom = null;
     #gesture = null;
     #resize = null;
@@ -3620,7 +3811,14 @@ class BondsView {
         const m = this.#model;
         const entries = this.#entryMap();
         // "Hide the dead" only thins the wheel; they stay in the inspector and the timeline.
-        this.#visible = new Set([...entries.keys()].filter(id => !(this.#hideDead && entries.get(id).status === "dead" && id !== this.#selected)));
+        const scene = new Set(m.inScene ?? []);
+        if (this.#sceneOnly && !scene.size) this.#sceneOnly = false;
+        this.#visible = new Set([...entries.keys()].filter(id => {
+            if (id === this.#selected) return true;
+            if (this.#hideDead && entries.get(id).status === "dead") return false;
+            if (this.#sceneOnly && !scene.has(id)) return false;
+            return true;
+        }));
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
         this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
@@ -3638,7 +3836,7 @@ class BondsView {
                         ${this.#renderSvg()}
                         <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
                     </div>
-                    ${this.#renderBanner()}
+                    ${this.#renderBanner() || this.#renderChanges(entries)}
                     ${this.#renderFinder(entries)}
                     ${this.#renderLegend()}
                     <div class="bonds-zoom">
@@ -3706,6 +3904,7 @@ class BondsView {
         const defs = [`<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#3a2a22"/><stop offset="0.55" stop-color="#211d19"/><stop offset="1" stop-color="#14120f" stop-opacity="0"/></radialGradient>`];
         const colors = [...new Set(laid.sectors.map(s => s.color))];
         colors.forEach((color, i) => defs.push(`<radialGradient id="bonds-g${i}" gradientUnits="userSpaceOnUse" cx="${C}" cy="${C}" r="${outer}"><stop offset="${(inner / outer).toFixed(3)}" stop-color="${color}" stop-opacity="0.42"/><stop offset="0.7" stop-color="${color}" stop-opacity="0.16"/><stop offset="1" stop-color="${color}" stop-opacity="0.05"/></radialGradient>`));
+        defs.push(`<pattern id="bonds-etch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 7h14M7 0v14" stroke="rgba(214,138,92,0.14)" stroke-width="1"/></pattern>`);
         for (const type of LINK_TYPES.filter(t => t.directed)) {
             defs.push(`<marker id="bonds-arrow-${type.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${type.color}"/></marker>`);
         }
@@ -3748,18 +3947,20 @@ class BondsView {
         parts.push(`<circle class="bonds-party-band" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0]}"/>`);
         parts.push(`<circle class="bonds-ring bonds-ring--party" cx="${C}" cy="${C}" r="${G.partyBand[1]}"/>`);
         parts.push(`<circle class="bonds-ring bonds-ring--self" cx="${C}" cy="${C}" r="${G.partyBand[0]}"/>`);
-        if (m.party.length) {
-            const arc = arcPath(G.partyBand[1] - 10, -0.5, 0.5);
-            parts.push(`<path id="bonds-arc-party" d="${arc.d}" fill="none"/><text class="bonds-party-label"><textPath href="#bonds-arc-party" startOffset="50%" text-anchor="middle">${esc(this.t("Party"))}</textPath></text>`);
-        }
+        // The party needs no caption: an engraved band, and a gold thread the companions sit on.
+        parts.push(`<circle class="bonds-party-etch" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0] - 6}" fill="none" stroke="url(#bonds-etch)"/>`);
+        if (m.party.length) parts.push(`<circle class="bonds-party-thread" cx="${C}" cy="${C}" r="${G.partyRadius}"/>`);
 
         // Links between portraits.
         const links = [];
-        for (const link of this.#bonds.links) {
+        for (const link of this.#allLinks()) {
             const geo = this.#linkGeometry(link);
             if (!geo) continue;
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            links.push(`<path class="bonds-link bonds-link--${type.id}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            const cls = `${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}`;
+            // Official links: a dark casing under the line, like an inked seal.
+            if (link.official) links.push(`<path class="bonds-link-casing ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}"/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -3782,13 +3983,14 @@ class BondsView {
         const laid = this.#laid;
         const sectors = new Map(laid.sectors.map(s => [s.id, s]));
         const out = [];
-        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : ""].join(" ");
+        const changed = new Set([...(m.changes?.newIds ?? []), ...(m.changes?.statusIds ?? [])]);
+        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : "", changed.has(id) ? "is-changed" : ""].join(" ");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
             <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
-            out.push(`<button type="button" class="bonds-node bonds-node--party ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
+            out.push(`<button type="button" class="bonds-node bonds-node--party ${pos.y < G.center - 1 ? "is-upper" : ""} ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
                 <span class="bonds-node__img"><img src="${esc(p.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(p.name)}</span></button>`);
         }
         for (const placement of this.#bonds.placements) {
@@ -3813,14 +4015,46 @@ class BondsView {
     }
 
     #renderLinkMarkers() {
-        const editable = this.#model.editable;
-        return this.#bonds.links.map(link => {
+        return this.#allLinks().map(link => {
             const geo = this.#linkGeometry(link);
             if (!geo) return "";
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            const label = this.t(`Type.${type.id}`);
-            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
+            const label = [this.t(`Type.${type.id}`), link.suspect ? this.t("Suspected") : "", link.official ? this.t("Official") : "", link.note].filter(Boolean).join(" — ");
+            const badge = link.suspect ? `<span class="bonds-marker__badge">?</span>` : link.official ? `<span class="bonds-marker__badge is-seal"><i class="fa-solid fa-stamp" inert></i></span>` : "";
+            return `<button type="button" class="bonds-marker ${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}" ${this.#canEditLink(link) ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i>${badge}</button>`;
         }).join("");
+    }
+
+    /** The player's links plus the GM's official ones this viewer may see. */
+    #allLinks() {
+        return [...this.#bonds.links, ...(this.#model.official ?? []).map(l => ({ ...l, official: true, suspect: false }))];
+    }
+
+    #canEditLink(link) {
+        const m = this.#model;
+        if (m.momentId) return false;
+        return link.official ? m.isGM : m.editable;
+    }
+
+    /** "Since you last looked": new people, deaths and disappearances, new official links. */
+    #renderChanges(entries) {
+        const c = this.#model.changes;
+        if (!c) return "";
+        const people = [...new Set([...c.newIds, ...c.statusIds])].map(id => entries.get(id)).filter(Boolean);
+        const parts = [];
+        if (c.newIds.length) parts.push(this.adapter.t(c.newIds.length === 1 ? "PERSONA.Bonds.ChangeNew1" : "PERSONA.Bonds.ChangeNew").replace("{n}", c.newIds.length));
+        const deaths = c.statusIds.filter(id => entries.get(id)?.status === "dead").length;
+        const other = c.statusIds.length - deaths;
+        if (deaths) parts.push(this.adapter.t(deaths === 1 ? "PERSONA.Bonds.ChangeDead1" : "PERSONA.Bonds.ChangeDead").replace("{n}", deaths));
+        if (other) parts.push(this.adapter.t(other === 1 ? "PERSONA.Bonds.ChangeStatus1" : "PERSONA.Bonds.ChangeStatus").replace("{n}", other));
+        if (c.linkIds.length) parts.push(this.adapter.t(c.linkIds.length === 1 ? "PERSONA.Bonds.ChangeLinks1" : "PERSONA.Bonds.ChangeLinks").replace("{n}", c.linkIds.length));
+        if (!parts.length) return "";
+        return `<div class="bonds-changes">
+            <div class="bonds-changes__text"><b>${esc(this.t("SinceLast"))}</b><span>${esc(parts.join(", "))}</span></div>
+            ${people.length ? `<div class="bonds-changes__faces">${people.slice(0, 6).map(e => `
+                <button type="button" class="bonds-changes__face ${e.status && e.status !== "alive" ? `is-${e.status}` : ""}" data-action="select" data-id="${esc(e.id)}" title="${esc(e.name ?? "???")}"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt=""></button>`).join("")}${people.length > 6 ? `<span class="bonds-changes__more">+${people.length - 6}</span>` : ""}</div>` : ""}
+            <button type="button" class="persona-mini" data-action="ackChanges">${esc(this.t("GotIt"))}</button>
+        </div>`;
     }
 
     #renderBanner() {
@@ -3844,12 +4078,14 @@ class BondsView {
     /** Find someone on a big wheel, and thin it out by hiding the dead. */
     #renderFinder(entries) {
         const placed = this.#bonds.placements.filter(p => entries.has(p.id));
-        if (placed.length < 8) return "";
-        const dead = placed.filter(p => entries.get(p.id).status === "dead").length;
+        const scene = (this.#model.inScene ?? []).filter(id => entries.has(id));
+        if (placed.length < 8 && !scene.length) return "";
+        const dead = placed.length >= 8 ? placed.filter(p => entries.get(p.id).status === "dead").length : 0;
         return `<div class="bonds-finder">
-            <label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
+            ${scene.length ? `<button type="button" class="persona-mini bonds-scene ${this.#sceneOnly ? "is-on" : ""}" data-action="toggleScene" aria-pressed="${this.#sceneOnly}" title="${esc(this.t("InSceneHint"))}"><i class="fa-solid fa-map-location-dot" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.InScene").replace("{n}", scene.length))}</span></button>` : ""}
+            ${placed.length >= 8 ? `<label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
                 <input type="search" name="bondsFind" placeholder="${esc(this.t("FindOnWheel"))}" autocomplete="off"></label>
-            <div class="bonds-finder__results" data-find-results hidden></div>
+            <div class="bonds-finder__results" data-find-results hidden></div>` : ""}
             ${dead ? `<button type="button" class="persona-mini ${this.#hideDead ? "is-on" : ""}" data-action="toggleDead" aria-pressed="${this.#hideDead}"><i class="fa-solid ${this.#hideDead ? "fa-eye" : "fa-skull"}" inert></i><span>${esc(this.#hideDead ? this.adapter.t("PERSONA.Bonds.ShowDead").replace("{n}", dead) : this.adapter.t("PERSONA.Bonds.HideDead").replace("{n}", dead))}</span></button>` : ""}
         </div>`;
     }
@@ -3893,10 +4129,13 @@ class BondsView {
         } else if (!loose.length) {
             body = `<p class="bonds-drawer__hint"><i class="fa-solid fa-check" inert></i>${esc(this.t("AllPlaced"))}</p>`;
         } else {
+            const scene = new Set(m.inScene ?? []);
+            loose = [...loose].sort((a, b) => scene.has(b.id) - scene.has(a.id));
             body = `<div class="bonds-drawer__list">${loose.map(e => `
                 <div class="bonds-loose ${e.status && e.status !== "alive" ? `is-${e.status}` : ""} ${e.isNew ? "is-new" : ""}" data-loose="${esc(e.id)}" data-entry="${esc(e.id)}" role="button" tabindex="0">
                     <span class="bonds-loose__img"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt="" draggable="false"></span>
                     <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
+                    ${scene.has(e.id) ? `<span class="bonds-loose__scene" title="${esc(this.t("InSceneHint"))}"><i class="fa-solid fa-map-location-dot" inert></i></span>` : ""}
                 </div>`).join("")}</div>`;
         }
         const start = m.editable && loose.length > 1
@@ -3932,7 +4171,7 @@ class BondsView {
 
     /** Everyone linked to `id`, and the links themselves. */
     #linksOf(id) {
-        return this.#bonds.links.filter(l => l.a === id || l.b === id);
+        return this.#allLinks().filter(l => l.a === id || l.b === id);
     }
 
     #renderInspector(loose) {
@@ -3970,12 +4209,17 @@ class BondsView {
             const type = LINK_TYPES.find(t => t.id === l.type) ?? LINK_TYPES[0];
             const outgoing = l.a === info.id;
             const label = type.directed ? this.t(`TypeDir.${type.id}.${outgoing ? "out" : "in"}`) : this.t(`Type.${type.id}`);
-            return `<li class="bonds-bond" style="--c:${type.color}">
+            const flags = [
+                l.suspect ? `<span class="bonds-flag">${esc(this.t("Suspected"))}</span>` : "",
+                l.official ? `<span class="bonds-flag is-official"><i class="fa-solid fa-stamp" inert></i>${esc(this.t("Official"))}</span>` : "",
+                l.hidden ? `<span class="bonds-flag"><i class="fa-solid fa-eye-slash" inert></i>${esc(this.t("HiddenShort"))}</span>` : ""
+            ].join("");
+            return `<li class="bonds-bond ${l.suspect ? "is-suspect" : ""}" style="--c:${type.color}">
                 <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
                     <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}</small></span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${esc(l.note)}</em>` : ""}</span>
                 </button>
-                ${editable ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-ellipsis" inert></i></button>` : ""}
+                ${this.#canEditLink(l) ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-pen" inert></i></button>` : ""}
             </li>`;
         }).join("");
 
@@ -4080,8 +4324,10 @@ class BondsView {
         if (!width || !height) return;
         // The wheel grows with the campaign: fit its real outer edge, labels included.
         const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 34;
-        const s = Math.min(width, height) / (2 * R);
-        this.#cam = { s, x: width / 2 - G.center * s, y: height / 2 - G.center * s, auto: true };
+        // Keep a strip at the top for the finder and notices, so they never cover the top slice's name.
+        const top = 52;
+        const s = Math.min(width, height - top) / (2 * R);
+        this.#cam = { s, x: width / 2 - G.center * s, y: top + (height - top) / 2 - G.center * s, auto: true };
         this.#applyCam();
     }
 
@@ -4304,6 +4550,14 @@ class BondsView {
         fit: () => this.fit(),
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
+        toggleScene: () => { this.#sceneOnly = !this.#sceneOnly; this.#cam.auto = true; this.#render(); },
+        ackChanges: () => this.adapter.ackChanges?.(),
+        pickType: el => {
+            const form = el.closest("[data-link-form]");
+            form.querySelectorAll(".bonds-type").forEach(b => b.classList.toggle("is-on", b === el));
+            form.querySelector('[name="type"]').value = el.dataset.type;
+            form.querySelector('[type="submit"]').disabled = false;
+        },
         findGo: (_el, id) => { this.#select(id); this.#centerOn(id); },
         deselect: () => this.#select(null),
         openCard: (_el, id) => this.adapter.openCard(id),
@@ -4343,19 +4597,19 @@ class BondsView {
             this.#commit(removeSector(this.#bonds, id));
             this.#closePop();
         },
-        linkType: el => {
-            const { a, b } = el.closest("[data-link-form]").dataset;
-            this.#commit(setLink(this.#bonds, a, b, el.dataset.type));
-            this.#closePop();
-        },
         linkFlip: el => {
             const form = el.closest("[data-link-form]");
-            const link = this.#bonds.links.find(l => l.id === form.dataset.link);
-            if (link) this.#commit(setLink(this.#bonds, link.b, link.a, link.type));
+            const link = this.#allLinks().find(l => l.id === form.dataset.link);
+            if (!link) return;
+            if (link.official) this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], link.b, link.a, link.type));
+            else this.#commit(setLink(this.#bonds, link.b, link.a, link.type));
             this.#closePop();
         },
         linkDelete: el => {
-            this.#commit(removeLink(this.#bonds, el.closest("[data-link-form]").dataset.link));
+            const form = el.closest("[data-link-form]");
+            const link = this.#allLinks().find(l => l.id === form.dataset.link);
+            if (link?.official) this.adapter.saveOfficial(removeOfficial(this.#model.officialAll ?? [], link.id));
+            else this.#commit(removeLink(this.#bonds, form.dataset.link));
             this.#closePop();
         }
     };
@@ -4433,32 +4687,53 @@ class BondsView {
     }
 
     #linkPop(linkId, anchor, fresh = null) {
-        const link = linkId ? this.#bonds.links.find(l => l.id === linkId) : null;
+        const m = this.#model;
+        const link = linkId ? this.#allLinks().find(l => l.id === linkId) : null;
         const a = link?.a ?? fresh?.a, b = link?.b ?? fresh?.b;
         if (!a || !b) return;
-        const name = id => {
-            if (id === SELF) return this.#model.self.name;
-            const party = this.#model.party.find(p => p.id === id);
-            if (party) return party.name;
-            return this.#model.entries.find(e => e.id === id)?.name ?? "???";
-        };
+        const name = id => this.#nodeInfo(id)?.name ?? "???";
+        const people = ![a, b].some(id => id === SELF || m.party.some(p => p.id === id));
+        // The GM can make a new link between two people "official": it shows on every wheel that knows both.
+        const canOfficial = m.isGM && !link && people;
+        const type = link?.type ?? "";
         const html = `
-        <div class="bonds-form" data-link-form data-link="${esc(link?.id ?? "")}" data-a="${esc(a)}" data-b="${esc(b)}">
+        <form class="bonds-form bonds-form--link" data-link-form data-link="${esc(link?.id ?? "")}" data-a="${esc(a)}" data-b="${esc(b)}" data-official="${link?.official ? "1" : ""}">
             <span class="persona-eyebrow">${esc(name(a))} <i class="fa-solid fa-arrow-right-long" inert></i> ${esc(name(b))}</span>
+            <input type="hidden" name="type" value="${esc(type)}">
             <div class="bonds-types">${LINK_TYPES.map(t => `
-                <button type="button" class="bonds-type ${link?.type === t.id ? "is-on" : ""}" data-action="linkType" data-type="${t.id}" style="--c:${t.color}">
+                <button type="button" class="bonds-type ${type === t.id ? "is-on" : ""}" data-action="pickType" data-type="${t.id}" style="--c:${t.color}">
                     <i class="${t.icon}" inert></i><span>${esc(this.t(`Type.${t.id}`))}</span>
                 </button>`).join("")}</div>
-            ${link ? `<div class="bonds-form__row">
-                ${LINK_TYPES.find(t => t.id === link.type)?.directed ? `<button type="button" class="persona-mini" data-action="linkFlip"><i class="fa-solid fa-right-left" inert></i><span>${esc(this.t("Flip"))}</span></button>` : ""}
+            <input type="text" name="note" maxlength="140" value="${esc(link?.note ?? "")}" placeholder="${esc(this.t("NotePlaceholder"))}" autocomplete="off">
+            ${link?.official ? "" : `<label class="bonds-check"><input type="checkbox" name="suspect" ${link?.suspect ? "checked" : ""}><span><b>${esc(this.t("Suspected"))}</b>${esc(this.t("SuspectHint"))}</span></label>`}
+            ${canOfficial ? `<label class="bonds-check"><input type="checkbox" name="official"><span><b><i class="fa-solid fa-stamp" inert></i> ${esc(this.t("Official"))}</b>${esc(this.t("OfficialHint"))}</span></label>` : ""}
+            ${link?.official || canOfficial ? `<label class="bonds-check"><input type="checkbox" name="hidden" ${link?.hidden ? "checked" : ""}><span><b><i class="fa-solid fa-eye-slash" inert></i> ${esc(this.t("HiddenShort"))}</b>${esc(this.t("HiddenHint"))}</span></label>` : ""}
+            <div class="bonds-form__row">
+                ${link && LINK_TYPES.find(t => t.id === link.type)?.directed ? `<button type="button" class="persona-mini persona-mini--icon" data-action="linkFlip" title="${esc(this.t("Flip"))}" aria-label="${esc(this.t("Flip"))}"><i class="fa-solid fa-right-left" inert></i></button>` : ""}
+                ${link ? `<button type="button" class="persona-mini persona-mini--icon bonds-danger" data-action="linkDelete" title="${esc(this.t("DeleteLink"))}" aria-label="${esc(this.t("DeleteLink"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
                 <span class="bonds-form__spacer"></span>
-                <button type="button" class="persona-mini bonds-danger" data-action="linkDelete"><i class="fa-solid fa-trash" inert></i><span>${esc(this.t("DeleteLink"))}</span></button>
-            </div>` : ""}
-        </div>`;
+                <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
+                <button type="submit" class="persona-button" ${type ? "" : "disabled"}>${esc(this.t("Save"))}</button>
+            </div>
+        </form>`;
         this.#openPop(html, anchor ?? fresh.at);
     }
 
     #onSubmit = event => {
+        const linkForm = event.target.closest("[data-link-form]");
+        if (linkForm) {
+            event.preventDefault();
+            const { a, b } = linkForm.dataset;
+            const type = linkForm.querySelector('[name="type"]').value;
+            if (!type) return;
+            const note = linkForm.querySelector('[name="note"]').value.trim();
+            const suspect = !!linkForm.querySelector('[name="suspect"]')?.checked;
+            const hidden = !!linkForm.querySelector('[name="hidden"]')?.checked;
+            const official = linkForm.dataset.official === "1" || !!linkForm.querySelector('[name="official"]')?.checked;
+            this.#closePop();
+            if (official) return this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], a, b, type, { note, hidden }));
+            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect }));
+        }
         const form = event.target.closest("[data-sector-form]");
         if (!form) return;
         event.preventDefault();
@@ -4543,9 +4818,9 @@ class BondsView {
         ],
         links: [
             { id: "l1", a: "self", b: "e12", type: "family" },
-            { id: "l2", a: "e9", b: "e8", type: "serves" },
+            { id: "l2", a: "e10", b: "e8", type: "serves", suspect: true, note: "Vimos o selo do Rei na adaga dela" },
             { id: "l3", a: "e1", b: "e2", type: "ally" },
-            { id: "l4", a: "self", b: "e9", type: "rival" },
+            { id: "l4", a: "self", b: "e9", type: "rival", note: "Me humilhou no torneio de Kurdrax" },
             { id: "l5", a: "e7", b: "e5", type: "betrayed" },
             { id: "l6", a: "u:p2", b: "e3", type: "love" }
         ]
@@ -4557,6 +4832,11 @@ class BondsView {
         wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
+        official: [
+            { id: "o1", a: "e9", b: "e8", type: "serves", note: "Juramento de sangue", hidden: false },
+            { id: "o2", a: "e5", b: "e2", type: "ally", note: "Pacto secreto", hidden: true }
+        ],
+        acked: false,
         gmOwner: "p1"
     });
     let S = fresh();
@@ -4599,7 +4879,11 @@ class BondsView {
                 tags: TAGS,
                 players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
-                momentId: moment?.id ?? null
+                momentId: moment?.id ?? null,
+                official: moment ? [] : S.official.filter(l => known.some(e => e.id === l.a) && known.some(e => e.id === l.b) && (isGM || !l.hidden)),
+                officialAll: S.official,
+                changes: !isGM && !moment && ownerId === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
+                inScene: moment ? null : ["e1", "e9", "e10", "e14"].filter(id => known.some(e => e.id === id))
             };
         },
         saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
@@ -4623,6 +4907,8 @@ class BondsView {
             S.moments.push({ id: `m${Date.now()}`, label, ts: Date.now(), wheels: JSON.parse(JSON.stringify(S.wheels)), statuses: Object.fromEntries(S.entries.map(e => [e.id, e.status])) });
             view.refresh();
         },
+        saveOfficial(list) { S.official = list; view.refresh(); },
+        ackChanges() { S.acked = true; view.refresh(); },
         deleteMoment(id) { S.moments = S.moments.filter(m => m.id !== id); S.momentId = null; view.refresh(); }
     };
 

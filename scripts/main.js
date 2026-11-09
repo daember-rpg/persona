@@ -258,6 +258,7 @@ Hooks.on(`${MODULE_ID}.changed`, key => {
             bonds?.refresh();
             break;
         case "moments":
+        case "officialLinks":
             bonds?.refresh();
             break;
         case "video":
@@ -284,6 +285,8 @@ Hooks.on("updateUser", (user, changes) => {
     if (changes.flags?.[MODULE_ID] || "character" in changes || "avatar" in changes || "name" in changes || "role" in changes) bonds?.refresh();
 });
 for (const hook of ["createUser", "deleteUser"]) Hooks.on(hook, () => { view?.requestRender(); bonds?.refresh(); });
+// "In scene": who has a token on the scene being viewed.
+for (const hook of ["canvasReady", "createToken", "deleteToken"]) Hooks.on(hook, () => bonds?.refresh());
 // A party member's portrait or name.
 Hooks.on("updateActor", (actor, changes) => {
     if (!("img" in changes || "name" in changes)) return;

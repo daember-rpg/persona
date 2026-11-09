@@ -14,6 +14,8 @@
  * - placements: a known person (Persona entry id) at a distance ring (1 close … 3 distant).
  *   The order of the array is the order inside each slice and ring.
  * - links: a relation between two portraits. Node ids are entry ids, "self" or "u:<userId>" (party).
+ *   `note`: one line of why ("owes us 50 gold"); `suspect`: the player thinks so but isn't sure.
+ * Official links (GM, world data) use the same shape between two people, plus `hidden`.
  * Everything is an array so a Foundry flag update replaces it whole (objects would be merged).
  */
 
@@ -93,7 +95,32 @@ export function normalizeBonds(raw) {
         const key = [l.a, l.b].sort().join("|");
         if (pairs.has(key)) continue;
         pairs.add(key);
-        out.links.push({ id: String(l.id ?? uid()), a: String(l.a), b: String(l.b), type: types.has(l.type) ? l.type : "ally" });
+        out.links.push(normalizeLink(l, types));
+    }
+    return out;
+}
+
+function normalizeLink(l, types = new Set(LINK_TYPES.map(t => t.id))) {
+    return {
+        id: String(l.id ?? uid()),
+        a: String(l.a),
+        b: String(l.b),
+        type: types.has(l.type) ? l.type : "ally",
+        note: String(l.note ?? "").slice(0, 140),
+        suspect: !!l.suspect
+    };
+}
+
+/** The GM's official links: between two people, shown on every wheel that knows both. */
+export function normalizeOfficial(raw) {
+    const out = [];
+    const pairs = new Set();
+    for (const l of Array.isArray(raw) ? raw : Object.values(raw ?? {})) {
+        if (!l?.a || !l?.b || l.a === l.b) continue;
+        const key = [l.a, l.b].sort().join("|");
+        if (pairs.has(key)) continue;
+        pairs.add(key);
+        out.push({ ...normalizeLink(l), suspect: false, hidden: !!l.hidden, official: true });
     }
     return out;
 }
@@ -155,8 +182,11 @@ export function unplace(bonds, entryId) {
     return normalizeBonds(next);
 }
 
-/** Creates the link between two nodes, or changes its type if they are already linked. */
-export function setLink(bonds, a, b, type) {
+/**
+ * Creates the link between two nodes, or updates it if they are already linked.
+ * `extra`: { note, suspect } (kept as they were when omitted).
+ */
+export function setLink(bonds, a, b, type, extra = {}) {
     const next = copy(bonds);
     if (!a || !b || a === b) return next;
     const existing = next.links.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
@@ -165,10 +195,24 @@ export function setLink(bonds, a, b, type) {
         // A directed link keeps the direction the player just drew.
         existing.a = a;
         existing.b = b;
+        if (extra.note !== undefined) existing.note = extra.note;
+        if (extra.suspect !== undefined) existing.suspect = extra.suspect;
     } else {
-        next.links.push({ id: uid(), a, b, type });
+        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect });
     }
     return normalizeBonds(next);
+}
+
+/** Same as setLink, for the GM's official list (an array). */
+export function setOfficial(list, a, b, type, extra = {}) {
+    const next = normalizeOfficial(list).filter(l => !((l.a === a && l.b === b) || (l.a === b && l.b === a)));
+    const was = normalizeOfficial(list).find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    next.push({ id: was?.id ?? uid(), a, b, type, note: extra.note ?? was?.note ?? "", hidden: extra.hidden ?? was?.hidden ?? false });
+    return normalizeOfficial(next);
+}
+
+export function removeOfficial(list, id) {
+    return normalizeOfficial(list).filter(l => l.id !== id);
 }
 
 export function removeLink(bonds, id) {

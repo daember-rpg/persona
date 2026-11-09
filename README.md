@@ -37,6 +37,11 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Inspector**: click a portrait to select it. The side panel shows who they are, their distance (change it in one click — or put someone on the wheel without dragging), their bonds, *Link to someone*, *Open card* and *Take off the wheel*. Double-click opens the Persona card. Click the empty wheel or press Escape to deselect.
 - **Focus**: hovering or selecting someone lights up them and everyone they're bound to, and dims the rest.
 - **Links**: *Link to someone* in the inspector, then click the other portrait (people, party members or yourself) and pick ally, family, love, rival, enemy, serves or betrayed. Serves and betrayed have a direction (flip it from the link). With many links, their icons only show for the person in focus.
+- **Notes and suspicions**: every link can carry one line of why ("owes us 50 gold") and be marked as a suspicion (dashed) until the player is sure.
+- **Official links (GM)**: when the GM links two people, *Official* puts that link on every wheel that knows both of them, with a seal; players can't change it. *Hidden* keeps it to the GM until unticked.
+- **Since you last looked**: when a player opens their wheel, a card lists new people, deaths and disappearances, and newly revealed official links; those portraits glow until they press *Got it*.
+- **In scene**: filters the wheel to the people with a token on the current scene (matched by their linked Actor); they also come first in the off-wheel list.
+- **The party** sits on a gold thread inside an engraved band, with name plates always shown.
 - **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
@@ -53,7 +58,7 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - A GM online for party notes.
 
 ## Data
-World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`. Per user (flags, written by the player): `seen`, `notes`, `bonds`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
+World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`. Per user (flags, written by the player): `seen`, `notes`, `bonds`, `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
 
 ## Structure
 ```

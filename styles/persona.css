@@ -3070,3 +3070,146 @@
 .bonds.is-dense .bonds-marker:not(.is-near) { display: none; }
 .bonds.is-dense .bonds-link { stroke-opacity: 0.35; }
 .bonds.is-dense.has-focus .bonds-link:not(.is-near) { stroke-opacity: 0.05; }
+
+/* ==========================================================================
+   Bonds — party ring, changes, suspicion, official links, in scene
+   ========================================================================== */
+
+/* Party: engraved band, gold thread, name plates always on. */
+.bonds-party-band { stroke: rgba(180, 100, 62, 0.12); }
+.bonds-party-etch { opacity: 0.9; }
+.bonds-party-thread { fill: none; stroke: var(--dp-gold); stroke-width: 1.5; stroke-opacity: 0.55; stroke-dasharray: 2 6; stroke-linecap: round; }
+
+.bonds-node--party .bonds-node__name,
+.bonds-node--self .bonds-node__name {
+    display: flex;
+    top: calc(100% - 8px);
+    padding: 2px 10px;
+    border-color: rgba(201, 163, 90, 0.45);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+}
+
+.bonds-node--self .bonds-node__name { top: calc(100% - 10px); border-color: var(--dp-gold); font-size: 12px; }
+.bonds-node--party:hover .bonds-node__name small,
+.bonds-node--self .bonds-node__name small { display: none; }
+
+/* Changed since last time: a soft ember halo until acknowledged. */
+.persona .bonds-node.is-changed { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-ember), 0 0 22px rgba(200, 69, 47, 0.6); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .persona .bonds-node.is-changed { animation: bonds-halo 2.4s ease-in-out infinite; }
+    @keyframes bonds-halo { 50% { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-ember), 0 0 6px rgba(200, 69, 47, 0.2); } }
+}
+
+.bonds-changes {
+    position: absolute;
+    top: var(--dp-2);
+    left: var(--dp-2);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 280px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(200, 69, 47, 0.55);
+    background: rgba(28, 26, 23, 0.94);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.bonds-changes__text { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.4; color: var(--dp-parchment-dim); }
+.bonds-changes__text b { font-family: var(--dp-display); font-size: 14px; font-weight: 600; color: var(--dp-parchment); }
+.bonds-changes__faces { display: flex; align-items: center; gap: 6px; }
+
+.persona .bonds-changes__face {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid var(--dp-ember);
+}
+
+.bonds-changes__face img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-changes__face.is-dead img { filter: grayscale(1) brightness(0.65); }
+.bonds-changes__more { font-size: 12px; color: var(--dp-parchment-faint); }
+.persona .bonds-changes .persona-mini { align-self: flex-start; }
+
+/* Suspicion: dashed. Official: inked casing and a seal. Hidden (GM): faded. */
+.bonds-link.is-suspect { stroke-dasharray: 7 7; }
+.bonds-link-casing { fill: none; stroke: rgba(15, 14, 12, 0.85); stroke-width: 7; stroke-linecap: round; }
+.bonds-link.is-official { stroke-width: 3; }
+.bonds-link.is-hidden, .bonds-link-casing.is-hidden { stroke-opacity: 0.35; }
+.bonds.has-focus .bonds-link-casing:not(.is-near) { stroke-opacity: 0.05; }
+
+.persona .bonds-marker.is-suspect { border-style: dashed; }
+.persona .bonds-marker.is-official { border-width: 2px; box-shadow: 0 0 0 2px var(--dp-night), 0 0 0 3px var(--dp-gold); }
+.persona .bonds-marker.is-hidden { opacity: 0.5; }
+
+.bonds-marker__badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    display: grid;
+    place-items: center;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--dp-night);
+    border: 1px solid var(--c);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--dp-parchment);
+}
+
+.bonds-marker__badge.is-seal { border-color: var(--dp-gold); color: var(--dp-gold); font-size: 7px; }
+
+/* Link form */
+.bonds-form--link { width: 100%; }
+.bonds-pop:has(.bonds-form--link) { width: 340px; }
+
+.bonds-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--dp-radius);
+    background: var(--dp-charcoal-2);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--dp-parchment-faint);
+    cursor: pointer;
+}
+
+.bonds-check input { margin: 2px 0 0; accent-color: var(--dp-clay); }
+.bonds-check span { display: flex; flex-direction: column; gap: 1px; }
+.bonds-check b { font-weight: 600; font-size: 13px; color: var(--dp-parchment); }
+.persona .bonds-form button[type="submit"]:disabled { opacity: 0.4; cursor: default; }
+
+/* Inspector bond rows */
+.bonds-bond.is-suspect { border-left-style: dashed; }
+.bonds-bond__text small { flex-wrap: wrap; }
+.bonds-bond__text em { margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--dp-parchment-dim); white-space: normal; }
+
+.bonds-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--dp-charcoal-3);
+    font-size: 10px;
+    font-style: normal;
+    color: var(--dp-parchment-dim);
+}
+
+.bonds-flag.is-official { color: var(--dp-gold); }
+
+/* In scene */
+.persona .bonds-scene.is-on { background: var(--dp-clay); border-color: var(--dp-clay); color: var(--dp-night); }
+.bonds-loose__scene { margin-left: auto; font-size: 12px; color: var(--dp-clay-light); }
+
+/* Party plates sit on the outer side of each companion, away from the centre. */
+.bonds-node--party.is-upper .bonds-node__name { top: auto; bottom: calc(100% - 8px); transform-origin: 50% 100%; }

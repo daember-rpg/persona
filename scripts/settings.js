@@ -21,6 +21,7 @@ export function registerSettings() {
     hidden("sharedNotes", {});
     hidden("handout", {});
     hidden("moments", {});
+    hidden("officialLinks", {});
 
     game.settings.register(MODULE_ID, "dockInTriad", {
         name: "PERSONA.Settings.dockInTriad.Name",

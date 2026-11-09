@@ -10,13 +10,17 @@
  *   editable, isGM, owner: { id, name }, self: { name, img }, party: [{ id, name, img }],
  *   entries: [{ id, name, title, img, frame, status, isNew, tag }], bonds,
  *   tags: [{ key, label, color }] (Persona folders, in the GM's order — the default slices),
- *   players: [{ id, name }], moments: [{ id, label, ts }], momentId
+ *   players: [{ id, name }], moments: [{ id, label, ts }], momentId,
+ *   official: [{ id, a, b, type, note, hidden }] (GM links this viewer may see),
+ *   changes: { newIds, statusIds, linkIds } | null (since the player last looked),
+ *   inScene: [entryId] | null (people with a token on the current scene)
  * }
  */
 import {
     GEOMETRY, LINK_TYPES, SECTOR_COLORS, RINGS, SELF,
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
-    createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG
+    createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG,
+    setOfficial, removeOfficial
 } from "./model.js";
 
 const G = GEOMETRY;
@@ -37,6 +41,7 @@ export class BondsView {
     #selected = null;
     #query = "";
     #hideDead = false;
+    #sceneOnly = false;
     #linkFrom = null;
     #gesture = null;
     #resize = null;
@@ -100,7 +105,14 @@ export class BondsView {
         const m = this.#model;
         const entries = this.#entryMap();
         // "Hide the dead" only thins the wheel; they stay in the inspector and the timeline.
-        this.#visible = new Set([...entries.keys()].filter(id => !(this.#hideDead && entries.get(id).status === "dead" && id !== this.#selected)));
+        const scene = new Set(m.inScene ?? []);
+        if (this.#sceneOnly && !scene.size) this.#sceneOnly = false;
+        this.#visible = new Set([...entries.keys()].filter(id => {
+            if (id === this.#selected) return true;
+            if (this.#hideDead && entries.get(id).status === "dead") return false;
+            if (this.#sceneOnly && !scene.has(id)) return false;
+            return true;
+        }));
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
         this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
@@ -118,7 +130,7 @@ export class BondsView {
                         ${this.#renderSvg()}
                         <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
                     </div>
-                    ${this.#renderBanner()}
+                    ${this.#renderBanner() || this.#renderChanges(entries)}
                     ${this.#renderFinder(entries)}
                     ${this.#renderLegend()}
                     <div class="bonds-zoom">
@@ -186,6 +198,7 @@ export class BondsView {
         const defs = [`<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#3a2a22"/><stop offset="0.55" stop-color="#211d19"/><stop offset="1" stop-color="#14120f" stop-opacity="0"/></radialGradient>`];
         const colors = [...new Set(laid.sectors.map(s => s.color))];
         colors.forEach((color, i) => defs.push(`<radialGradient id="bonds-g${i}" gradientUnits="userSpaceOnUse" cx="${C}" cy="${C}" r="${outer}"><stop offset="${(inner / outer).toFixed(3)}" stop-color="${color}" stop-opacity="0.42"/><stop offset="0.7" stop-color="${color}" stop-opacity="0.16"/><stop offset="1" stop-color="${color}" stop-opacity="0.05"/></radialGradient>`));
+        defs.push(`<pattern id="bonds-etch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 7h14M7 0v14" stroke="rgba(214,138,92,0.14)" stroke-width="1"/></pattern>`);
         for (const type of LINK_TYPES.filter(t => t.directed)) {
             defs.push(`<marker id="bonds-arrow-${type.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${type.color}"/></marker>`);
         }
@@ -228,18 +241,20 @@ export class BondsView {
         parts.push(`<circle class="bonds-party-band" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0]}"/>`);
         parts.push(`<circle class="bonds-ring bonds-ring--party" cx="${C}" cy="${C}" r="${G.partyBand[1]}"/>`);
         parts.push(`<circle class="bonds-ring bonds-ring--self" cx="${C}" cy="${C}" r="${G.partyBand[0]}"/>`);
-        if (m.party.length) {
-            const arc = arcPath(G.partyBand[1] - 10, -0.5, 0.5);
-            parts.push(`<path id="bonds-arc-party" d="${arc.d}" fill="none"/><text class="bonds-party-label"><textPath href="#bonds-arc-party" startOffset="50%" text-anchor="middle">${esc(this.t("Party"))}</textPath></text>`);
-        }
+        // The party needs no caption: an engraved band, and a gold thread the companions sit on.
+        parts.push(`<circle class="bonds-party-etch" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0] - 6}" fill="none" stroke="url(#bonds-etch)"/>`);
+        if (m.party.length) parts.push(`<circle class="bonds-party-thread" cx="${C}" cy="${C}" r="${G.partyRadius}"/>`);
 
         // Links between portraits.
         const links = [];
-        for (const link of this.#bonds.links) {
+        for (const link of this.#allLinks()) {
             const geo = this.#linkGeometry(link);
             if (!geo) continue;
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            links.push(`<path class="bonds-link bonds-link--${type.id}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            const cls = `${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}`;
+            // Official links: a dark casing under the line, like an inked seal.
+            if (link.official) links.push(`<path class="bonds-link-casing ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}"/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -262,13 +277,14 @@ export class BondsView {
         const laid = this.#laid;
         const sectors = new Map(laid.sectors.map(s => [s.id, s]));
         const out = [];
-        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : ""].join(" ");
+        const changed = new Set([...(m.changes?.newIds ?? []), ...(m.changes?.statusIds ?? [])]);
+        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : "", changed.has(id) ? "is-changed" : ""].join(" ");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
             <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
-            out.push(`<button type="button" class="bonds-node bonds-node--party ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
+            out.push(`<button type="button" class="bonds-node bonds-node--party ${pos.y < G.center - 1 ? "is-upper" : ""} ${picked(p.id)}" data-node="${esc(p.id)}" style="left:${pos.x}px;top:${pos.y}px">
                 <span class="bonds-node__img"><img src="${esc(p.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(p.name)}</span></button>`);
         }
         for (const placement of this.#bonds.placements) {
@@ -293,14 +309,46 @@ export class BondsView {
     }
 
     #renderLinkMarkers() {
-        const editable = this.#model.editable;
-        return this.#bonds.links.map(link => {
+        return this.#allLinks().map(link => {
             const geo = this.#linkGeometry(link);
             if (!geo) return "";
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            const label = this.t(`Type.${type.id}`);
-            return `<button type="button" class="bonds-marker" ${editable ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i></button>`;
+            const label = [this.t(`Type.${type.id}`), link.suspect ? this.t("Suspected") : "", link.official ? this.t("Official") : "", link.note].filter(Boolean).join(" — ");
+            const badge = link.suspect ? `<span class="bonds-marker__badge">?</span>` : link.official ? `<span class="bonds-marker__badge is-seal"><i class="fa-solid fa-stamp" inert></i></span>` : "";
+            return `<button type="button" class="bonds-marker ${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}" ${this.#canEditLink(link) ? `data-action="editLink"` : ""} data-id="${esc(link.id)}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" style="left:${geo.mid.x}px;top:${geo.mid.y}px;--c:${type.color}" title="${esc(label)}" aria-label="${esc(label)}"><i class="${type.icon}" inert></i>${badge}</button>`;
         }).join("");
+    }
+
+    /** The player's links plus the GM's official ones this viewer may see. */
+    #allLinks() {
+        return [...this.#bonds.links, ...(this.#model.official ?? []).map(l => ({ ...l, official: true, suspect: false }))];
+    }
+
+    #canEditLink(link) {
+        const m = this.#model;
+        if (m.momentId) return false;
+        return link.official ? m.isGM : m.editable;
+    }
+
+    /** "Since you last looked": new people, deaths and disappearances, new official links. */
+    #renderChanges(entries) {
+        const c = this.#model.changes;
+        if (!c) return "";
+        const people = [...new Set([...c.newIds, ...c.statusIds])].map(id => entries.get(id)).filter(Boolean);
+        const parts = [];
+        if (c.newIds.length) parts.push(this.adapter.t(c.newIds.length === 1 ? "PERSONA.Bonds.ChangeNew1" : "PERSONA.Bonds.ChangeNew").replace("{n}", c.newIds.length));
+        const deaths = c.statusIds.filter(id => entries.get(id)?.status === "dead").length;
+        const other = c.statusIds.length - deaths;
+        if (deaths) parts.push(this.adapter.t(deaths === 1 ? "PERSONA.Bonds.ChangeDead1" : "PERSONA.Bonds.ChangeDead").replace("{n}", deaths));
+        if (other) parts.push(this.adapter.t(other === 1 ? "PERSONA.Bonds.ChangeStatus1" : "PERSONA.Bonds.ChangeStatus").replace("{n}", other));
+        if (c.linkIds.length) parts.push(this.adapter.t(c.linkIds.length === 1 ? "PERSONA.Bonds.ChangeLinks1" : "PERSONA.Bonds.ChangeLinks").replace("{n}", c.linkIds.length));
+        if (!parts.length) return "";
+        return `<div class="bonds-changes">
+            <div class="bonds-changes__text"><b>${esc(this.t("SinceLast"))}</b><span>${esc(parts.join(", "))}</span></div>
+            ${people.length ? `<div class="bonds-changes__faces">${people.slice(0, 6).map(e => `
+                <button type="button" class="bonds-changes__face ${e.status && e.status !== "alive" ? `is-${e.status}` : ""}" data-action="select" data-id="${esc(e.id)}" title="${esc(e.name ?? "???")}"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt=""></button>`).join("")}${people.length > 6 ? `<span class="bonds-changes__more">+${people.length - 6}</span>` : ""}</div>` : ""}
+            <button type="button" class="persona-mini" data-action="ackChanges">${esc(this.t("GotIt"))}</button>
+        </div>`;
     }
 
     #renderBanner() {
@@ -324,12 +372,14 @@ export class BondsView {
     /** Find someone on a big wheel, and thin it out by hiding the dead. */
     #renderFinder(entries) {
         const placed = this.#bonds.placements.filter(p => entries.has(p.id));
-        if (placed.length < 8) return "";
-        const dead = placed.filter(p => entries.get(p.id).status === "dead").length;
+        const scene = (this.#model.inScene ?? []).filter(id => entries.has(id));
+        if (placed.length < 8 && !scene.length) return "";
+        const dead = placed.length >= 8 ? placed.filter(p => entries.get(p.id).status === "dead").length : 0;
         return `<div class="bonds-finder">
-            <label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
+            ${scene.length ? `<button type="button" class="persona-mini bonds-scene ${this.#sceneOnly ? "is-on" : ""}" data-action="toggleScene" aria-pressed="${this.#sceneOnly}" title="${esc(this.t("InSceneHint"))}"><i class="fa-solid fa-map-location-dot" inert></i><span>${esc(this.adapter.t("PERSONA.Bonds.InScene").replace("{n}", scene.length))}</span></button>` : ""}
+            ${placed.length >= 8 ? `<label class="bonds-search bonds-search--wheel"><i class="fa-solid fa-magnifying-glass" inert></i>
                 <input type="search" name="bondsFind" placeholder="${esc(this.t("FindOnWheel"))}" autocomplete="off"></label>
-            <div class="bonds-finder__results" data-find-results hidden></div>
+            <div class="bonds-finder__results" data-find-results hidden></div>` : ""}
             ${dead ? `<button type="button" class="persona-mini ${this.#hideDead ? "is-on" : ""}" data-action="toggleDead" aria-pressed="${this.#hideDead}"><i class="fa-solid ${this.#hideDead ? "fa-eye" : "fa-skull"}" inert></i><span>${esc(this.#hideDead ? this.adapter.t("PERSONA.Bonds.ShowDead").replace("{n}", dead) : this.adapter.t("PERSONA.Bonds.HideDead").replace("{n}", dead))}</span></button>` : ""}
         </div>`;
     }
@@ -373,10 +423,13 @@ export class BondsView {
         } else if (!loose.length) {
             body = `<p class="bonds-drawer__hint"><i class="fa-solid fa-check" inert></i>${esc(this.t("AllPlaced"))}</p>`;
         } else {
+            const scene = new Set(m.inScene ?? []);
+            loose = [...loose].sort((a, b) => scene.has(b.id) - scene.has(a.id));
             body = `<div class="bonds-drawer__list">${loose.map(e => `
                 <div class="bonds-loose ${e.status && e.status !== "alive" ? `is-${e.status}` : ""} ${e.isNew ? "is-new" : ""}" data-loose="${esc(e.id)}" data-entry="${esc(e.id)}" role="button" tabindex="0">
                     <span class="bonds-loose__img"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt="" draggable="false"></span>
                     <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
+                    ${scene.has(e.id) ? `<span class="bonds-loose__scene" title="${esc(this.t("InSceneHint"))}"><i class="fa-solid fa-map-location-dot" inert></i></span>` : ""}
                 </div>`).join("")}</div>`;
         }
         const start = m.editable && loose.length > 1
@@ -412,7 +465,7 @@ export class BondsView {
 
     /** Everyone linked to `id`, and the links themselves. */
     #linksOf(id) {
-        return this.#bonds.links.filter(l => l.a === id || l.b === id);
+        return this.#allLinks().filter(l => l.a === id || l.b === id);
     }
 
     #renderInspector(loose) {
@@ -450,12 +503,17 @@ export class BondsView {
             const type = LINK_TYPES.find(t => t.id === l.type) ?? LINK_TYPES[0];
             const outgoing = l.a === info.id;
             const label = type.directed ? this.t(`TypeDir.${type.id}.${outgoing ? "out" : "in"}`) : this.t(`Type.${type.id}`);
-            return `<li class="bonds-bond" style="--c:${type.color}">
+            const flags = [
+                l.suspect ? `<span class="bonds-flag">${esc(this.t("Suspected"))}</span>` : "",
+                l.official ? `<span class="bonds-flag is-official"><i class="fa-solid fa-stamp" inert></i>${esc(this.t("Official"))}</span>` : "",
+                l.hidden ? `<span class="bonds-flag"><i class="fa-solid fa-eye-slash" inert></i>${esc(this.t("HiddenShort"))}</span>` : ""
+            ].join("");
+            return `<li class="bonds-bond ${l.suspect ? "is-suspect" : ""}" style="--c:${type.color}">
                 <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
                     <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}</small></span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${esc(l.note)}</em>` : ""}</span>
                 </button>
-                ${editable ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-ellipsis" inert></i></button>` : ""}
+                ${this.#canEditLink(l) ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-pen" inert></i></button>` : ""}
             </li>`;
         }).join("");
 
@@ -560,8 +618,10 @@ export class BondsView {
         if (!width || !height) return;
         // The wheel grows with the campaign: fit its real outer edge, labels included.
         const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 34;
-        const s = Math.min(width, height) / (2 * R);
-        this.#cam = { s, x: width / 2 - G.center * s, y: height / 2 - G.center * s, auto: true };
+        // Keep a strip at the top for the finder and notices, so they never cover the top slice's name.
+        const top = 52;
+        const s = Math.min(width, height - top) / (2 * R);
+        this.#cam = { s, x: width / 2 - G.center * s, y: top + (height - top) / 2 - G.center * s, auto: true };
         this.#applyCam();
     }
 
@@ -784,6 +844,14 @@ export class BondsView {
         fit: () => this.fit(),
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
+        toggleScene: () => { this.#sceneOnly = !this.#sceneOnly; this.#cam.auto = true; this.#render(); },
+        ackChanges: () => this.adapter.ackChanges?.(),
+        pickType: el => {
+            const form = el.closest("[data-link-form]");
+            form.querySelectorAll(".bonds-type").forEach(b => b.classList.toggle("is-on", b === el));
+            form.querySelector('[name="type"]').value = el.dataset.type;
+            form.querySelector('[type="submit"]').disabled = false;
+        },
         findGo: (_el, id) => { this.#select(id); this.#centerOn(id); },
         deselect: () => this.#select(null),
         openCard: (_el, id) => this.adapter.openCard(id),
@@ -823,19 +891,19 @@ export class BondsView {
             this.#commit(removeSector(this.#bonds, id));
             this.#closePop();
         },
-        linkType: el => {
-            const { a, b } = el.closest("[data-link-form]").dataset;
-            this.#commit(setLink(this.#bonds, a, b, el.dataset.type));
-            this.#closePop();
-        },
         linkFlip: el => {
             const form = el.closest("[data-link-form]");
-            const link = this.#bonds.links.find(l => l.id === form.dataset.link);
-            if (link) this.#commit(setLink(this.#bonds, link.b, link.a, link.type));
+            const link = this.#allLinks().find(l => l.id === form.dataset.link);
+            if (!link) return;
+            if (link.official) this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], link.b, link.a, link.type));
+            else this.#commit(setLink(this.#bonds, link.b, link.a, link.type));
             this.#closePop();
         },
         linkDelete: el => {
-            this.#commit(removeLink(this.#bonds, el.closest("[data-link-form]").dataset.link));
+            const form = el.closest("[data-link-form]");
+            const link = this.#allLinks().find(l => l.id === form.dataset.link);
+            if (link?.official) this.adapter.saveOfficial(removeOfficial(this.#model.officialAll ?? [], link.id));
+            else this.#commit(removeLink(this.#bonds, form.dataset.link));
             this.#closePop();
         }
     };
@@ -913,32 +981,53 @@ export class BondsView {
     }
 
     #linkPop(linkId, anchor, fresh = null) {
-        const link = linkId ? this.#bonds.links.find(l => l.id === linkId) : null;
+        const m = this.#model;
+        const link = linkId ? this.#allLinks().find(l => l.id === linkId) : null;
         const a = link?.a ?? fresh?.a, b = link?.b ?? fresh?.b;
         if (!a || !b) return;
-        const name = id => {
-            if (id === SELF) return this.#model.self.name;
-            const party = this.#model.party.find(p => p.id === id);
-            if (party) return party.name;
-            return this.#model.entries.find(e => e.id === id)?.name ?? "???";
-        };
+        const name = id => this.#nodeInfo(id)?.name ?? "???";
+        const people = ![a, b].some(id => id === SELF || m.party.some(p => p.id === id));
+        // The GM can make a new link between two people "official": it shows on every wheel that knows both.
+        const canOfficial = m.isGM && !link && people;
+        const type = link?.type ?? "";
         const html = `
-        <div class="bonds-form" data-link-form data-link="${esc(link?.id ?? "")}" data-a="${esc(a)}" data-b="${esc(b)}">
+        <form class="bonds-form bonds-form--link" data-link-form data-link="${esc(link?.id ?? "")}" data-a="${esc(a)}" data-b="${esc(b)}" data-official="${link?.official ? "1" : ""}">
             <span class="persona-eyebrow">${esc(name(a))} <i class="fa-solid fa-arrow-right-long" inert></i> ${esc(name(b))}</span>
+            <input type="hidden" name="type" value="${esc(type)}">
             <div class="bonds-types">${LINK_TYPES.map(t => `
-                <button type="button" class="bonds-type ${link?.type === t.id ? "is-on" : ""}" data-action="linkType" data-type="${t.id}" style="--c:${t.color}">
+                <button type="button" class="bonds-type ${type === t.id ? "is-on" : ""}" data-action="pickType" data-type="${t.id}" style="--c:${t.color}">
                     <i class="${t.icon}" inert></i><span>${esc(this.t(`Type.${t.id}`))}</span>
                 </button>`).join("")}</div>
-            ${link ? `<div class="bonds-form__row">
-                ${LINK_TYPES.find(t => t.id === link.type)?.directed ? `<button type="button" class="persona-mini" data-action="linkFlip"><i class="fa-solid fa-right-left" inert></i><span>${esc(this.t("Flip"))}</span></button>` : ""}
+            <input type="text" name="note" maxlength="140" value="${esc(link?.note ?? "")}" placeholder="${esc(this.t("NotePlaceholder"))}" autocomplete="off">
+            ${link?.official ? "" : `<label class="bonds-check"><input type="checkbox" name="suspect" ${link?.suspect ? "checked" : ""}><span><b>${esc(this.t("Suspected"))}</b>${esc(this.t("SuspectHint"))}</span></label>`}
+            ${canOfficial ? `<label class="bonds-check"><input type="checkbox" name="official"><span><b><i class="fa-solid fa-stamp" inert></i> ${esc(this.t("Official"))}</b>${esc(this.t("OfficialHint"))}</span></label>` : ""}
+            ${link?.official || canOfficial ? `<label class="bonds-check"><input type="checkbox" name="hidden" ${link?.hidden ? "checked" : ""}><span><b><i class="fa-solid fa-eye-slash" inert></i> ${esc(this.t("HiddenShort"))}</b>${esc(this.t("HiddenHint"))}</span></label>` : ""}
+            <div class="bonds-form__row">
+                ${link && LINK_TYPES.find(t => t.id === link.type)?.directed ? `<button type="button" class="persona-mini persona-mini--icon" data-action="linkFlip" title="${esc(this.t("Flip"))}" aria-label="${esc(this.t("Flip"))}"><i class="fa-solid fa-right-left" inert></i></button>` : ""}
+                ${link ? `<button type="button" class="persona-mini persona-mini--icon bonds-danger" data-action="linkDelete" title="${esc(this.t("DeleteLink"))}" aria-label="${esc(this.t("DeleteLink"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
                 <span class="bonds-form__spacer"></span>
-                <button type="button" class="persona-mini bonds-danger" data-action="linkDelete"><i class="fa-solid fa-trash" inert></i><span>${esc(this.t("DeleteLink"))}</span></button>
-            </div>` : ""}
-        </div>`;
+                <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
+                <button type="submit" class="persona-button" ${type ? "" : "disabled"}>${esc(this.t("Save"))}</button>
+            </div>
+        </form>`;
         this.#openPop(html, anchor ?? fresh.at);
     }
 
     #onSubmit = event => {
+        const linkForm = event.target.closest("[data-link-form]");
+        if (linkForm) {
+            event.preventDefault();
+            const { a, b } = linkForm.dataset;
+            const type = linkForm.querySelector('[name="type"]').value;
+            if (!type) return;
+            const note = linkForm.querySelector('[name="note"]').value.trim();
+            const suspect = !!linkForm.querySelector('[name="suspect"]')?.checked;
+            const hidden = !!linkForm.querySelector('[name="hidden"]')?.checked;
+            const official = linkForm.dataset.official === "1" || !!linkForm.querySelector('[name="official"]')?.checked;
+            this.#closePop();
+            if (official) return this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], a, b, type, { note, hidden }));
+            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect }));
+        }
         const form = event.target.closest("[data-sector-form]");
         if (!form) return;
         event.preventDefault();

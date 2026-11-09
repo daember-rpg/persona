@@ -13,7 +13,7 @@ import { getSetting } from "../settings.js";
 import { getEntries, getGroups, canSee, seenIds, players, updateSetting } from "../store.js";
 import { imageOf, frameStyle } from "../view-data.js";
 import { BondsView } from "./view.js";
-import { normalizeBonds, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
+import { normalizeBonds, normalizeOfficial, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
 
 const t = key => game.i18n.localize(key);
 
@@ -61,6 +61,55 @@ function migrate(bonds) {
     const copies = new Set(bonds.sectors.filter(s => labels.has(s.label.trim().toLowerCase())).map(s => s.id));
     if (!copies.size) return bonds;
     return normalizeBonds({ ...bonds, placements: bonds.placements.map(p => copies.has(p.sector) ? { ...p, sector: null } : p) });
+}
+
+/** The GM's official links (all of them; filtered per viewer in the model). */
+export function getOfficial() {
+    return normalizeOfficial(getSetting("officialLinks"));
+}
+
+export function saveOfficial(list) {
+    if (!game.user.isGM) return Promise.reject(new Error("Only the GM sets official links"));
+    return updateSetting("officialLinks", () => Object.fromEntries(normalizeOfficial(list).map(l => [l.id, l])));
+}
+
+/** Entry ids with a token on the scene currently viewed (by their linked Actor). */
+function inScene(entries) {
+    const scene = canvas?.scene;
+    if (!scene) return null;
+    const actors = new Set();
+    for (const token of scene.tokens) {
+        if (token.actorId) actors.add(`Actor.${token.actorId}`);
+        const uuid = token.actor?.uuid;
+        if (uuid) actors.add(uuid);
+    }
+    return entries.filter(e => e.actorUuid && actors.has(e.actorUuid)).map(e => e.id);
+}
+
+/**
+ * What changed for this player since they last acknowledged it: people newly revealed to them,
+ * status changes (deaths, disappearances), official links that became visible.
+ * The first time, the snapshot is taken silently so nobody gets a flood of "new" people.
+ */
+function changesFor(owner, known, official) {
+    const seen = owner.getFlag(MODULE_ID, "bondsSeen");
+    if (!seen) return { changes: null, snapshot: true };
+    const knownBefore = new Set(seen.known ?? []);
+    const statusBefore = seen.statuses ?? {};
+    const linksBefore = new Set(seen.links ?? []);
+    const newIds = known.filter(e => !knownBefore.has(e.id)).map(e => e.id);
+    const statusIds = known.filter(e => knownBefore.has(e.id) && (statusBefore[e.id] ?? "alive") !== e.status).map(e => e.id);
+    const linkIds = official.filter(l => !linksBefore.has(l.id)).map(l => l.id);
+    const any = newIds.length || statusIds.length || linkIds.length;
+    return { changes: any ? { newIds, statusIds, linkIds } : null, snapshot: false };
+}
+
+function snapshotFor(known, official) {
+    return {
+        known: known.map(e => e.id),
+        statuses: Object.fromEntries(known.map(e => [e.id, e.status])),
+        links: official.map(l => l.id)
+    };
 }
 
 export function getMoments() {
@@ -153,6 +202,8 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             selectPlayer: id => { this.ownerId = id; this.momentId = null; this.view?.refresh(); },
             selectMoment: id => { this.momentId = id; this.view?.refresh(); },
             recordMoment: () => this.#promptMoment(),
+            saveOfficial: list => saveOfficial(list),
+            ackChanges: () => this.#ack(),
             deleteMoment: id => this.#confirmDelete(id)
         };
     }
@@ -175,7 +226,8 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         if (!owner) {
             return {
                 ...base, editable: false, owner: { id: null, name: "" },
-                self: { name: "—", img: "icons/svg/mystery-man.svg" }, party: [], entries: [], bonds: null, tags: []
+                self: { name: "—", img: "icons/svg/mystery-man.svg" }, party: [], entries: [], bonds: null, tags: [],
+                official: [], officialAll: [], changes: null, inScene: null
             };
         }
 
@@ -203,6 +255,17 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         const knownIds = new Set(known.map(e => e.id));
         const self = persona(owner);
 
+        // Official links this wheel's owner may see: both people known, and not hidden (the GM sees all).
+        const officialAll = getOfficial();
+        const official = officialAll.filter(l => knownIds.has(l.a) && knownIds.has(l.b) && (isGM || !l.hidden));
+        // "Since you last looked": only on the player's own wheel, in the present.
+        let changes = null;
+        if (!isGM && !moment && owner.id === game.user.id) {
+            const result = changesFor(owner, known, official.filter(l => !l.hidden));
+            changes = result.changes;
+            if (result.snapshot) owner.setFlag(MODULE_ID, "bondsSeen", snapshotFor(known, official));
+        }
+
         return {
             ...base,
             // Moments are read-only; otherwise a player edits their own wheel and the GM edits anyone's.
@@ -212,8 +275,20 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             party: roster.filter(u => u.id !== owner.id).map(persona),
             entries: entries.filter(e => knownIds.has(e.id)),
             bonds: migrate(normalizeBonds(moment ? moment.wheels?.[owner.id] : owner.getFlag(MODULE_ID, "bonds"))),
-            tags
+            tags,
+            official: moment ? [] : official,
+            officialAll: isGM ? officialAll : [],
+            changes,
+            inScene: moment ? null : inScene(known)
         };
+    }
+
+    /** The player has seen what changed: remember the current state. */
+    #ack() {
+        const known = getEntries().filter(e => e.kind === "npc" && canSee(e, "face", game.user));
+        const knownIds = new Set(known.map(e => e.id));
+        const official = getOfficial().filter(l => knownIds.has(l.a) && knownIds.has(l.b) && !l.hidden);
+        return game.user.setFlag(MODULE_ID, "bondsSeen", snapshotFor(known, official));
     }
 
     async #promptMoment() {

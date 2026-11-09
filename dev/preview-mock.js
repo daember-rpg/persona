@@ -54,9 +54,9 @@
         ],
         links: [
             { id: "l1", a: "self", b: "e12", type: "family" },
-            { id: "l2", a: "e9", b: "e8", type: "serves" },
+            { id: "l2", a: "e10", b: "e8", type: "serves", suspect: true, note: "Vimos o selo do Rei na adaga dela" },
             { id: "l3", a: "e1", b: "e2", type: "ally" },
-            { id: "l4", a: "self", b: "e9", type: "rival" },
+            { id: "l4", a: "self", b: "e9", type: "rival", note: "Me humilhou no torneio de Kurdrax" },
             { id: "l5", a: "e7", b: "e5", type: "betrayed" },
             { id: "l6", a: "u:p2", b: "e3", type: "love" }
         ]
@@ -68,6 +68,11 @@
         wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
+        official: [
+            { id: "o1", a: "e9", b: "e8", type: "serves", note: "Juramento de sangue", hidden: false },
+            { id: "o2", a: "e5", b: "e2", type: "ally", note: "Pacto secreto", hidden: true }
+        ],
+        acked: false,
         gmOwner: "p1"
     });
     let S = fresh();
@@ -110,7 +115,11 @@
                 tags: TAGS,
                 players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
                 moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
-                momentId: moment?.id ?? null
+                momentId: moment?.id ?? null,
+                official: moment ? [] : S.official.filter(l => known.some(e => e.id === l.a) && known.some(e => e.id === l.b) && (isGM || !l.hidden)),
+                officialAll: S.official,
+                changes: !isGM && !moment && ownerId === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
+                inScene: moment ? null : ["e1", "e9", "e10", "e14"].filter(id => known.some(e => e.id === id))
             };
         },
         saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
@@ -134,6 +143,8 @@
             S.moments.push({ id: `m${Date.now()}`, label, ts: Date.now(), wheels: JSON.parse(JSON.stringify(S.wheels)), statuses: Object.fromEntries(S.entries.map(e => [e.id, e.status])) });
             view.refresh();
         },
+        saveOfficial(list) { S.official = list; view.refresh(); },
+        ackChanges() { S.acked = true; view.refresh(); },
         deleteMoment(id) { S.moments = S.moments.filter(m => m.id !== id); S.momentId = null; view.refresh(); }
     };
 
