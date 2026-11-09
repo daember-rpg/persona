@@ -54,9 +54,9 @@
         ],
         links: [
             { id: "l1", a: "self", b: "e12", type: "family" },
-            { id: "l2", a: "e10", b: "e8", type: "serves", suspect: true, note: "Vimos o selo do Rei na adaga dela" },
+            { id: "l2", a: "e10", b: "e8", type: "serves", suspect: true, note: "We saw the King's seal on her dagger" },
             { id: "l3", a: "e1", b: "e2", type: "ally" },
-            { id: "l4", a: "self", b: "e9", type: "rival", note: "Me humilhou no torneio de Kurdrax" },
+            { id: "l4", a: "self", b: "e9", type: "rival", note: "Humiliated me at the Kurdrax tourney" },
             { id: "l5", a: "e7", b: "e5", type: "betrayed" },
             { id: "l6", a: "u:p2", b: "e3", type: "love" }
         ]
@@ -69,8 +69,8 @@
         moments: [],
         momentId: null,
         official: [
-            { id: "o1", a: "e9", b: "e8", type: "serves", note: "Juramento de sangue", hidden: false },
-            { id: "o2", a: "e5", b: "e2", type: "ally", note: "Pacto secreto", hidden: true }
+            { id: "o1", a: "e9", b: "e8", type: "serves", note: "Blood oath", hidden: false },
+            { id: "o2", a: "e5", b: "e2", type: "ally", note: "Secret pact", hidden: true }
         ],
         acked: false,
         gmOwner: "p1"
@@ -80,10 +80,10 @@
     const older = sample();
     older.placements = older.placements.filter(p => !["e5", "e6", "e7", "e10"].includes(p.id));
         older.links = older.links.filter(l => !["l5"].includes(l.id));
-    const seedMoments = () => [{ id: "m1", label: "Sessão 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Sessão 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
+    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
     S.moments = seedMoments();
 
-    let lang = "pt-BR";
+    let lang = "en";
     const t = key => key.split(".").reduce((o, k) => o?.[k], LANG[lang]) ?? key;
 
     const playerById = id => PLAYERS.find(p => p.id === id);
@@ -132,7 +132,7 @@
             document.getElementById("pv-card-kind").textContent = t("PERSONA.Kind.npc") + (e.status !== "alive" ? ` · ${t(`PERSONA.Status.${e.status}`)}` : "");
             document.getElementById("pv-card-name").textContent = named ? e.name : "???";
             document.getElementById("pv-card-title").textContent = named ? e.title : "";
-            document.getElementById("pv-card-text").textContent = lang === "en" ? "This is Persona's card (no Actor sheet). Click outside to close." : "Este é o cartão do Persona (nunca a ficha do ator). Clique fora para fechar.";
+            document.getElementById("pv-card-text").textContent = lang === "en" ? "This is Persona's card (no Actor sheet). Click outside to close." : "This is Persona's card (never the Actor sheet). Click outside to close.";
             document.getElementById("pv-card").hidden = false;
         },
         selectPlayer(id) { S.gmOwner = id; S.momentId = null; view.refresh(); },
@@ -149,7 +149,7 @@
     };
 
     const role = document.getElementById("pv-role");
-    role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Mestre (GM)</option>`;
+    role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Game Master</option>`;
     role.addEventListener("change", () => { S.role = role.value; S.momentId = null; view.refresh(); });
     document.getElementById("pv-lang").addEventListener("change", e => {
         lang = e.target.value;
@@ -157,6 +157,18 @@
         view.refresh();
     });
     document.getElementById("pv-reset").addEventListener("click", () => { const r = S.role; S = fresh(); S.moments = seedMoments(); S.role = r; view.refresh(); });
+    // Live moments: what the table sees when the GM reveals someone or someone dies.
+    document.getElementById("pv-reveal").addEventListener("click", () => {
+        const n = S.entries.filter(e => e.id.startsWith("r")).length + 1;
+        const e = E(`r${n}`, ["Maelis Thorncrown", "Brother Ottar", "The Grey Envoy", "Lady Sefa Imrith"][(n - 1) % 4], "Just revealed");
+        S.entries.push(e);
+        view.refresh();
+    });
+    document.getElementById("pv-kill").addEventListener("click", () => {
+        const e = S.entries.find(x => x.id === "e1");
+        e.status = e.status === "dead" ? "alive" : "dead";
+        view.refresh();
+    });
     document.getElementById("pv-card").addEventListener("click", () => { document.getElementById("pv-card").hidden = true; });
 
     const view = new BondsView(document.getElementById("bonds-root"), adapter);

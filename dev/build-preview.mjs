@@ -17,7 +17,7 @@ const lang = { en: JSON.parse(read("lang/en.json")), "pt-BR": JSON.parse(read("l
 const mock = read("dev/preview-mock.js");
 
 const html = `<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Persona Bonds Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -47,7 +47,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 .pv-card p { color: var(--dp-parchment-dim); font-size: 14px; }
 @media (max-width: 760px) {
   .pv-bar { gap: 6px 10px; padding: 8px 10px; font-size: 12px; }
-  .pv-bar b, .pv-note, .pv-bar label:nth-of-type(2) { display: none; }
+  .pv-bar b, .pv-note, .pv-bar label:nth-of-type(2), #pv-reset { display: none; }
   .pv-stage { padding: 0; }
   .pv-window { border: 0; border-radius: 0; grid-template-rows: minmax(0, 1fr); }
   .pv-titlebar { display: none; }
@@ -59,12 +59,14 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 <div class="pv">
   <div class="pv-bar">
     <b>Persona · Bonds</b>
-    <label>Ver como <select id="pv-role"></select></label>
-    <label>Idioma <select id="pv-lang"><option value="pt-BR">Português</option><option value="en">English</option></select></label>
-    <button type="button" id="pv-reset">Resetar dados</button>
-    <span class="pv-note">Prévia: os mesmos arquivos do módulo, com dados de exemplo.</span>
+    <label>View as <select id="pv-role"></select></label>
+    <label>Language <select id="pv-lang"><option value="en">English</option><option value="pt-BR">Português</option></select></label>
+    <button type="button" id="pv-reveal">Reveal someone</button>
+    <button type="button" id="pv-kill">Kill Captain Ilsa</button>
+    <button type="button" id="pv-reset">Reset</button>
+    <span class="pv-note">Preview: the module's own wheel code, with sample data.</span>
   </div>
-  <div class="pv-stage"><div class="pv-window"><div class="pv-titlebar"><i class="fa-solid fa-circle-nodes"></i><span id="pv-title">Laços</span></div><div id="bonds-root" class="persona-bonds-host"></div></div></div>
+  <div class="pv-stage"><div class="pv-window"><div class="pv-titlebar"><i class="fa-solid fa-circle-nodes"></i><span id="pv-title">Bonds</span></div><div id="bonds-root" class="persona-bonds-host"></div></div></div>
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>

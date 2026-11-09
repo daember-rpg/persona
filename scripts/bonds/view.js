@@ -42,6 +42,9 @@ export class BondsView {
     #query = "";
     #hideDead = false;
     #sceneOnly = false;
+    /** What this view saw last time, to animate what changes live (a reveal, a death). */
+    #lastSeen = null;
+    #moments = { arriving: new Set(), dying: new Set(), vanishing: new Set() };
     #linkFrom = null;
     #gesture = null;
     #resize = null;
@@ -94,7 +97,38 @@ export class BondsView {
         if (previous !== undefined && previous !== this.#model.owner?.id) this.#linkFrom = null;
         if (previous !== undefined && previous !== this.#model.owner?.id) this.#selected = null;
         if (!this.#model.editable) this.#linkMode = false;
+        this.#diffLive();
         this.#render();
+    }
+
+    /**
+     * Live moments while the window is open: someone just revealed to this player arrives with a
+     * glow; someone who just died fades to grey on every open wheel. Only between two refreshes of
+     * the same wheel in the present — never on first open, a player switch or a past moment.
+     */
+    #diffLive() {
+        const m = this.#model;
+        const now = { owner: m.owner?.id, past: !!m.momentId, status: new Map(m.entries.map(e => [e.id, e.status])) };
+        const before = this.#lastSeen;
+        this.#lastSeen = now;
+        this.#moments = { arriving: new Set(), dying: new Set(), vanishing: new Set() };
+        if (!before || before.owner !== now.owner || before.past || now.past) return;
+        for (const [id, status] of now.status) {
+            if (!before.status.has(id)) this.#moments.arriving.add(id);
+            else if (before.status.get(id) !== status && status === "dead") this.#moments.dying.add(id);
+            else if (before.status.get(id) !== status && status === "missing") this.#moments.vanishing.add(id);
+        }
+        const any = this.#moments.arriving.size || this.#moments.dying.size || this.#moments.vanishing.size;
+        if (any) clearTimeout(this.#momentTimer), this.#momentTimer = setTimeout(() => {
+            this.#moments = { arriving: new Set(), dying: new Set(), vanishing: new Set() };
+            this.host.querySelectorAll(".is-arriving, .is-dying, .is-vanishing").forEach(el => el.classList.remove("is-arriving", "is-dying", "is-vanishing"));
+        }, 4000);
+    }
+
+    #momentTimer = null;
+
+    #liveClass(id) {
+        return this.#moments.arriving.has(id) ? "is-arriving" : this.#moments.dying.has(id) ? "is-dying" : this.#moments.vanishing.has(id) ? "is-vanishing" : "";
     }
 
     #entryMap() {
@@ -292,7 +326,7 @@ export class BondsView {
             const pos = laid.nodes.get(placement.id);
             if (!entry || !pos) continue;
             const color = sectors.get(placement.sector)?.color ?? SECTOR_COLORS[0];
-            out.push(this.#entryNode(entry, `left:${pos.x}px;top:${pos.y}px;--c:${color}`, picked(entry.id)));
+            out.push(this.#entryNode(entry, `left:${pos.x}px;top:${pos.y}px;--c:${color}`, `${picked(entry.id)} ${this.#liveClass(entry.id)}`));
         }
         return out.join("");
     }
@@ -426,7 +460,7 @@ export class BondsView {
             const scene = new Set(m.inScene ?? []);
             loose = [...loose].sort((a, b) => scene.has(b.id) - scene.has(a.id));
             body = `<div class="bonds-drawer__list">${loose.map(e => `
-                <div class="bonds-loose ${e.status && e.status !== "alive" ? `is-${e.status}` : ""} ${e.isNew ? "is-new" : ""}" data-loose="${esc(e.id)}" data-entry="${esc(e.id)}" role="button" tabindex="0">
+                <div class="bonds-loose ${e.status && e.status !== "alive" ? `is-${e.status}` : ""} ${e.isNew ? "is-new" : ""} ${this.#liveClass(e.id)}" data-loose="${esc(e.id)}" data-entry="${esc(e.id)}" role="button" tabindex="0">
                     <span class="bonds-loose__img"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt="" draggable="false"></span>
                     <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
                     ${scene.has(e.id) ? `<span class="bonds-loose__scene" title="${esc(this.t("InSceneHint"))}"><i class="fa-solid fa-map-location-dot" inert></i></span>` : ""}

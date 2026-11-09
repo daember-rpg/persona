@@ -41,6 +41,7 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Official links (GM)**: when the GM links two people, *Official* puts that link on every wheel that knows both of them, with a seal; players can't change it. *Hidden* keeps it to the GM until unticked.
 - **Since you last looked**: when a player opens their wheel, a card lists new people, deaths and disappearances, and newly revealed official links; those portraits glow until they press *Got it*.
 - **In scene**: filters the wheel to the people with a token on the current scene (matched by their linked Actor); they also come first in the off-wheel list.
+- **Live moments**: with the wheel open, someone the GM just revealed flies into the list with an ember glow; someone who just died drains to grey with a pale flash before the skull sets in; someone who went missing blurs out. (Respects reduced motion.)
 - **The party** sits on a gold thread inside an engraved band, with name plates always shown.
 - **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
