@@ -45,7 +45,15 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 .pv-card .body { padding: 20px; }
 .pv-card h3 { margin: 4px 0; font-family: var(--dp-display); font-size: 22px; border: 0; }
 .pv-card p { color: var(--dp-parchment-dim); font-size: 14px; }
-@media (max-width: 760px) { .pv-stage { padding: 0; } .pv-window { border-radius: 0; } .pv-note { display: none; } }
+@media (max-width: 760px) {
+  .pv-bar { gap: 6px 10px; padding: 8px 10px; font-size: 12px; }
+  .pv-bar b, .pv-note, .pv-bar label:nth-of-type(2) { display: none; }
+  .pv-stage { padding: 0; }
+  .pv-window { border: 0; border-radius: 0; grid-template-rows: minmax(0, 1fr); }
+  .pv-titlebar { display: none; }
+  .pv-card article { grid-template-columns: 1fr; width: calc(100vw - 32px); }
+  .pv-card img { width: 100%; height: 240px; }
+}
 </style></head>
 <body>
 <div class="pv">
