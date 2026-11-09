@@ -307,7 +307,17 @@
       "DiffMissing": "{name} went missing",
       "DiffAdded": "{name} joined the wheel",
       "AutoSession": "Session {n} · {date}",
-      "AutoCombat": "After the fight · {scene}"
+      "AutoCombat": "After the fight · {scene}",
+      "LinkStyle": "Link style",
+      "ShapeCurve": "Curved",
+      "ShapeAngular": "Angular",
+      "Bend": "How much curves bend",
+      "BendStraight": "Straight",
+      "BendLoose": "Loose",
+      "ShowLines": "Show lines",
+      "ShowAlways": "Always",
+      "ShowFocus": "Only in focus",
+      "LinkStyleHint": "Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them."
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

@@ -169,6 +169,8 @@
         saveOfficial(list) { S.official = list; view.refresh(); },
         ackChanges() { S.acked = true; view.refresh(); },
         notify(message) { alert(message); },
+        getLinkStyle() { return S.linkStyle; },
+        setLinkStyle(style) { S.linkStyle = style; },
         deleteMoment(id) { S.moments = S.moments.filter(m => m.id !== id); S.momentId = null; view.refresh(); }
     };
 

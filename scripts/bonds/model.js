@@ -458,13 +458,14 @@ export function arcPath(r, a1, a2, g = GEOMETRY) {
  * A gentle curve between two portraits, bowed away from the centre so links don't cross the
  * self portrait, trimmed by each portrait's radius so arrowheads land on the rim.
  */
-export function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
+export function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY, bend = 0.5) {
     const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
     const dx = q.x - p.x, dy = q.y - p.y;
     const len = Math.hypot(dx, dy) || 1;
     let nx = -dy / len, ny = dx / len;
     if ((mx - g.center) * nx + (my - g.center) * ny < 0) { nx = -nx; ny = -ny; }
-    const bow = Math.min(60, len * 0.18);
+    // bend 0 = a straight line, 0.5 = the default gentle curve, 1 = a strong arc.
+    const bow = Math.min(120, len * 0.36) * Math.max(0, Math.min(1, bend));
     const cx = mx + nx * bow, cy = my + ny * bow;
     const toward = (from, r) => {
         const vx = cx - from.x, vy = cy - from.y;
@@ -475,6 +476,56 @@ export function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
     // Midpoint of the quadratic curve, for the relation icon.
     const ix = 0.25 * s.x + 0.5 * cx + 0.25 * e.x, iy = 0.25 * s.y + 0.5 * cy + 0.25 * e.y;
     return { d: `M${f(s.x)} ${f(s.y)}Q${f(cx)} ${f(cy)} ${f(e.x)} ${f(e.y)}`, mid: { x: ix, y: iy } };
+}
+
+/** How a viewer likes links drawn (their own preference, kept per user). */
+export const LINK_STYLE_DEFAULT = { shape: "curve", bend: 0.5, show: "always" };
+
+export function normalizeLinkStyle(raw) {
+    const r = raw && typeof raw === "object" ? raw : {};
+    return {
+        shape: ["curve", "angular"].includes(r.shape) ? r.shape : LINK_STYLE_DEFAULT.shape,
+        bend: Number.isFinite(Number(r.bend)) ? Math.max(0, Math.min(1, Number(r.bend))) : LINK_STYLE_DEFAULT.bend,
+        show: ["always", "focus"].includes(r.show) ? r.show : LINK_STYLE_DEFAULT.show
+    };
+}
+
+/**
+ * Angular links, like a circuit or FFXVI's chart: out along the radius, around the wheel on a
+ * ring just inside the nearer person, then out again. Links from the centre are a straight spoke.
+ * Links therefore follow the wheel's own geometry instead of crossing it.
+ */
+export function angularPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
+    const P = toPolar(p.x, p.y, g), Q = toPolar(q.x, q.y, g);
+    // From the centre (or to it): one straight spoke.
+    if (P.r < 1 || Q.r < 1) {
+        const [c, o, ro, rc] = P.r < 1 ? [P, Q, rq, rp] : [Q, P, rp, rq];
+        const s = polar(rc, o.angle, g), e = polar(o.r - ro, o.angle, g);
+        const [a, b] = P.r < 1 ? [s, e] : [e, s];
+        return { d: `M${f(a.x)} ${f(a.y)}L${f(b.x)} ${f(b.y)}`, mid: { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 } };
+    }
+    // The ring to travel around: just inside whoever is nearer the centre, never inside the party band.
+    const inner = Math.min(P.r, Q.r);
+    const rm = inner > g.partyBand[1] + 20 ? Math.max(g.partyBand[1] + 6, inner - 36) : inner;
+    let delta = Q.angle - P.angle;
+    while (delta > Math.PI) delta -= Math.PI * 2;
+    while (delta < -Math.PI) delta += Math.PI * 2;
+    const leave = (pt, r) => (pt.r > rm ? pt.r - r : pt.r + (pt.r === rm ? 0 : r));
+    const s = polar(P.r === rm ? P.r : leave(P, rp), P.angle, g);
+    const e = polar(Q.r === rm ? Q.r : leave(Q, rq), Q.angle, g);
+    const a1 = polar(rm, P.angle, g), a2 = polar(rm, Q.angle, g);
+    // On the travel ring itself (e.g. two party members), trim along the arc instead.
+    const startArc = P.r === rm ? polar(rm, P.angle + Math.sign(delta) * (rp / rm), g) : a1;
+    const endArc = Q.r === rm ? polar(rm, Q.angle - Math.sign(delta) * (rq / rm), g) : a2;
+    const sweep = delta > 0 ? 1 : 0;
+    const large = Math.abs(delta) > Math.PI ? 1 : 0;
+    const d = [
+        P.r === rm ? `M${f(startArc.x)} ${f(startArc.y)}` : `M${f(s.x)} ${f(s.y)}L${f(a1.x)} ${f(a1.y)}`,
+        Math.abs(delta) > 0.001 ? `A${f(rm)} ${f(rm)} 0 ${large} ${sweep} ${f(endArc.x)} ${f(endArc.y)}` : "",
+        Q.r === rm ? "" : `L${f(e.x)} ${f(e.y)}`
+    ].join("");
+    const mid = Math.abs(delta) > 0.05 ? polar(rm, P.angle + delta / 2, g) : { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 };
+    return { d, mid };
 }
 
 /* -------------------------------------------- */

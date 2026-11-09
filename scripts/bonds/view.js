@@ -20,7 +20,8 @@ import {
     GEOMETRY, LINK_TYPES, SECTOR_COLORS, RINGS, SELF,
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
     createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG,
-    setOfficial, removeOfficial, togglePin, archive, restore
+    setOfficial, removeOfficial, togglePin, archive, restore,
+    angularPath, normalizeLinkStyle
 } from "./model.js";
 
 const G = GEOMETRY;
@@ -160,7 +161,7 @@ export class BondsView {
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
 
         this.host.innerHTML = `
-        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""}" tabindex="-1">
+        <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""} ${this.#linkStyle().show === "focus" ? "is-lines-focus" : ""}" tabindex="-1">
             ${this.#renderBar()}
             ${this.#overview ? this.#renderOverview() : `<div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
@@ -175,6 +176,7 @@ export class BondsView {
                         <button type="button" class="persona-icon-btn" data-action="zoomIn" aria-label="${esc(this.t("ZoomIn"))}" title="${esc(this.t("ZoomIn"))}"><i class="fa-solid fa-plus" inert></i></button>
                         <button type="button" class="persona-icon-btn" data-action="zoomOut" aria-label="${esc(this.t("ZoomOut"))}" title="${esc(this.t("ZoomOut"))}"><i class="fa-solid fa-minus" inert></i></button>
                         <button type="button" class="persona-icon-btn" data-action="fit" aria-label="${esc(this.t("Fit"))}" title="${esc(this.t("Fit"))}"><i class="fa-solid fa-expand" inert></i></button>
+                        <button type="button" class="persona-icon-btn" data-action="linkStyle" aria-label="${esc(this.t("LinkStyle"))}" title="${esc(this.t("LinkStyle"))}"><i class="fa-solid fa-bezier-curve" inert></i></button>
                     </div>
                 </div>
                 ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
@@ -310,7 +312,11 @@ export class BondsView {
     #linkGeometry(link) {
         const a = this.#laid.nodes.get(link.a), b = this.#laid.nodes.get(link.b);
         if (!a || !b) return null;
-        return linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5);
+        const style = this.#linkStyle();
+        const g = this.#laid.g ?? G;
+        return style.shape === "angular"
+            ? angularPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g)
+            : linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend);
     }
 
     #renderNodes(entries) {
@@ -644,6 +650,52 @@ export class BondsView {
         this.host.querySelectorAll("[data-ov-row]").forEach(tr => { tr.hidden = !!q && !tr.dataset.ovRow.includes(q); });
     }
 
+    /** The viewer's own link style (shape, how much a curve bends, always shown or only in focus). */
+    #linkStyle() {
+        return normalizeLinkStyle(this.#styleNext ?? this.adapter.getLinkStyle?.());
+    }
+
+    #renderStylePop() {
+        const st = this.#linkStyle();
+        return `<div class="bonds-form bonds-form--style" data-style-form>
+            <span class="persona-eyebrow">${esc(this.t("LinkStyle"))}</span>
+            <div class="bonds-seg" role="group">
+                <button type="button" class="${st.shape === "curve" ? "is-on" : ""}" data-action="styleShape" data-shape="curve" aria-pressed="${st.shape === "curve"}">${esc(this.t("ShapeCurve"))}</button>
+                <button type="button" class="${st.shape === "angular" ? "is-on" : ""}" data-action="styleShape" data-shape="angular" aria-pressed="${st.shape === "angular"}">${esc(this.t("ShapeAngular"))}</button>
+            </div>
+            <label class="bonds-range ${st.shape === "curve" ? "" : "is-off"}">
+                <span>${esc(this.t("Bend"))}</span>
+                <input type="range" name="styleBend" min="0" max="1" step="0.05" value="${st.bend}" ${st.shape === "curve" ? "" : "disabled"}>
+                <span class="bonds-range__ends"><small>${esc(this.t("BendStraight"))}</small><small>${esc(this.t("BendLoose"))}</small></span>
+            </label>
+            <span class="bonds-insp__label">${esc(this.t("ShowLines"))}</span>
+            <div class="bonds-seg" role="group">
+                <button type="button" class="${st.show === "always" ? "is-on" : ""}" data-action="styleShow" data-show="always" aria-pressed="${st.show === "always"}">${esc(this.t("ShowAlways"))}</button>
+                <button type="button" class="${st.show === "focus" ? "is-on" : ""}" data-action="styleShow" data-show="focus" aria-pressed="${st.show === "focus"}">${esc(this.t("ShowFocus"))}</button>
+            </div>
+            <p class="bonds-form__hint">${esc(this.t("LinkStyleHint"))}</p>
+        </div>`;
+    }
+
+    #setLinkStyle(changes) {
+        const next = { ...this.#linkStyle(), ...changes };
+        Promise.resolve(this.adapter.setLinkStyle?.(next)).catch(() => {});
+        // Redraw the wheel but keep the style panel open.
+        const pop = this.host.querySelector(".bonds-pop");
+        const at = pop && !pop.hidden ? { left: pop.style.left, top: pop.style.top } : null;
+        this.#styleNext = next;
+        this.#render();
+        if (at) {
+            const fresh = this.host.querySelector(".bonds-pop");
+            fresh.innerHTML = this.#renderStylePop();
+            fresh.hidden = false;
+            fresh.style.left = at.left;
+            fresh.style.top = at.top;
+        }
+    }
+
+    #styleNext = null;
+
     #renderLegend() {
         const rings = [this.t("Ring1"), this.t("Ring2"), this.t("Ring3")];
         const used = new Set(this.#bonds.links.map(l => l.type));
@@ -833,8 +885,39 @@ export class BondsView {
         if (node && !node.contains(event.relatedTarget)) this.#applyFocus(this.#selected);
     };
 
+    #bendTimer = null;
+
+    /** Redraws only the lines and their icons (for the bend slider, so it stays smooth). */
+    #redrawLinks(style) {
+        const g = this.#laid.g ?? G;
+        const all = this.#allLinks();
+        const byKey = new Map(all.map(l => [`${l.a}|${l.b}`, l]));
+        this.host.querySelectorAll(".bonds-link, .bonds-link-casing").forEach(el => {
+            const link = byKey.get(`${el.dataset.a}|${el.dataset.b}`);
+            const a = link && this.#laid.nodes.get(link.a), b = link && this.#laid.nodes.get(link.b);
+            if (!a || !b) return;
+            el.setAttribute("d", linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend).d);
+        });
+        this.host.querySelectorAll(".bonds-marker").forEach(el => {
+            const link = byKey.get(`${el.dataset.a}|${el.dataset.b}`);
+            const a = link && this.#laid.nodes.get(link.a), b = link && this.#laid.nodes.get(link.b);
+            if (!a || !b) return;
+            const mid = linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend).mid;
+            el.style.left = `${mid.x}px`;
+            el.style.top = `${mid.y}px`;
+        });
+    }
+
     #onInput = event => {
         if (event.target.name === "bondsFind") return this.#onFind(event.target.value);
+        if (event.target.name === "styleBend") {
+            // Live while dragging the slider: just redraw the lines, then save.
+            const bend = Number(event.target.value);
+            this.#styleNext = { ...this.#linkStyle(), bend };
+            clearTimeout(this.#bendTimer);
+            this.#bendTimer = setTimeout(() => this.adapter.setLinkStyle?.(this.#styleNext), 250);
+            return this.#redrawLinks({ ...this.#linkStyle(), bend });
+        }
         if (event.target.name === "ovQuery") { this.#overviewQuery = event.target.value; return this.#filterOverview(); }
         if (event.target.name !== "bondsQuery") return;
         this.#query = event.target.value;
@@ -1129,6 +1212,9 @@ export class BondsView {
             this.#render();
         },
         exportImage: () => this.#exportImage(),
+        linkStyle: el => this.#openPop(this.#renderStylePop(), el),
+        styleShape: el => this.#setLinkStyle({ shape: el.dataset.shape }),
+        styleShow: el => this.#setLinkStyle({ show: el.dataset.show }),
         toggleScene: () => { this.#sceneOnly = !this.#sceneOnly; this.#cam.auto = true; this.#render(); },
         ackChanges: () => this.adapter.ackChanges?.(),
         pickType: el => {

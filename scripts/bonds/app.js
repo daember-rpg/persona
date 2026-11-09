@@ -236,6 +236,8 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             saveOfficial: list => saveOfficial(list),
             ackChanges: () => this.#ack(),
             notify: message => ui.notifications.warn(message),
+            getLinkStyle: () => (this.linkStyle ??= getSetting("bondsLinkStyle")),
+            setLinkStyle: style => { this.linkStyle = style; return game.settings.set(MODULE_ID, "bondsLinkStyle", style); },
             deleteMoment: id => this.#confirmDelete(id)
         };
     }

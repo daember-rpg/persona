@@ -49,6 +49,13 @@ export function registerSettings() {
         type: Object,
         default: {}
     });
+    // Bonds: how this user likes links drawn (curve or angular, how much curves bend, when shown).
+    game.settings.register(MODULE_ID, "bondsLinkStyle", {
+        scope: "client",
+        config: false,
+        type: Object,
+        default: { shape: "curve", bend: 0.5, show: "always" }
+    });
     // Bonds: record a moment on the timeline without thinking about it.
     game.settings.register(MODULE_ID, "autoMoment", {
         name: "PERSONA.Settings.autoMoment.Name",

@@ -3080,9 +3080,9 @@
 .bonds-party-etch { opacity: 0.9; }
 .bonds-party-thread { fill: none; stroke: var(--dp-gold); stroke-width: 1.5; stroke-opacity: 0.55; stroke-dasharray: 2 6; stroke-linecap: round; }
 
+/* Party and self names: on hover, like everyone else's (styled as plates). */
 .bonds-node--party .bonds-node__name,
 .bonds-node--self .bonds-node__name {
-    display: flex;
     top: calc(100% - 8px);
     padding: 2px 10px;
     border-color: rgba(201, 163, 90, 0.45);
@@ -3462,3 +3462,15 @@
 .persona .bonds-ov__cell:hover { background: var(--dp-charcoal-3); }
 
 .bonds .bonds-ov { grid-row: 2; }
+
+/* Lines only for the person in focus (a viewer's choice). */
+.bonds.is-lines-focus .bonds-link:not(.is-near),
+.bonds.is-lines-focus .bonds-link-casing:not(.is-near),
+.bonds.is-lines-focus .bonds-marker:not(.is-near) { visibility: hidden; }
+
+/* Link style panel */
+.bonds-pop:has(.bonds-form--style) { width: 280px; }
+.bonds-range { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--dp-parchment-dim); }
+.bonds-range.is-off { opacity: 0.4; }
+.bonds-range input[type="range"] { width: 100%; accent-color: var(--dp-clay); }
+.bonds-range__ends { display: flex; justify-content: space-between; color: var(--dp-parchment-faint); }

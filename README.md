@@ -49,7 +49,8 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Automatic moments**: a world setting records a moment at the start of each session (the GM's first login 6 hours after the last moment), after each combat, both, or never.
 - **Save as image**: the image button saves the wheel as a PNG with every portrait and name, to share at the end of an arc.
 - **Live moments**: with the wheel open, someone the GM just revealed flies into the list with an ember glow; someone who just died drains to grey with a pale flash before the skull sets in; someone who went missing blurs out. (Respects reduced motion.)
-- **The party** sits on a gold thread inside an engraved band, with name plates always shown.
+- **The party** sits on a gold thread inside an engraved band; names show on hover, like everyone else's.
+- **Link style (per user)**: the curve button by the zoom controls sets how *your* links are drawn — curved, with a slider from straight to loose, or angular, following the rings of the wheel — and whether lines show always or only for the person in focus.
 - **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
