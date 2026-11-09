@@ -46,6 +46,8 @@
     const sample = () => ({
         v: 1,
         sectors: [{ id: "c1", label: "My people", color: "#74864a" }],
+        pins: ["e9", "e12"],
+        archived: [],
         placements: [
             { id: "e1", sector: null, ring: 1 }, { id: "e2", sector: null, ring: 2 }, { id: "e3", sector: null, ring: 2 }, { id: "e4", sector: null, ring: 3 },
             { id: "e5", sector: null, ring: 2 }, { id: "e6", sector: null, ring: 3 }, { id: "e7", sector: null, ring: 1 },
@@ -65,7 +67,7 @@
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [{ id: "e1", sector: null, ring: 3 }, { id: "e3", sector: null, ring: 1 }, { id: "e9", sector: null, ring: 2 }], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         official: [
@@ -79,8 +81,10 @@
     // One older moment: before Bram died and before the Order and Nyx were met.
     const older = sample();
     older.placements = older.placements.filter(p => !["e5", "e6", "e7", "e10"].includes(p.id));
-        older.links = older.links.filter(l => !["l5"].includes(l.id));
-    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: {} }];
+    older.links = older.links.filter(l => !["l5"].includes(l.id));
+    older.placements.find(p => p.id === "e1").ring = 3; // Captain Ilsa was a stranger back then
+    older.placements.find(p => p.id === "e9").ring = 3;
+    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: { e4: "dead" } }];
     S.moments = seedMoments();
 
     let lang = "en";
@@ -114,7 +118,26 @@
                 bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
                 tags: TAGS,
                 players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
-                moments: S.moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
+                moments: S.moments.map((mo, i) => {
+                    const prev = S.moments[i - 1];
+                    const d = diffWheels(prev?.wheels?.[ownerId], mo.wheels?.[ownerId], prev?.statuses ?? {}, mo.statuses ?? {});
+                    return { id: mo.id, label: mo.label, ts: mo.ts, auto: mo.auto ?? null, diff: { ...d, moves: [...d.moves] } };
+                }),
+                peers: PLAYERS.filter(p => p.id !== ownerId).map(p => ({
+                    id: p.id, name: p.character, img: avatar(p.character),
+                    rings: Object.fromEntries((S.wheels[p.id]?.placements ?? []).filter(x => known.some(e => e.id === x.id)).map(x => [x.id, x.ring]))
+                })),
+                overview: isGM ? {
+                    players: PLAYERS.map(p => ({ id: p.id, name: p.character, img: avatar(p.character) })),
+                    rows: S.entries.filter(e => PLAYERS.some(p => e.known.includes(p.id))).map(e => ({
+                        id: e.id, name: e.name, title: e.title, img: e.img, frame: "", status: e.status,
+                        cells: Object.fromEntries(PLAYERS.map(p => {
+                            const w = normalizeBonds(S.wheels[p.id]);
+                            const pl = w.placements.find(x => x.id === e.id);
+                            return [p.id, { known: e.known.includes(p.id), ring: pl?.ring ?? null, archived: w.archived.includes(e.id), pinned: w.pins.includes(e.id), links: w.links.filter(l => l.a === e.id || l.b === e.id).length }];
+                        }))
+                    }))
+                } : null,
                 momentId: moment?.id ?? null,
                 official: moment ? [] : S.official.filter(l => known.some(e => e.id === l.a) && known.some(e => e.id === l.b) && (isGM || !l.hidden)),
                 officialAll: S.official,
@@ -145,17 +168,14 @@
         },
         saveOfficial(list) { S.official = list; view.refresh(); },
         ackChanges() { S.acked = true; view.refresh(); },
+        notify(message) { alert(message); },
         deleteMoment(id) { S.moments = S.moments.filter(m => m.id !== id); S.momentId = null; view.refresh(); }
     };
 
     const role = document.getElementById("pv-role");
     role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Game Master</option>`;
     role.addEventListener("change", () => { S.role = role.value; S.momentId = null; view.refresh(); });
-    document.getElementById("pv-lang").addEventListener("change", e => {
-        lang = e.target.value;
-        document.getElementById("pv-title").textContent = t("PERSONA.Bonds.Title");
-        view.refresh();
-    });
+
     document.getElementById("pv-reset").addEventListener("click", () => { const r = S.role; S = fresh(); S.moments = seedMoments(); S.role = r; view.refresh(); });
     // Live moments: what the table sees when the GM reveals someone or someone dies.
     document.getElementById("pv-reveal").addEventListener("click", () => {

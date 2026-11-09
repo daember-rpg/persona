@@ -152,6 +152,14 @@
       "revealToasts": {
         "Name": "Reveal notices",
         "Hint": "Show a notice when the GM reveals someone or something new to you."
+      },
+      "autoMoment": {
+        "Name": "Bonds: record moments automatically",
+        "Hint": "Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.",
+        "off": "Never",
+        "session": "At the start of each session",
+        "combat": "After each combat",
+        "both": "Both"
       }
     },
     "Warn": {
@@ -278,7 +286,28 @@
       "ChangeLinks1": "{n} new revealed bond",
       "ChangeLinks": "{n} new revealed bonds",
       "InScene": "In scene ({n})",
-      "InSceneHint": "Only the people with a token on the current scene"
+      "InSceneHint": "Only the people with a token on the current scene",
+      "Export": "Save the wheel as an image",
+      "ExportFailed": "Couldn't save the image: a portrait comes from another site that doesn't allow it.",
+      "Overview": "Overview",
+      "OverviewHint": "Every person the players know, and where each player keeps them. Click a cell to open that wheel on that person.",
+      "OverviewEmpty": "No one has been revealed to the players yet.",
+      "OvUnknown": "Not revealed to this player",
+      "OvNotPlaced": "Not placed",
+      "Archived": "Archived",
+      "Archive": "Archive",
+      "ArchiveHint": "Takes them off the wheel and out of the list, but keeps them in the timeline.",
+      "Restore": "Restore",
+      "Pin": "Pin",
+      "Unpin": "Unpin",
+      "Pinned": "Pinned",
+      "PartyThinks": "What the party thinks",
+      "NoChangesInMoment": "Nothing changed on this wheel in this moment.",
+      "DiffDied": "{name} died",
+      "DiffMissing": "{name} went missing",
+      "DiffAdded": "{name} joined the wheel",
+      "AutoSession": "Session {n} · {date}",
+      "AutoCombat": "After the fight · {scene}"
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

@@ -3300,3 +3300,165 @@
         100% { filter: grayscale(0.6) sepia(0.3) brightness(0.8); opacity: 1; }
     }
 }
+
+/* ==========================================================================
+   Bonds — pins, archive, the party's view, moments, overview
+   ========================================================================== */
+
+/* Distance colours, shared by every "Close / Known / Distant" chip. */
+.is-ring1 { --ring: #c9a35a; }
+.is-ring2 { --ring: #b4643e; }
+.is-ring3 { --ring: #7d7466; }
+
+/* Pins: a gold star on the portrait, a strip at the top of the list. */
+.bonds-node__pin {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    display: none;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--dp-night);
+    border: 1px solid var(--dp-gold);
+    font-size: 9px;
+    color: var(--dp-gold);
+}
+
+.bonds-node.is-pinned .bonds-node__pin { display: grid; }
+
+.persona .bonds-pin {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    margin-left: 6px;
+    vertical-align: 2px;
+    border-radius: 50%;
+    font-size: 13px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona .bonds-pin:hover, .persona .bonds-pin.is-on { color: var(--dp-gold); }
+
+.bonds-pins { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--dp-line); }
+.bonds-pins .bonds-insp__label i { color: var(--dp-gold); }
+.bonds-pins__row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.persona .bonds-pins__face {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid var(--dp-gold);
+}
+
+.bonds-pins__face img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-pins__face.is-dead img { filter: grayscale(1) brightness(0.65); }
+
+/* Archive */
+.bonds-archive { border-top: 1px solid var(--dp-line); padding-top: 10px; }
+
+.bonds-archive summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--dp-parchment-faint);
+    list-style: none;
+}
+
+.bonds-archive summary::-webkit-details-marker { display: none; }
+.bonds-archive summary b { padding: 0 6px; border-radius: 999px; background: var(--dp-charcoal-3); font-family: var(--dp-body); font-size: 11px; }
+.bonds-archive[open] summary { margin-bottom: 8px; color: var(--dp-parchment-dim); }
+.persona .bonds-loose--archived { width: 100%; justify-content: flex-start; opacity: 0.75; }
+.bonds-loose--archived .bonds-loose__img img { filter: grayscale(0.5); }
+
+.bonds-insp__minor { display: flex; justify-content: center; gap: var(--dp-2); margin-top: auto; }
+.bonds-insp__minor .bonds-takeoff-btn { margin-top: 0; }
+
+/* What the party thinks */
+.bonds-peers { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.bonds-peers li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dp-parchment); }
+.bonds-peers__img { flex: none; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; border: 1px solid var(--dp-line-strong); }
+.bonds-peers__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-peers__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.bonds-peers__ring {
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--ring);
+    font-size: 11px;
+    color: var(--ring);
+}
+
+/* Moments: what changed, and who */
+.persona .bonds-node.is-moved { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 18px rgba(201, 163, 90, 0.45); }
+
+.bonds-banner--moment {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    max-width: 360px;
+    padding: 8px 10px 10px 14px;
+    border-radius: 10px;
+    white-space: normal;
+}
+
+.bonds-banner__row { display: flex; align-items: center; gap: 10px; }
+.bonds-banner__row > i { color: var(--dp-gold); }
+.bonds-banner__diff { display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 6px 0 0; border-top: 1px solid var(--dp-line); list-style: none; font-size: 12px; color: var(--dp-parchment-dim); }
+.bonds-banner__diff i { width: 14px; color: var(--dp-gold); text-align: center; }
+.bonds-banner__diff .is-more, .bonds-banner__none { margin: 0; font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-tick.is-auto .bonds-tick__dot { border-style: dotted; }
+
+/* GM overview */
+.bonds-ov { display: flex; flex-direction: column; min-height: 0; padding: var(--dp-2) var(--dp-3); gap: var(--dp-2); overflow: hidden; }
+.bonds-ov__bar { display: flex; align-items: center; gap: var(--dp-2); flex-wrap: wrap; }
+.bonds-ov__bar .bonds-search { width: 260px; }
+.bonds-ov__bar p { margin: 0; max-width: 60ch; font-size: 13px; color: var(--dp-parchment-faint); }
+.bonds-ov__scroll { flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--dp-line); border-radius: 8px; }
+
+.bonds-ov__table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.bonds-ov__table thead th { position: sticky; top: 0; z-index: 2; padding: 10px 8px; background: var(--dp-charcoal); border-bottom: 1px solid var(--dp-line-strong); }
+.bonds-ov__table tbody th { position: sticky; left: 0; z-index: 1; background: var(--dp-charcoal-2); text-align: left; font-weight: 400; }
+.bonds-ov__table th, .bonds-ov__table td { padding: 6px 8px; border-bottom: 1px solid var(--dp-line); }
+.bonds-ov__table td { text-align: center; }
+.bonds-ov__table tr[hidden] { display: none; }
+.bonds-ov__table tbody tr:hover td, .bonds-ov__table tbody tr:hover th { background: var(--dp-charcoal-3); }
+
+.bonds-ov__player { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--dp-display); font-size: 12px; font-weight: 600; color: var(--dp-parchment); }
+.bonds-ov__player img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--dp-line-strong); }
+
+.bonds-ov__who { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+.bonds-ov__who b { display: block; font-weight: 500; color: var(--dp-parchment); }
+.bonds-ov__who small { display: block; font-size: 11px; color: var(--dp-parchment-faint); }
+.bonds-ov__img { flex: none; width: 34px; height: 34px; border-radius: 50%; overflow: hidden; }
+.bonds-ov__img img { width: 100%; height: 100%; border: 0; display: block; }
+.bonds-ov__who.is-dead .bonds-ov__img img { filter: grayscale(1) brightness(0.65); }
+
+.bonds-ov__table td.is-unknown { color: var(--dp-parchment-faint); opacity: 0.4; font-size: 11px; }
+
+.persona .bonds-ov__cell {
+    gap: 6px;
+    min-width: 92px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--ring, var(--dp-line-strong));
+    color: var(--ring, var(--dp-parchment-faint));
+    font-size: 12px;
+}
+
+.persona .bonds-ov__cell:not(.is-ring1):not(.is-ring2):not(.is-ring3) { border-style: dashed; }
+.persona .bonds-ov__cell.is-archived { opacity: 0.55; }
+.persona .bonds-ov__cell .fa-star { color: var(--dp-gold); font-size: 10px; }
+.persona .bonds-ov__cell small { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--dp-parchment-faint); }
+.persona .bonds-ov__cell:hover { background: var(--dp-charcoal-3); }
+
+.bonds .bonds-ov { grid-row: 2; }

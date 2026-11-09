@@ -62,7 +62,7 @@ const clampRing = ring => Math.min(3, Math.max(1, Math.round(Number(ring) || 2))
 /* -------------------------------------------- */
 
 export function emptyBonds() {
-    return { v: 1, sectors: [], placements: [], links: [] };
+    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [] };
 }
 
 export function normalizeBonds(raw) {
@@ -85,6 +85,9 @@ export function normalizeBonds(raw) {
         placed.add(p.id);
         out.placements.push({ id: String(p.id), sector: sectorIds.has(p.sector) ? String(p.sector) : null, ring: clampRing(p.ring) });
     }
+    // Pinned people (shown first, starred) and archived ones (out of the way, kept for the timeline).
+    out.archived = [...new Set((Array.isArray(raw.archived) ? raw.archived : []).map(String))].filter(id => !placed.has(id));
+    out.pins = [...new Set((Array.isArray(raw.pins) ? raw.pins : []).map(String))];
     // A category exists only while someone is in it.
     const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
     out.sectors = sectors.filter(s => used.has(s.id));
@@ -168,11 +171,33 @@ export function place(bonds, entryId, sector, ring, beforeId = null) {
     if (sector && !next.sectors.some(s => s.id === sector)) sector = null;
     ring = clampRing(ring);
     const rest = next.placements.filter(p => p.id !== entryId);
+    next.archived = next.archived.filter(id => id !== entryId);
     const item = { id: entryId, sector: sector ?? null, ring };
     const anchor = beforeId ? rest.findIndex(p => p.id === beforeId) : -1;
     if (anchor >= 0) rest.splice(anchor, 0, item);
     else rest.push(item);
     next.placements = rest;
+    return normalizeBonds(next);
+}
+
+export function togglePin(bonds, entryId) {
+    const next = copy(bonds);
+    next.pins = next.pins.includes(entryId) ? next.pins.filter(id => id !== entryId) : [...next.pins, entryId];
+    return normalizeBonds(next);
+}
+
+/** Archives someone: off the wheel and out of the "not placed" list, still in the timeline. */
+export function archive(bonds, entryId) {
+    const next = copy(bonds);
+    next.placements = next.placements.filter(p => p.id !== entryId);
+    next.archived = [...new Set([...next.archived, entryId])];
+    next.pins = next.pins.filter(id => id !== entryId);
+    return normalizeBonds(next);
+}
+
+export function restore(bonds, entryId) {
+    const next = copy(bonds);
+    next.archived = next.archived.filter(id => id !== entryId);
     return normalizeBonds(next);
 }
 
@@ -225,7 +250,8 @@ export function removeLink(bonds, id) {
 export function placeAll(bonds, entryIds, ring = 2) {
     const next = copy(bonds);
     const placed = new Set(next.placements.map(p => p.id));
-    for (const id of entryIds) if (!placed.has(id)) next.placements.push({ id, sector: null, ring });
+    const archived = new Set(next.archived);
+    for (const id of entryIds) if (!placed.has(id) && !archived.has(id)) next.placements.push({ id, sector: null, ring });
     return normalizeBonds(next);
 }
 
@@ -449,4 +475,30 @@ export function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
     // Midpoint of the quadratic curve, for the relation icon.
     const ix = 0.25 * s.x + 0.5 * cx + 0.25 * e.x, iy = 0.25 * s.y + 0.5 * cy + 0.25 * e.y;
     return { d: `M${f(s.x)} ${f(s.y)}Q${f(cx)} ${f(cy)} ${f(e.x)} ${f(e.y)}`, mid: { x: ix, y: iy } };
+}
+
+/* -------------------------------------------- */
+/*  Timeline                                    */
+/* -------------------------------------------- */
+
+/**
+ * What changed for one wheel between two moments (or a moment and now).
+ * @returns {{ added: string[], removed: string[], closer: string[], farther: string[], died: string[], missing: string[], moves: Map }}
+ */
+export function diffWheels(before, after, statusBefore = {}, statusAfter = {}) {
+    const a = new Map(normalizeBonds(before).placements.map(p => [p.id, p.ring]));
+    const b = new Map(normalizeBonds(after).placements.map(p => [p.id, p.ring]));
+    const out = { added: [], removed: [], closer: [], farther: [], died: [], missing: [], moves: new Map() };
+    for (const [id, ring] of b) {
+        if (!a.has(id)) out.added.push(id);
+        else if (ring < a.get(id)) { out.closer.push(id); out.moves.set(id, [a.get(id), ring]); }
+        else if (ring > a.get(id)) { out.farther.push(id); out.moves.set(id, [a.get(id), ring]); }
+    }
+    for (const id of a.keys()) if (!b.has(id)) out.removed.push(id);
+    for (const [id, status] of Object.entries(statusAfter)) {
+        const was = statusBefore[id] ?? "alive";
+        if (status === "dead" && was !== "dead") out.died.push(id);
+        else if (status === "missing" && was !== "missing") out.missing.push(id);
+    }
+    return out;
 }

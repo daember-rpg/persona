@@ -10,10 +10,10 @@
  */
 import { MODULE_ID } from "../constants.js";
 import { getSetting } from "../settings.js";
-import { getEntries, getGroups, canSee, seenIds, players, updateSetting } from "../store.js";
+import { getEntries, getEntry, getGroups, canSee, seenIds, players, updateSetting } from "../store.js";
 import { imageOf, frameStyle } from "../view-data.js";
 import { BondsView } from "./view.js";
-import { normalizeBonds, normalizeOfficial, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
+import { normalizeBonds, normalizeOfficial, diffWheels, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
 
 const t = key => game.i18n.localize(key);
 
@@ -116,16 +116,47 @@ export function getMoments() {
     return Object.values(getSetting("moments") ?? {}).sort((a, b) => a.ts - b.ts);
 }
 
-export async function recordMoment(label) {
+export async function recordMoment(label, auto = null) {
     if (!game.user.isGM) return;
     const id = foundry.utils.randomID();
     const wheels = Object.fromEntries(players().map(u => [u.id, bondsOf(u)]));
     const statuses = Object.fromEntries(getEntries().map(e => [e.id, e.status]));
     await updateSetting("moments", moments => {
-        moments[id] = { id, label: String(label).slice(0, 60), ts: Date.now(), wheels, statuses };
+        moments[id] = { id, label: String(label).slice(0, 60), ts: Date.now(), wheels, statuses, auto };
         return moments;
     });
     return id;
+}
+
+/* -------------------------------------------- */
+/*  Automatic moments                           */
+/* -------------------------------------------- */
+
+const SESSION_GAP = 6 * 60 * 60 * 1000; // a GM login this long after the last moment = a new session
+
+/** Only one client records: the active GM. */
+function isRecorder() {
+    return game.user.isGM && (game.users.activeGM?.id ?? game.user.id) === game.user.id;
+}
+
+const dateLabel = () => new Date().toLocaleDateString(game.i18n.lang, { day: "numeric", month: "short" });
+
+/** At the start of a session: how every wheel looked when the table sat down. */
+export async function autoMomentOnLogin() {
+    if (!isRecorder() || !["session", "both"].includes(getSetting("autoMoment"))) return;
+    if (!players().length) return;
+    const last = getMoments().at(-1);
+    if (last && Date.now() - last.ts < SESSION_GAP) return;
+    const n = getMoments().filter(m => m.auto === "session").length + 1;
+    await recordMoment(game.i18n.format("PERSONA.Bonds.AutoSession", { n, date: dateLabel() }), "session");
+}
+
+/** After a fight: what changed in the heat of it. */
+export async function autoMomentAfterCombat(combat) {
+    if (!isRecorder() || !["combat", "both"].includes(getSetting("autoMoment"))) return;
+    if (!combat?.started && !combat?.round) return;
+    const scene = combat.scene?.name ?? game.scenes.get(combat.scene)?.name ?? "";
+    await recordMoment(game.i18n.format("PERSONA.Bonds.AutoCombat", { scene: scene || dateLabel() }), "combat");
 }
 
 export function deleteMoment(id) {
@@ -204,6 +235,7 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             recordMoment: () => this.#promptMoment(),
             saveOfficial: list => saveOfficial(list),
             ackChanges: () => this.#ack(),
+            notify: message => ui.notifications.warn(message),
             deleteMoment: id => this.#confirmDelete(id)
         };
     }
@@ -217,10 +249,16 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         const moment = this.momentId ? moments.find(m => m.id === this.momentId) : null;
         if (this.momentId && !moment) this.momentId = null;
 
+        // What changed in each moment for this wheel, against the moment before it.
+        const summarize = ownerId => moments.map((m, i) => {
+            const prev = moments[i - 1];
+            const d = diffWheels(prev?.wheels?.[ownerId], m.wheels?.[ownerId], prev?.statuses ?? {}, m.statuses ?? {});
+            return { id: m.id, label: m.label, ts: m.ts, auto: m.auto ?? null, diff: { ...d, moves: [...d.moves] } };
+        });
         const base = {
             isGM,
             players: isGM ? roster.map(u => ({ id: u.id, name: u.character?.name ?? u.name, user: u.character ? u.name : "", img: u.character?.img || u.avatar || "icons/svg/mystery-man.svg" })) : [],
-            moments: moments.map(m => ({ id: m.id, label: m.label, ts: m.ts })),
+            moments: summarize(this.ownerId),
             momentId: moment?.id ?? null
         };
         if (!owner) {
@@ -266,8 +304,19 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             if (result.snapshot) owner.setFlag(MODULE_ID, "bondsSeen", snapshotFor(known, official));
         }
 
+        // Where the rest of the party put the same people (ring only), for "What the party thinks".
+        const peers = roster.filter(u => u.id !== owner.id).map(u => {
+            const theirs = bondsOf(u);
+            const rings = {};
+            for (const p of theirs.placements) if (knownIds.has(p.id) && canSee(getEntry(p.id), "face", u)) rings[p.id] = p.ring;
+            const { name, img } = persona(u);
+            return { id: u.id, name, img, rings };
+        });
+
         return {
             ...base,
+            peers,
+            overview: isGM ? this.#overview(roster) : null,
             // Moments are read-only; otherwise a player edits their own wheel and the GM edits anyone's.
             editable: !moment && (isGM || owner.id === game.user.id),
             owner: { id: owner.id, name: self.name },
@@ -281,6 +330,31 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             changes,
             inScene: moment ? null : inScene(known)
         };
+    }
+
+    /** GM: every person any player knows, against every player — known? on the wheel? how close? */
+    #overview(roster) {
+        const wheels = new Map(roster.map(u => [u.id, bondsOf(u)]));
+        const rows = [];
+        for (const e of getEntries().filter(x => x.kind === "npc")) {
+            const cells = {};
+            let anyone = false;
+            for (const u of roster) {
+                const known = canSee(e, "face", u);
+                anyone ||= known;
+                const w = wheels.get(u.id);
+                const p = w.placements.find(x => x.id === e.id);
+                cells[u.id] = {
+                    known,
+                    ring: p?.ring ?? null,
+                    archived: w.archived.includes(e.id),
+                    pinned: w.pins.includes(e.id),
+                    links: w.links.filter(l => l.a === e.id || l.b === e.id).length
+                };
+            }
+            if (anyone) rows.push({ id: e.id, name: e.name, title: e.title, img: imageOf(e), frame: frameStyle(e), status: e.status, cells });
+        }
+        return { players: roster.map(u => ({ ...persona(u), id: u.id })), rows };
     }
 
     /** The player has seen what changed: remember the current state. */

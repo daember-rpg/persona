@@ -49,6 +49,21 @@ export function registerSettings() {
         type: Object,
         default: {}
     });
+    // Bonds: record a moment on the timeline without thinking about it.
+    game.settings.register(MODULE_ID, "autoMoment", {
+        name: "PERSONA.Settings.autoMoment.Name",
+        hint: "PERSONA.Settings.autoMoment.Hint",
+        scope: "world",
+        config: true,
+        type: String,
+        choices: {
+            off: "PERSONA.Settings.autoMoment.off",
+            session: "PERSONA.Settings.autoMoment.session",
+            combat: "PERSONA.Settings.autoMoment.combat",
+            both: "PERSONA.Settings.autoMoment.both"
+        },
+        default: "session"
+    });
     game.settings.register(MODULE_ID, "revealToasts", {
         name: "PERSONA.Settings.revealToasts.Name",
         hint: "PERSONA.Settings.revealToasts.Hint",

@@ -13,7 +13,7 @@ const strip = src => src.replace(/^import[\s\S]*?from\s+["'][^"']+["'];\s*$/gm, 
 
 const code = strip(read("scripts/bonds/model.js")) + "\n" + strip(read("scripts/bonds/view.js"));
 const css = read("styles/persona.css").replace(/^@import[^\n]*\n/, "");
-const lang = { en: JSON.parse(read("lang/en.json")), "pt-BR": JSON.parse(read("lang/pt-BR.json")) };
+const lang = { en: JSON.parse(read("lang/en.json")) };
 const mock = read("dev/preview-mock.js");
 
 const html = `<!doctype html>
@@ -60,7 +60,6 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
   <div class="pv-bar">
     <b>Persona · Bonds</b>
     <label>View as <select id="pv-role"></select></label>
-    <label>Language <select id="pv-lang"><option value="en">English</option><option value="pt-BR">Português</option></select></label>
     <button type="button" id="pv-reveal">Reveal someone</button>
     <button type="button" id="pv-kill">Kill Captain Ilsa</button>
     <button type="button" id="pv-reset">Reset</button>

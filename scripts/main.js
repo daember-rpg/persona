@@ -13,7 +13,7 @@ import { VideoPlayer } from "./video.js";
 import { Toasts } from "./toasts.js";
 import { syncFromJournal } from "./entries.js";
 import { imageOf } from "./view-data.js";
-import { BondsWindow } from "./bonds/app.js";
+import { BondsWindow, autoMomentOnLogin, autoMomentAfterCombat } from "./bonds/app.js";
 
 const PARTIALS = {
     "persona-director": `${TEMPLATE_ROOT}/partials/director.hbs`,
@@ -81,6 +81,7 @@ Hooks.once("ready", () => {
 
     if (getSetting("dockInTriad") && game.triad?.api?.registerDock) dockIntoTriad(game.triad.api);
     updateBadge();
+    autoMomentOnLogin();
 
     const api = {
         open, close, toggle,
@@ -285,6 +286,8 @@ Hooks.on("updateUser", (user, changes) => {
     if (changes.flags?.[MODULE_ID] || "character" in changes || "avatar" in changes || "name" in changes || "role" in changes) bonds?.refresh();
 });
 for (const hook of ["createUser", "deleteUser"]) Hooks.on(hook, () => { view?.requestRender(); bonds?.refresh(); });
+// Bonds: a moment after each combat, if the GM wants it.
+Hooks.on("deleteCombat", combat => autoMomentAfterCombat(combat));
 // "In scene": who has a token on the scene being viewed.
 for (const hook of ["canvasReady", "createToken", "deleteToken"]) Hooks.on(hook, () => bonds?.refresh());
 // A party member's portrait or name.

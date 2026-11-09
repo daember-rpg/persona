@@ -41,6 +41,13 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Official links (GM)**: when the GM links two people, *Official* puts that link on every wheel that knows both of them, with a seal; players can't change it. *Hidden* keeps it to the GM until unticked.
 - **Since you last looked**: when a player opens their wheel, a card lists new people, deaths and disappearances, and newly revealed official links; those portraits glow until they press *Got it*.
 - **In scene**: filters the wheel to the people with a token on the current scene (matched by their linked Actor); they also come first in the off-wheel list.
+- **Pins**: star someone in the inspector to keep them at the top of the list and marked on the wheel.
+- **Archive**: people who left the story go to a folded *Archive* at the bottom of the list — off the wheel, still in the timeline. *Restore* brings them back.
+- **What the party thinks**: the inspector shows where the other players keep the same person (distance only; never their notes or categories).
+- **GM overview**: *Overview* shows every person the players know against every player — not revealed, not placed, or how close — with pins and link counts. Click a cell to open that player's wheel on that person.
+- **Timeline that tells the story**: each moment lists what changed on that wheel since the one before (who joined, who died or went missing, who moved closer or farther), and those portraits are highlighted while looking back.
+- **Automatic moments**: a world setting records a moment at the start of each session (the GM's first login 6 hours after the last moment), after each combat, both, or never.
+- **Save as image**: the image button saves the wheel as a PNG with every portrait and name, to share at the end of an arc.
 - **Live moments**: with the wheel open, someone the GM just revealed flies into the list with an ember glow; someone who just died drains to grey with a pale flash before the skull sets in; someone who went missing blurs out. (Respects reduced motion.)
 - **The party** sits on a gold thread inside an engraved band, with name plates always shown.
 - **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
@@ -82,7 +89,7 @@ scripts/
     app.js       Bonds window, Foundry adapter, moments
 templates/       panel, card, editor + partials
 styles/          persona.css (Embermark)
-lang/            en, pt-BR
+lang/            en
 dev/             bonds-preview.html (standalone preview, not shipped) and its build script
 ```
 

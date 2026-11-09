@@ -20,7 +20,7 @@ import {
     GEOMETRY, LINK_TYPES, SECTOR_COLORS, RINGS, SELF,
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
     createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG,
-    setOfficial, removeOfficial
+    setOfficial, removeOfficial, togglePin, archive, restore
 } from "./model.js";
 
 const G = GEOMETRY;
@@ -42,6 +42,8 @@ export class BondsView {
     #query = "";
     #hideDead = false;
     #sceneOnly = false;
+    #overview = false;
+    #overviewQuery = "";
     /** What this view saw last time, to animate what changes live (a reveal, a death). */
     #lastSeen = null;
     #moments = { arriving: new Set(), dying: new Set(), vanishing: new Set() };
@@ -150,7 +152,9 @@ export class BondsView {
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
         this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
-        const loose = m.entries.filter(e => !placed.has(e.id));
+        const archivedIds = new Set(this.#bonds.archived);
+        const loose = m.entries.filter(e => !placed.has(e.id) && !archivedIds.has(e.id));
+        if (this.#overview && !m.overview) this.#overview = false;
         if (this.#selected && !this.#nodeInfo(this.#selected)) this.#selected = null;
         const pop = this.host.querySelector(".bonds-pop");
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
@@ -158,7 +162,7 @@ export class BondsView {
         this.host.innerHTML = `
         <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""}" tabindex="-1">
             ${this.#renderBar()}
-            <div class="bonds-main">
+            ${this.#overview ? this.#renderOverview() : `<div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
                     <div class="bonds-stage" data-stage>
                         ${this.#renderSvg()}
@@ -174,14 +178,15 @@ export class BondsView {
                     </div>
                 </div>
                 ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
-            </div>
-            ${this.#renderTimeline()}
+            </div>`}
+            ${this.#overview ? "" : this.#renderTimeline()}
             <div class="bonds-pop" hidden></div>
         </div>`;
 
         this.#applyCam();
         const viewport = this.host.querySelector("[data-viewport]");
         this.#resize.disconnect();
+        if (!viewport) return this.#filterOverview();
         this.#resize.observe(viewport);
         if (this.#cam.auto) this.fit();
         if (keepPop) this.#closePop();
@@ -202,9 +207,11 @@ export class BondsView {
         const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
             : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
             : m.editable ? this.t("SubPlayer") : "";
-        const tools = m.isGM && m.players.length
-            ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>`
-            : "";
+        const tools = [
+            !this.#overview && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
+            m.overview ? `<button type="button" class="persona-button bonds-tool ${this.#overview ? "is-on" : ""}" data-action="toggleOverview" aria-pressed="${this.#overview}"><i class="fa-solid fa-table-cells" inert></i><span>${esc(this.t("Overview"))}</span></button>` : "",
+            m.isGM && m.players.length ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>` : ""
+        ].join("");
         return `
         <header class="bonds-bar">
             <div class="bonds-who">
@@ -312,7 +319,11 @@ export class BondsView {
         const sectors = new Map(laid.sectors.map(s => [s.id, s]));
         const out = [];
         const changed = new Set([...(m.changes?.newIds ?? []), ...(m.changes?.statusIds ?? [])]);
-        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : "", changed.has(id) ? "is-changed" : ""].join(" ");
+        // Looking back at a moment: who arrived or moved in it.
+        const diff = m.momentId ? m.moments.find(x => x.id === m.momentId)?.diff : null;
+        const moved = new Set(diff ? [...diff.added, ...diff.closer, ...diff.farther, ...diff.died, ...diff.missing] : []);
+        const pins = new Set(this.#bonds.pins);
+        const picked = id => [this.#linkFrom === id ? "is-picked" : "", this.#selected === id ? "is-selected" : "", changed.has(id) ? "is-changed" : "", moved.has(id) ? "is-moved" : "", pins.has(id) ? "is-pinned" : ""].join(" ");
 
         out.push(`<button type="button" class="bonds-node bonds-node--self ${picked(SELF)}" data-node="${SELF}" style="left:${G.center}px;top:${G.center}px">
             <span class="bonds-node__img"><img src="${esc(m.self.img)}" alt="" draggable="false"></span><span class="bonds-node__name">${esc(m.self.name)}</span></button>`);
@@ -338,7 +349,7 @@ export class BondsView {
         const name = entry.name ?? "???";
         const statusText = entry.status && entry.status !== "alive" ? this.adapter.t(`PERSONA.Status.${entry.status}`) : "";
         return `<button type="button" class="bonds-node bonds-node--entry ${status} ${entry.isNew ? "is-new" : ""} ${extra}" data-node="${esc(entry.id)}" data-entry="${esc(entry.id)}" style="${style}" aria-label="${esc(name)}">
-            <span class="bonds-node__img"><img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false"></span>${mark}
+            <span class="bonds-node__img"><img class="persona-fit" src="${esc(entry.img)}" style="${esc(entry.frame ?? "")}" alt="" draggable="false"></span>${mark}<span class="bonds-node__pin"><i class="fa-solid fa-star" inert></i></span>
             <span class="bonds-node__name">${esc(name)}${entry.title ? `<small>${esc(entry.title)}</small>` : ""}${statusText ? `<small class="bonds-node__status">${esc(statusText)}</small>` : ""}</span></button>`;
     }
 
@@ -389,10 +400,13 @@ export class BondsView {
         const m = this.#model;
         const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
         if (moment) {
-            return `<div class="bonds-banner"><i class="fa-solid fa-clock-rotate-left" inert></i>
+            const lines = this.#diffLines(moment.diff);
+            return `<div class="bonds-banner bonds-banner--moment"><div class="bonds-banner__row"><i class="fa-solid fa-clock-rotate-left" inert></i>
                 <span>${esc(this.t("Viewing"))} <b>${esc(moment.label)}</b></span>
                 <button type="button" class="persona-mini" data-action="moment" data-id="">${esc(this.t("BackToNow"))}</button>
                 ${m.isGM ? `<button type="button" class="persona-mini persona-mini--icon" data-action="deleteMoment" data-id="${esc(moment.id)}" title="${esc(this.t("DeleteMoment"))}" aria-label="${esc(this.t("DeleteMoment"))}"><i class="fa-solid fa-trash" inert></i></button>` : ""}
+                </div>
+                ${lines.length ? `<ul class="bonds-banner__diff">${lines.slice(0, 6).map(l => `<li>${l}</li>`).join("")}${lines.length > 6 ? `<li class="is-more">+${lines.length - 6}</li>` : ""}</ul>` : `<p class="bonds-banner__none">${esc(this.t("NoChangesInMoment"))}</p>`}
             </div>`;
         }
         if (this.#linkMode) {
@@ -439,6 +453,197 @@ export class BondsView {
         this.#applyCam();
     }
 
+    /** A moment's changes for this wheel, as short readable lines (HTML-escaped). */
+    #diffLines(diff) {
+        if (!diff) return [];
+        const name = id => esc(this.#model.entries.find(e => e.id === id)?.name ?? "???");
+        const ring = r => esc(this.t(`Ring${r}`));
+        const moves = new Map(diff.moves ?? []);
+        const out = [];
+        for (const id of diff.died) out.push(`<i class="fa-solid fa-skull" inert></i> ${this.adapter.t("PERSONA.Bonds.DiffDied").replace("{name}", name(id))}`);
+        for (const id of diff.missing) out.push(`<i class="fa-solid fa-question" inert></i> ${this.adapter.t("PERSONA.Bonds.DiffMissing").replace("{name}", name(id))}`);
+        for (const id of diff.added) out.push(`<i class="fa-solid fa-plus" inert></i> ${this.adapter.t("PERSONA.Bonds.DiffAdded").replace("{name}", name(id))}`);
+        for (const id of [...diff.closer, ...diff.farther]) {
+            const [from, to] = moves.get(id) ?? [];
+            out.push(`<i class="fa-solid ${to < from ? "fa-arrow-down-short-wide" : "fa-arrow-up-wide-short"}" inert></i> ${name(id)}: ${ring(from)} → ${ring(to)}`);
+        }
+        return out;
+    }
+
+    /**
+     * Saves the wheel as a PNG to share (e.g. in the campaign's chat at the end of an arc): the
+     * wheel itself, every portrait with its name, the links, and a title. Drawn on a canvas at 2x.
+     */
+    async #exportImage() {
+        const m = this.#model;
+        const laid = this.#laid;
+        const g = laid.g;
+        const R = g.labelRadius + 46;
+        const scale = 2;
+        const size = Math.ceil(2 * R * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(scale, scale);
+        ctx.translate(R - G.center, R - G.center);
+        ctx.fillStyle = "#16130f";
+        ctx.fillRect(G.center - R, G.center - R, 2 * R, 2 * R);
+
+        // 1. The SVG (slices, rings, labels, links), with its computed styles inlined.
+        const source = this.host.querySelector(".bonds-svg");
+        if (source) {
+            const clone = source.cloneNode(true);
+            const props = ["fill", "fill-opacity", "stroke", "stroke-width", "stroke-opacity", "stroke-dasharray", "opacity", "font-family", "font-size", "font-weight", "letter-spacing", "text-transform", "paint-order"];
+            const from = [source, ...source.querySelectorAll("*")];
+            const to = [clone, ...clone.querySelectorAll("*")];
+            from.forEach((el, i) => {
+                const cs = getComputedStyle(el);
+                to[i].setAttribute("style", props.map(prop => `${prop}:${cs.getPropertyValue(prop)}`).join(";"));
+            });
+            clone.querySelector("[data-rubber]")?.remove();
+            clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            clone.setAttribute("viewBox", `${G.center - R} ${G.center - R} ${2 * R} ${2 * R}`);
+            clone.setAttribute("width", 2 * R);
+            clone.setAttribute("height", 2 * R);
+            const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: "image/svg+xml" }));
+            try {
+                const img = await this.#loadImage(url);
+                if (img) ctx.drawImage(img, G.center - R, G.center - R, 2 * R, 2 * R);
+            } finally { URL.revokeObjectURL(url); }
+        }
+
+        // 2. Portraits and names.
+        const frameOf = style => {
+            const num = (key, def) => Number(String(style ?? "").match(new RegExp(`--${key}:\\s*([\\d.]+)`))?.[1] ?? def);
+            return { fx: num("fx", 50) / 100, fy: num("fy", 20) / 100, zoom: num("zoom", 1) };
+        };
+        const drawPortrait = async (x, y, r, src, { frame = "", ring = "#d9c79e", status = "alive", label = "" } = {}) => {
+            const img = await this.#loadImage(src);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r + 3, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+            ctx.fillStyle = "#2c2723"; ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
+            if (img) {
+                const { fx, fy, zoom } = frameOf(frame);
+                const d = 2 * r;
+                const k = Math.max(d / img.naturalWidth, d / img.naturalHeight) * zoom;
+                const w = img.naturalWidth * k, h = img.naturalHeight * k;
+                if (status === "dead") ctx.filter = "grayscale(1) brightness(0.62)";
+                else if (status === "missing") ctx.filter = "grayscale(0.6) sepia(0.3) brightness(0.8)";
+                ctx.drawImage(img, x - r - (w - d) * fx, y - r - (h - d) * fy, w, h);
+                ctx.filter = "none";
+            }
+            ctx.restore();
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = ring; ctx.stroke();
+            if (status === "dead" || status === "missing") {
+                ctx.beginPath(); ctx.arc(x + r * 0.72, y + r * 0.72, 8, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
+                ctx.fillStyle = "#eadfc4"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(status === "dead" ? "✝" : "?", x + r * 0.72, y + r * 0.72 + 0.5);
+            }
+            if (label) {
+                ctx.font = "600 10px Cinzel, Georgia, serif";
+                const w = ctx.measureText(label).width + 12;
+                ctx.fillStyle = "rgba(15,14,12,0.9)";
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(x - w / 2, y + r + 4, w, 16, 3);
+                else ctx.rect(x - w / 2, y + r + 4, w, 16);
+                ctx.fill();
+                ctx.fillStyle = "#eadfc4"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText(label, x, y + r + 12.5);
+            }
+        };
+        // Link icons: a dot in the link's colour at its middle.
+        for (const link of this.#allLinks()) {
+            const geo = this.#linkGeometry(link);
+            if (!geo) continue;
+            const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
+            ctx.beginPath(); ctx.arc(geo.mid.x, geo.mid.y, 6, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = type.color; ctx.stroke();
+        }
+        const entries = this.#entryMap();
+        const sectors = new Map(laid.sectors.map(sec => [sec.id, sec]));
+        for (const p of this.#bonds.placements) {
+            const pos = laid.nodes.get(p.id), e = entries.get(p.id);
+            if (!pos || !e) continue;
+            await drawPortrait(pos.x, pos.y, NODE_R.entry, e.img, { frame: e.frame, ring: sectors.get(pos.sector)?.color, status: e.status, label: e.name ?? "???" });
+        }
+        for (const p of m.party) {
+            const pos = laid.nodes.get(p.id);
+            if (pos) await drawPortrait(pos.x, pos.y, NODE_R.party, p.img, { ring: "#d68a5c", label: p.name });
+        }
+        await drawPortrait(G.center, G.center, NODE_R.self, m.self.img, { ring: "#c9a35a", label: m.self.name });
+
+        // 3. Title.
+        ctx.fillStyle = "#eadfc4";
+        ctx.textAlign = "left"; ctx.textBaseline = "top";
+        ctx.font = "600 22px Cinzel, Georgia, serif";
+        const title = this.adapter.t("PERSONA.Bonds.TitleOf").replace("{name}", m.owner?.name ?? "");
+        ctx.fillText(title, G.center - R + 24, G.center - R + 20);
+        const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
+        ctx.font = "13px Spectral, Georgia, serif";
+        ctx.fillStyle = "#a89c84";
+        ctx.fillText(moment?.label ?? new Date().toLocaleDateString(), G.center - R + 24, G.center - R + 50);
+
+        const name = `bonds-${String(m.owner?.name ?? "wheel").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}.png`;
+        const save = blob => {
+            if (!blob) return this.adapter.notify?.(this.t("ExportFailed"));
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            document.body.append(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        };
+        // A portrait from another site without CORS taints the canvas: say so instead of failing silently.
+        try { canvas.toBlob(save, "image/png"); }
+        catch (error) { console.warn("persona | export", error); this.adapter.notify?.(this.t("ExportFailed")); }
+    }
+
+    /** Loads an image for the canvas; null when it can't be used (missing, or another site's without CORS). */
+    #loadImage(src) {
+        return new Promise(resolve => {
+            if (!src) return resolve(null);
+            const img = new Image();
+            if (/^https?:/i.test(src) && !src.startsWith(location.origin)) img.crossOrigin = "anonymous";
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = src;
+        });
+    }
+
+    /** GM: who knows whom, and how close each player keeps them — at a glance. */
+    #renderOverview() {
+        const o = this.#model.overview;
+        const ringCls = r => (r ? `is-ring${r}` : "");
+        const rows = o.rows.map(row => `
+            <tr data-ov-row="${esc((row.name ?? "").toLowerCase())}">
+                <th scope="row"><span class="bonds-ov__who ${row.status && row.status !== "alive" ? `is-${row.status}` : ""}"><span class="bonds-ov__img"><img class="persona-fit" src="${esc(row.img)}" style="${esc(row.frame ?? "")}" alt=""></span><span><b>${esc(row.name)}</b>${row.title ? `<small>${esc(row.title)}</small>` : ""}</span></span></th>
+                ${o.players.map(p => {
+                    const c = row.cells[p.id];
+                    if (!c.known) return `<td class="is-unknown" title="${esc(this.t("OvUnknown"))}"><i class="fa-solid fa-lock" inert></i></td>`;
+                    const label = c.archived ? this.t("Archived") : c.ring ? this.t(`Ring${c.ring}`) : this.t("OvNotPlaced");
+                    return `<td><button type="button" class="bonds-ov__cell ${ringCls(c.ring)} ${c.archived ? "is-archived" : ""}" data-action="ovJump" data-player="${esc(p.id)}" data-id="${esc(row.id)}">
+                        ${c.pinned ? `<i class="fa-solid fa-star" inert></i>` : ""}<span>${esc(label)}</span>${c.links ? `<small><i class="fa-solid fa-link" inert></i>${c.links}</small>` : ""}</button></td>`;
+                }).join("")}
+            </tr>`).join("");
+        return `<div class="bonds-ov">
+            <div class="bonds-ov__bar">
+                <label class="bonds-search"><i class="fa-solid fa-magnifying-glass" inert></i><input type="search" name="ovQuery" value="${esc(this.#overviewQuery)}" placeholder="${esc(this.t("Search"))}" autocomplete="off"></label>
+                <p>${esc(this.t("OverviewHint"))}</p>
+            </div>
+            ${o.rows.length ? `<div class="bonds-ov__scroll"><table class="bonds-ov__table">
+                <thead><tr><th scope="col"></th>${o.players.map(p => `<th scope="col"><span class="bonds-ov__player"><img src="${esc(p.img)}" alt=""><span>${esc(p.name)}</span></span></th>`).join("")}</tr></thead>
+                <tbody>${rows}</tbody>
+            </table></div>` : `<p class="bonds-insp__empty">${esc(this.t("OverviewEmpty"))}</p>`}
+        </div>`;
+    }
+
+    #filterOverview() {
+        const q = this.#overviewQuery.trim().toLowerCase();
+        this.host.querySelectorAll("[data-ov-row]").forEach(tr => { tr.hidden = !!q && !tr.dataset.ovRow.includes(q); });
+    }
+
     #renderLegend() {
         const rings = [this.t("Ring1"), this.t("Ring2"), this.t("Ring3")];
         const used = new Set(this.#bonds.links.map(l => l.type));
@@ -479,10 +684,25 @@ export class BondsView {
         const out = m.editable
             ? `<div class="bonds-takeoff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOffDrop"))}</span></div>`
             : "";
+        const byId = new Map(m.entries.map(e => [e.id, e]));
+        const pinned = this.#bonds.pins.map(id => byId.get(id)).filter(Boolean);
+        const pinStrip = pinned.length ? `<div class="bonds-pins">
+            <span class="bonds-insp__label"><i class="fa-solid fa-star" inert></i>${esc(this.t("Pinned"))}</span>
+            <div class="bonds-pins__row">${pinned.map(e => `<button type="button" class="bonds-pins__face ${e.status && e.status !== "alive" ? `is-${e.status}` : ""}" data-action="findGo" data-id="${esc(e.id)}" title="${esc(e.name ?? "???")}"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt=""></button>`).join("")}</div>
+        </div>` : "";
+        const archivedList = this.#bonds.archived.map(id => byId.get(id)).filter(Boolean);
+        const archiveBox = archivedList.length ? `<details class="bonds-archive">
+            <summary><i class="fa-solid fa-box-archive" inert></i>${esc(this.t("Archive"))} <b>${archivedList.length}</b></summary>
+            <div class="bonds-drawer__list">${archivedList.map(e => `
+                <button type="button" class="bonds-loose bonds-loose--archived" data-action="select" data-id="${esc(e.id)}">
+                    <span class="bonds-loose__img"><img class="persona-fit" src="${esc(e.img)}" style="${esc(e.frame ?? "")}" alt=""></span>
+                    <span class="bonds-loose__name">${esc(e.name ?? "???")}${e.title ? `<small>${esc(e.title)}</small>` : ""}</span>
+                </button>`).join("")}</div>
+        </details>` : "";
         return `<aside class="bonds-drawer" data-drawer>
             ${newCat}${out}
             <div class="bonds-drawer__head"><span class="persona-eyebrow">${esc(this.t("Unplaced"))}</span><span class="bonds-drawer__count">${loose.length}</span></div>
-            ${search}${body}${start}${hint}
+            ${pinStrip}${search}${body}${start}${hint}${archiveBox}
         </aside>`;
     }
 
@@ -551,6 +771,17 @@ export class BondsView {
             </li>`;
         }).join("");
 
+        const archived = info.kind === "entry" && this.#bonds.archived.includes(info.id);
+        const pinned = this.#bonds.pins.includes(info.id);
+        // What the rest of the party thinks: where each of them keeps this person (distance only).
+        let peers = "";
+        if (info.kind === "entry") {
+            const theirs = (m.peers ?? []).filter(p => p.rings[info.id]);
+            if (theirs.length) peers = `<div class="bonds-insp__block">
+                <span class="bonds-insp__label">${esc(this.t("PartyThinks"))}</span>
+                <ul class="bonds-peers">${theirs.map(p => `<li><span class="bonds-peers__img"><img src="${esc(p.img)}" alt=""></span><span class="bonds-peers__name">${esc(p.name)}</span><span class="bonds-peers__ring is-ring${p.rings[info.id]}">${esc(this.t(`Ring${p.rings[info.id]}`))}</span></li>`).join("")}</ul>
+            </div>`;
+        }
         const actions = [];
         if (editable && (placement || info.kind !== "entry")) actions.push(`<button type="button" class="persona-button" data-action="startLink"><i class="fa-solid fa-link" inert></i><span>${esc(this.t("LinkTo"))}</span></button>`);
         if (entry) actions.push(`<button type="button" class="persona-button bonds-ghost-btn" data-action="openCard" data-id="${esc(entry.id)}"><i class="fa-solid fa-id-card" inert></i><span>${esc(this.t("OpenCard"))}</span></button>`);
@@ -559,17 +790,22 @@ export class BondsView {
             <button type="button" class="bonds-back" data-action="deselect"><i class="fa-solid fa-chevron-left" inert></i><span>${esc(loose.length ? this.adapter.t("PERSONA.Bonds.BackToList").replace("{n}", loose.length) : this.t("Close"))}</span></button>
             <div class="bonds-insp__head ${entry?.status && entry.status !== "alive" ? `is-${entry.status}` : ""}">
                 <span class="bonds-insp__portrait ${info.kind}"><img class="persona-fit" src="${esc(info.img)}" style="${esc(entry?.frame ?? "")}" alt="" draggable="false"></span>
-                <h3>${esc(info.name)}</h3>
+                <h3>${esc(info.name)}${info.kind === "entry" && editable ? `<button type="button" class="bonds-pin ${pinned ? "is-on" : ""}" data-action="togglePin" aria-pressed="${pinned}" title="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}" aria-label="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}"><i class="fa-${pinned ? "solid" : "regular"} fa-star" inert></i></button>` : ""}</h3>
                 ${entry?.title ? `<p class="bonds-insp__title">${esc(entry.title)}</p>` : ""}
-                <div class="bonds-insp__tags"><span class="bonds-tag">${esc(place)}</span>${status}</div>
+                <div class="bonds-insp__tags"><span class="bonds-tag">${esc(archived ? this.t("Archived") : place)}</span>${status}</div>
             </div>
             ${distance}
             <div class="bonds-insp__block">
                 <span class="bonds-insp__label">${esc(this.t("Bonds"))}${links.length ? ` <b>${links.length}</b>` : ""}</span>
                 ${rows ? `<ul class="bonds-bonds">${rows}</ul>` : `<p class="bonds-insp__empty">${esc(editable && (placement || info.kind !== "entry") ? this.t("NoBondsYet") : this.t("NoBonds"))}</p>`}
             </div>
+            ${peers}
             <div class="bonds-insp__actions">${actions.join("")}</div>
-            ${editable && placement ? `<button type="button" class="bonds-takeoff-btn" data-action="takeOff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOff"))}</span></button>` : ""}
+            <div class="bonds-insp__minor">
+                ${editable && placement ? `<button type="button" class="bonds-takeoff-btn" data-action="takeOff"><i class="fa-solid fa-arrow-right-from-bracket" inert></i><span>${esc(this.t("TakeOff"))}</span></button>` : ""}
+                ${editable && info.kind === "entry" && !archived ? `<button type="button" class="bonds-takeoff-btn" data-action="archive" title="${esc(this.t("ArchiveHint"))}"><i class="fa-solid fa-box-archive" inert></i><span>${esc(this.t("Archive"))}</span></button>` : ""}
+                ${editable && archived ? `<button type="button" class="bonds-takeoff-btn" data-action="restore"><i class="fa-solid fa-box-open" inert></i><span>${esc(this.t("Restore"))}</span></button>` : ""}
+            </div>
             <div class="bonds-newcat" data-new-sector><i class="fa-solid fa-folder-plus" inert></i><span>${esc(this.t("NewCategoryDrop"))}</span></div>
         </aside>`;
     }
@@ -599,6 +835,7 @@ export class BondsView {
 
     #onInput = event => {
         if (event.target.name === "bondsFind") return this.#onFind(event.target.value);
+        if (event.target.name === "ovQuery") { this.#overviewQuery = event.target.value; return this.#filterOverview(); }
         if (event.target.name !== "bondsQuery") return;
         this.#query = event.target.value;
         this.#filterLoose();
@@ -622,7 +859,7 @@ export class BondsView {
         if (!m.moments.length && !m.isGM) return "";
         if (!m.moments.length) return `<footer class="bonds-timeline is-empty"><i class="fa-solid fa-clock-rotate-left" inert></i><span>${esc(this.t("NoMoments"))}</span></footer>`;
         const ticks = m.moments.map(moment => `
-            <button type="button" class="bonds-tick ${m.momentId === moment.id ? "is-active" : ""}" data-action="moment" data-id="${esc(moment.id)}" title="${esc(moment.label)}">
+            <button type="button" class="bonds-tick ${m.momentId === moment.id ? "is-active" : ""} ${moment.auto ? `is-auto` : ""}" data-action="moment" data-id="${esc(moment.id)}" title="${esc([moment.label, ...this.#diffLines(moment.diff).map(l => l.replace(/<[^>]+>/g, "").trim())].join("\n"))}">
                 <span class="bonds-tick__dot"></span><span class="bonds-tick__label">${esc(moment.label)}</span>
             </button>`).join("");
         return `<footer class="bonds-timeline">
@@ -878,6 +1115,20 @@ export class BondsView {
         fit: () => this.fit(),
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
+        togglePin: () => this.#commit(togglePin(this.#bonds, this.#selected)),
+        archive: () => this.#commit(archive(this.#bonds, this.#selected)),
+        restore: () => this.#commit(restore(this.#bonds, this.#selected)),
+        toggleOverview: () => { this.#overview = !this.#overview; this.#cam.auto = true; this.#render(); },
+        ovJump: el => {
+            this.#overview = false;
+            this.#selected = el.dataset.id;
+            this.#cam.auto = true;
+            this.adapter.selectPlayer(el.dataset.player);
+            // selectPlayer resets the selection for another player's wheel; pick it again.
+            this.#selected = el.dataset.id;
+            this.#render();
+        },
+        exportImage: () => this.#exportImage(),
         toggleScene: () => { this.#sceneOnly = !this.#sceneOnly; this.#cam.auto = true; this.#render(); },
         ackChanges: () => this.adapter.ackChanges?.(),
         pickType: el => {
