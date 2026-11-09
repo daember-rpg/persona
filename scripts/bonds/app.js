@@ -13,7 +13,7 @@ import { getSetting } from "../settings.js";
 import { getEntries, getEntry, getGroups, canSee, seenIds, players, updateSetting } from "../store.js";
 import { imageOf, frameStyle } from "../view-data.js";
 import { BondsView } from "./view.js";
-import { normalizeBonds, normalizeOfficial, diffWheels, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
+import { normalizeBonds, normalizeOfficial, diffWheels, setShared, PARTY_PREFIX, SECTOR_COLORS, NO_TAG } from "./model.js";
 
 const t = key => game.i18n.localize(key);
 
@@ -231,6 +231,13 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             saveBonds: bonds => saveBonds(this.ownerId ?? game.user.id, bonds),
             openCard: id => this.openCard(id),
             selectPlayer: id => { this.ownerId = id; this.momentId = null; this.view?.refresh(); },
+            togglePartyView: () => {
+                this.partyView = !this.partyView;
+                if (!this.partyView) this.ownerId = game.user.id;
+                this.momentId = null;
+                this.view?.refresh();
+            },
+            setShared: shared => saveOwnBonds(setShared(bondsOf(game.user), shared)),
             selectMoment: id => { this.momentId = id; this.view?.refresh(); },
             recordMoment: () => this.#promptMoment(),
             saveOfficial: list => saveOfficial(list),
@@ -246,6 +253,9 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
     buildModel() {
         const isGM = game.user.isGM;
         const roster = players();
+        // Players may look at the wheels the rest of the party shares (read-only); the GM sees all.
+        const sharers = roster.filter(u => u.id === game.user.id || bondsOf(u).shared);
+        if (!isGM && (!this.partyView || !sharers.some(u => u.id === this.ownerId))) this.ownerId = game.user.id;
         const owner = game.users.get(this.ownerId) ?? (isGM ? null : game.user);
         const moments = getMoments();
         const moment = this.momentId ? moments.find(m => m.id === this.momentId) : null;
@@ -259,7 +269,9 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
         });
         const base = {
             isGM,
-            players: isGM ? roster.map(u => ({ id: u.id, name: u.character?.name ?? u.name, user: u.character ? u.name : "", img: u.character?.img || u.avatar || "icons/svg/mystery-man.svg" })) : [],
+            players: (isGM ? roster : this.partyView ? sharers : []).map(u => ({ id: u.id, name: u.character?.name ?? u.name, user: u.character ? u.name : "", img: u.character?.img || u.avatar || "icons/svg/mystery-man.svg", self: u.id === game.user.id })),
+            canBrowse: !isGM && sharers.length > 1,
+            browsing: !isGM && !!this.partyView,
             moments: summarize(this.ownerId),
             momentId: moment?.id ?? null
         };
@@ -271,14 +283,17 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             };
         }
 
-        // People this player knows, as they know them (name hidden until revealed).
+        // People this player knows, as they know them (name hidden until revealed). Looking at
+        // someone else's wheel, a player only ever sees the people *they* know too, as they know them.
+        const other = !isGM && owner.id !== game.user.id;
+        const viewer = isGM ? owner : game.user;
         const seen = seenIds(owner);
         const statusOf = entry => moment?.statuses?.[entry.id] ?? entry.status;
-        const known = getEntries().filter(e => e.kind === "npc" && canSee(e, "face", owner));
+        const known = getEntries().filter(e => e.kind === "npc" && canSee(e, "face", owner) && (!other || canSee(e, "face", game.user)));
         const tags = folderTags();
         const order = new Map(tags.map((tag, i) => [tag.key, i]));
         const entries = known.map(e => {
-            const named = canSee(e, "name", owner);
+            const named = canSee(e, "name", viewer);
             // The person's slice by default: their first folder, in the GM's folder order.
             const tag = [...e.groups].filter(id => order.has(id)).sort((a, b) => order.get(a) - order.get(b))[0] ?? NO_TAG;
             return {
@@ -288,7 +303,7 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
                 img: imageOf(e),
                 frame: frameStyle(e),
                 status: statusOf(e),
-                isNew: !isGM && !seen.has(e.id),
+                isNew: !isGM && !other && !seen.has(e.id),
                 tag
             };
         });
@@ -325,13 +340,20 @@ export class BondsWindow extends foundry.applications.api.ApplicationV2 {
             self: { name: self.name, img: self.img },
             party: roster.filter(u => u.id !== owner.id).map(persona),
             entries: entries.filter(e => knownIds.has(e.id)),
-            bonds: migrate(normalizeBonds(moment ? moment.wheels?.[owner.id] : owner.getFlag(MODULE_ID, "bonds"))),
+            bonds: this.#forViewer(migrate(normalizeBonds(moment ? moment.wheels?.[owner.id] : owner.getFlag(MODULE_ID, "bonds"))), other),
+            viewingOther: other,
             tags,
             official: moment ? [] : official,
             officialAll: isGM ? officialAll : [],
             changes,
             inScene: moment ? null : inScene(known)
         };
+    }
+
+    /** Someone else's wheel, seen by a player: their private notes stay theirs. */
+    #forViewer(bonds, other) {
+        if (!other) return bonds;
+        return { ...bonds, links: bonds.links.map(l => (l.notePrivate ? { ...l, note: "" } : l)) };
     }
 
     /** GM: every person any player knows, against every player — known? on the wheel? how close? */

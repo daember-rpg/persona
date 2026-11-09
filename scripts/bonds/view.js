@@ -199,17 +199,19 @@ export class BondsView {
     #renderBar() {
         const m = this.#model;
         const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
-        const players = m.isGM && m.players.length
+        const players = m.players.length
             ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
                 <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
                     <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-player__name">${esc(p.name)}</span>
+                    <span class="bonds-player__name">${esc(p.self ? this.t("You") : p.name)}</span>
                 </button>`).join("")}</nav>`
             : "";
         const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.viewingOther ? this.adapter.t("PERSONA.Bonds.SubOther").replace("{name}", m.owner.name)
             : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
             : m.editable ? this.t("SubPlayer") : "";
         const tools = [
+            m.canBrowse ? `<button type="button" class="persona-button bonds-tool ${m.browsing ? "is-on" : ""}" data-action="togglePartyView" aria-pressed="${!!m.browsing}" title="${esc(this.t("PartyWheelsHint"))}"><i class="fa-solid fa-users" inert></i><span>${esc(this.t("PartyWheels"))}</span></button>` : "",
             !this.#overview && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
             m.overview ? `<button type="button" class="persona-button bonds-tool ${this.#overview ? "is-on" : ""}" data-action="toggleOverview" aria-pressed="${this.#overview}"><i class="fa-solid fa-table-cells" inert></i><span>${esc(this.t("Overview"))}</span></button>` : "",
             m.isGM && m.players.length ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>` : ""
@@ -674,6 +676,13 @@ export class BondsView {
                 <button type="button" class="${st.show === "focus" ? "is-on" : ""}" data-action="styleShow" data-show="focus" aria-pressed="${st.show === "focus"}">${esc(this.t("ShowFocus"))}</button>
             </div>
             <p class="bonds-form__hint">${esc(this.t("LinkStyleHint"))}</p>
+            ${!this.#model.isGM && !this.#model.viewingOther ? `
+            <span class="bonds-insp__label">${esc(this.t("ShareWheel"))}</span>
+            <div class="bonds-seg bonds-seg--two" role="group">
+                <button type="button" class="${this.#bonds.shared ? "is-on" : ""}" data-action="shareWheel" data-share="1" aria-pressed="${this.#bonds.shared}">${esc(this.t("ShareParty"))}</button>
+                <button type="button" class="${this.#bonds.shared ? "" : "is-on"}" data-action="shareWheel" data-share="0" aria-pressed="${!this.#bonds.shared}">${esc(this.t("ShareNobody"))}</button>
+            </div>
+            <p class="bonds-form__hint">${esc(this.t("ShareHint"))}</p>` : ""}
         </div>`;
     }
 
@@ -783,7 +792,7 @@ export class BondsView {
 
         // Where they sit: their category, else their folder.
         let place = "";
-        if (info.kind === "self") place = this.t("You");
+        if (info.kind === "self") place = m.viewingOther ? this.t("WheelOwner") : this.t("You");
         else if (info.kind === "party") place = this.t("Party");
         else if (placement?.sector) place = this.#bonds.sectors.find(s => s.id === placement.sector)?.label ?? "";
         else place = (m.tags ?? []).find(t => t.key === entry?.tag)?.label ?? this.t("NoFolder");
@@ -817,7 +826,7 @@ export class BondsView {
             return `<li class="bonds-bond ${l.suspect ? "is-suspect" : ""}" style="--c:${type.color}">
                 <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
                     <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${esc(l.note)}</em>` : ""}</span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${!l.official && l.notePrivate && !this.#model.viewingOther ? `<i class="fa-solid fa-lock" title="${esc(this.t("OnlyMe"))}" inert></i> ` : ""}${esc(l.note)}</em>` : ""}</span>
                 </button>
                 ${this.#canEditLink(l) ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-pen" inert></i></button>` : ""}
             </li>`;
@@ -1199,6 +1208,18 @@ export class BondsView {
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
         togglePin: () => this.#commit(togglePin(this.#bonds, this.#selected)),
+        togglePartyView: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePartyView?.(); },
+        shareWheel: el => {
+            Promise.resolve(this.adapter.setShared?.(el.dataset.share === "1")).catch(() => {});
+            this.#bonds = { ...this.#bonds, shared: el.dataset.share === "1" };
+            this.#model = { ...this.#model, bonds: this.#bonds };
+            this.#closePop();
+        },
+        noteVis: el => {
+            const form = el.closest("[data-link-form]");
+            form.querySelectorAll("[data-action=noteVis]").forEach(b => b.classList.toggle("is-on", b === el));
+            form.querySelector('[name="notePrivate"]').value = el.dataset.private;
+        },
         archive: () => this.#commit(archive(this.#bonds, this.#selected)),
         restore: () => this.#commit(restore(this.#bonds, this.#selected)),
         toggleOverview: () => { this.#overview = !this.#overview; this.#cam.auto = true; this.#render(); },
@@ -1370,6 +1391,12 @@ export class BondsView {
                     <i class="${t.icon}" inert></i><span>${esc(this.t(`Type.${t.id}`))}</span>
                 </button>`).join("")}</div>
             <input type="text" name="note" maxlength="140" value="${esc(link?.note ?? "")}" placeholder="${esc(this.t("NotePlaceholder"))}" autocomplete="off">
+            ${link?.official ? "" : `<input type="hidden" name="notePrivate" value="${link && link.notePrivate === false ? "0" : "1"}">
+            <div class="bonds-notevis"><span>${esc(this.t("NoteVisibleTo"))}</span>
+                <div class="bonds-seg bonds-seg--two" role="group">
+                    <button type="button" class="${link && link.notePrivate === false ? "" : "is-on"}" data-action="noteVis" data-private="1"><i class="fa-solid fa-lock" inert></i> ${esc(this.t("OnlyMe"))}</button>
+                    <button type="button" class="${link && link.notePrivate === false ? "is-on" : ""}" data-action="noteVis" data-private="0"><i class="fa-solid fa-users" inert></i> ${esc(this.t("Everyone"))}</button>
+                </div></div>`}
             ${link?.official ? "" : `<label class="bonds-check"><input type="checkbox" name="suspect" ${link?.suspect ? "checked" : ""}><span><b>${esc(this.t("Suspected"))}</b>${esc(this.t("SuspectHint"))}</span></label>`}
             ${canOfficial ? `<label class="bonds-check"><input type="checkbox" name="official"><span><b><i class="fa-solid fa-stamp" inert></i> ${esc(this.t("Official"))}</b>${esc(this.t("OfficialHint"))}</span></label>` : ""}
             ${link?.official || canOfficial ? `<label class="bonds-check"><input type="checkbox" name="hidden" ${link?.hidden ? "checked" : ""}><span><b><i class="fa-solid fa-eye-slash" inert></i> ${esc(this.t("HiddenShort"))}</b>${esc(this.t("HiddenHint"))}</span></label>` : ""}
@@ -1393,11 +1420,12 @@ export class BondsView {
             if (!type) return;
             const note = linkForm.querySelector('[name="note"]').value.trim();
             const suspect = !!linkForm.querySelector('[name="suspect"]')?.checked;
+            const notePrivate = linkForm.querySelector('[name="notePrivate"]')?.value !== "0";
             const hidden = !!linkForm.querySelector('[name="hidden"]')?.checked;
             const official = linkForm.dataset.official === "1" || !!linkForm.querySelector('[name="official"]')?.checked;
             this.#closePop();
             if (official) return this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], a, b, type, { note, hidden }));
-            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect }));
+            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect, notePrivate }));
         }
         const form = event.target.closest("[data-sector-form]");
         if (!form) return;

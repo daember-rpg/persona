@@ -3474,3 +3474,10 @@
 .bonds-range.is-off { opacity: 0.4; }
 .bonds-range input[type="range"] { width: 100%; accent-color: var(--dp-clay); }
 .bonds-range__ends { display: flex; justify-content: space-between; color: var(--dp-parchment-faint); }
+
+/* Party wheels, sharing, note visibility */
+.bonds-seg--two { grid-template-columns: repeat(2, 1fr); }
+.bonds-notevis { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-notevis .bonds-seg button i { margin-right: 4px; font-size: 11px; }
+.bonds-bond__text em i { font-size: 10px; color: var(--dp-parchment-faint); }
+.bonds.is-readonly .bonds-who__img { border-color: var(--dp-clay-light); }

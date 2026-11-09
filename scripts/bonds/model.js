@@ -62,7 +62,7 @@ const clampRing = ring => Math.min(3, Math.max(1, Math.round(Number(ring) || 2))
 /* -------------------------------------------- */
 
 export function emptyBonds() {
-    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [] };
+    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [], shared: true };
 }
 
 export function normalizeBonds(raw) {
@@ -88,6 +88,8 @@ export function normalizeBonds(raw) {
     // Pinned people (shown first, starred) and archived ones (out of the way, kept for the timeline).
     out.archived = [...new Set((Array.isArray(raw.archived) ? raw.archived : []).map(String))].filter(id => !placed.has(id));
     out.pins = [...new Set((Array.isArray(raw.pins) ? raw.pins : []).map(String))];
+    // Whether the rest of the party may look at this wheel (read-only).
+    out.shared = raw.shared !== false;
     // A category exists only while someone is in it.
     const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
     out.sectors = sectors.filter(s => used.has(s.id));
@@ -110,6 +112,8 @@ function normalizeLink(l, types = new Set(LINK_TYPES.map(t => t.id))) {
         b: String(l.b),
         type: types.has(l.type) ? l.type : "ally",
         note: String(l.note ?? "").slice(0, 140),
+        // A note is the player's own unless they choose to show it to the party.
+        notePrivate: l.notePrivate !== false,
         suspect: !!l.suspect
     };
 }
@@ -180,6 +184,12 @@ export function place(bonds, entryId, sector, ring, beforeId = null) {
     return normalizeBonds(next);
 }
 
+export function setShared(bonds, shared) {
+    const next = copy(bonds);
+    next.shared = !!shared;
+    return normalizeBonds(next);
+}
+
 export function togglePin(bonds, entryId) {
     const next = copy(bonds);
     next.pins = next.pins.includes(entryId) ? next.pins.filter(id => id !== entryId) : [...next.pins, entryId];
@@ -222,8 +232,9 @@ export function setLink(bonds, a, b, type, extra = {}) {
         existing.b = b;
         if (extra.note !== undefined) existing.note = extra.note;
         if (extra.suspect !== undefined) existing.suspect = extra.suspect;
+        if (extra.notePrivate !== undefined) existing.notePrivate = extra.notePrivate;
     } else {
-        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect });
+        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect, notePrivate: extra.notePrivate !== false });
     }
     return normalizeBonds(next);
 }

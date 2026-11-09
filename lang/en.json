@@ -317,7 +317,18 @@
       "ShowLines": "Show lines",
       "ShowAlways": "Always",
       "ShowFocus": "Only in focus",
-      "LinkStyleHint": "Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them."
+      "LinkStyleHint": "Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them.",
+      "PartyWheels": "Party wheels",
+      "PartyWheelsHint": "Look at the wheels the rest of the party shares. You can only change your own.",
+      "SubOther": "{name}'s wheel, as they see it. You can look, not change it. Their private notes stay hidden.",
+      "ShareWheel": "Your wheel",
+      "ShareParty": "Party can see it",
+      "ShareNobody": "Only me",
+      "ShareHint": "When shared, the party can look at your wheel (never change it). They only see people they know too, and only the notes you set to Everyone.",
+      "NoteVisibleTo": "Note visible to",
+      "OnlyMe": "Only me",
+      "Everyone": "Everyone",
+      "WheelOwner": "Whose wheel this is"
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

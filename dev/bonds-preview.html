@@ -3481,6 +3481,13 @@
 .bonds-range input[type="range"] { width: 100%; accent-color: var(--dp-clay); }
 .bonds-range__ends { display: flex; justify-content: space-between; color: var(--dp-parchment-faint); }
 
+/* Party wheels, sharing, note visibility */
+.bonds-seg--two { grid-template-columns: repeat(2, 1fr); }
+.bonds-notevis { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-notevis .bonds-seg button i { margin-right: 4px; font-size: 11px; }
+.bonds-bond__text em i { font-size: 10px; color: var(--dp-parchment-faint); }
+.bonds.is-readonly .bonds-who__img { border-color: var(--dp-clay-light); }
+
 /* Preview chrome (not part of the module) */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; background: #0b0a09; }
@@ -3526,7 +3533,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>
-const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."},"autoMoment":{"Name":"Bonds: record moments automatically","Hint":"Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.","off":"Never","session":"At the start of each session","combat":"After each combat","both":"Both"}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})","Suspected":"Suspicion","SuspectHint":"You think so, but aren't sure yet. Drawn as a dashed line.","Official":"Official","OfficialHint":"Shows on every wheel that knows both people. Players can't change it.","HiddenShort":"Hidden","HiddenHint":"Only you see it, until you untick this.","NotePlaceholder":"Why? (optional, e.g. owes us 50 gold)","SinceLast":"Since you last looked","GotIt":"Got it","ChangeNew1":"{n} new person","ChangeNew":"{n} new people","ChangeDead1":"{n} death","ChangeDead":"{n} deaths","ChangeStatus1":"{n} went missing or came back","ChangeStatus":"{n} went missing or came back","ChangeLinks1":"{n} new revealed bond","ChangeLinks":"{n} new revealed bonds","InScene":"In scene ({n})","InSceneHint":"Only the people with a token on the current scene","Export":"Save the wheel as an image","ExportFailed":"Couldn't save the image: a portrait comes from another site that doesn't allow it.","Overview":"Overview","OverviewHint":"Every person the players know, and where each player keeps them. Click a cell to open that wheel on that person.","OverviewEmpty":"No one has been revealed to the players yet.","OvUnknown":"Not revealed to this player","OvNotPlaced":"Not placed","Archived":"Archived","Archive":"Archive","ArchiveHint":"Takes them off the wheel and out of the list, but keeps them in the timeline.","Restore":"Restore","Pin":"Pin","Unpin":"Unpin","Pinned":"Pinned","PartyThinks":"What the party thinks","NoChangesInMoment":"Nothing changed on this wheel in this moment.","DiffDied":"{name} died","DiffMissing":"{name} went missing","DiffAdded":"{name} joined the wheel","AutoSession":"Session {n} · {date}","AutoCombat":"After the fight · {scene}","LinkStyle":"Link style","ShapeCurve":"Curved","ShapeAngular":"Angular","Bend":"How much curves bend","BendStraight":"Straight","BendLoose":"Loose","ShowLines":"Show lines","ShowAlways":"Always","ShowFocus":"Only in focus","LinkStyleHint":"Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them."},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}}};
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."},"autoMoment":{"Name":"Bonds: record moments automatically","Hint":"Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.","off":"Never","session":"At the start of each session","combat":"After each combat","both":"Both"}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})","Suspected":"Suspicion","SuspectHint":"You think so, but aren't sure yet. Drawn as a dashed line.","Official":"Official","OfficialHint":"Shows on every wheel that knows both people. Players can't change it.","HiddenShort":"Hidden","HiddenHint":"Only you see it, until you untick this.","NotePlaceholder":"Why? (optional, e.g. owes us 50 gold)","SinceLast":"Since you last looked","GotIt":"Got it","ChangeNew1":"{n} new person","ChangeNew":"{n} new people","ChangeDead1":"{n} death","ChangeDead":"{n} deaths","ChangeStatus1":"{n} went missing or came back","ChangeStatus":"{n} went missing or came back","ChangeLinks1":"{n} new revealed bond","ChangeLinks":"{n} new revealed bonds","InScene":"In scene ({n})","InSceneHint":"Only the people with a token on the current scene","Export":"Save the wheel as an image","ExportFailed":"Couldn't save the image: a portrait comes from another site that doesn't allow it.","Overview":"Overview","OverviewHint":"Every person the players know, and where each player keeps them. Click a cell to open that wheel on that person.","OverviewEmpty":"No one has been revealed to the players yet.","OvUnknown":"Not revealed to this player","OvNotPlaced":"Not placed","Archived":"Archived","Archive":"Archive","ArchiveHint":"Takes them off the wheel and out of the list, but keeps them in the timeline.","Restore":"Restore","Pin":"Pin","Unpin":"Unpin","Pinned":"Pinned","PartyThinks":"What the party thinks","NoChangesInMoment":"Nothing changed on this wheel in this moment.","DiffDied":"{name} died","DiffMissing":"{name} went missing","DiffAdded":"{name} joined the wheel","AutoSession":"Session {n} · {date}","AutoCombat":"After the fight · {scene}","LinkStyle":"Link style","ShapeCurve":"Curved","ShapeAngular":"Angular","Bend":"How much curves bend","BendStraight":"Straight","BendLoose":"Loose","ShowLines":"Show lines","ShowAlways":"Always","ShowFocus":"Only in focus","LinkStyleHint":"Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them.","PartyWheels":"Party wheels","PartyWheelsHint":"Look at the wheels the rest of the party shares. You can only change your own.","SubOther":"{name}'s wheel, as they see it. You can look, not change it. Their private notes stay hidden.","ShareWheel":"Your wheel","ShareParty":"Party can see it","ShareNobody":"Only me","ShareHint":"When shared, the party can look at your wheel (never change it). They only see people they know too, and only the notes you set to Everyone.","NoteVisibleTo":"Note visible to","OnlyMe":"Only me","Everyone":"Everyone","WheelOwner":"Whose wheel this is"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}}};
 /**
  * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
  *
@@ -3591,7 +3598,7 @@ const clampRing = ring => Math.min(3, Math.max(1, Math.round(Number(ring) || 2))
 /* -------------------------------------------- */
 
 function emptyBonds() {
-    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [] };
+    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [], shared: true };
 }
 
 function normalizeBonds(raw) {
@@ -3617,6 +3624,8 @@ function normalizeBonds(raw) {
     // Pinned people (shown first, starred) and archived ones (out of the way, kept for the timeline).
     out.archived = [...new Set((Array.isArray(raw.archived) ? raw.archived : []).map(String))].filter(id => !placed.has(id));
     out.pins = [...new Set((Array.isArray(raw.pins) ? raw.pins : []).map(String))];
+    // Whether the rest of the party may look at this wheel (read-only).
+    out.shared = raw.shared !== false;
     // A category exists only while someone is in it.
     const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
     out.sectors = sectors.filter(s => used.has(s.id));
@@ -3639,6 +3648,8 @@ function normalizeLink(l, types = new Set(LINK_TYPES.map(t => t.id))) {
         b: String(l.b),
         type: types.has(l.type) ? l.type : "ally",
         note: String(l.note ?? "").slice(0, 140),
+        // A note is the player's own unless they choose to show it to the party.
+        notePrivate: l.notePrivate !== false,
         suspect: !!l.suspect
     };
 }
@@ -3709,6 +3720,12 @@ function place(bonds, entryId, sector, ring, beforeId = null) {
     return normalizeBonds(next);
 }
 
+function setShared(bonds, shared) {
+    const next = copy(bonds);
+    next.shared = !!shared;
+    return normalizeBonds(next);
+}
+
 function togglePin(bonds, entryId) {
     const next = copy(bonds);
     next.pins = next.pins.includes(entryId) ? next.pins.filter(id => id !== entryId) : [...next.pins, entryId];
@@ -3751,8 +3768,9 @@ function setLink(bonds, a, b, type, extra = {}) {
         existing.b = b;
         if (extra.note !== undefined) existing.note = extra.note;
         if (extra.suspect !== undefined) existing.suspect = extra.suspect;
+        if (extra.notePrivate !== undefined) existing.notePrivate = extra.notePrivate;
     } else {
-        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect });
+        next.links.push({ id: uid(), a, b, type, note: extra.note ?? "", suspect: !!extra.suspect, notePrivate: extra.notePrivate !== false });
     }
     return normalizeBonds(next);
 }
@@ -4277,17 +4295,19 @@ class BondsView {
     #renderBar() {
         const m = this.#model;
         const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
-        const players = m.isGM && m.players.length
+        const players = m.players.length
             ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
                 <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
                     <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-player__name">${esc(p.name)}</span>
+                    <span class="bonds-player__name">${esc(p.self ? this.t("You") : p.name)}</span>
                 </button>`).join("")}</nav>`
             : "";
         const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.viewingOther ? this.adapter.t("PERSONA.Bonds.SubOther").replace("{name}", m.owner.name)
             : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
             : m.editable ? this.t("SubPlayer") : "";
         const tools = [
+            m.canBrowse ? `<button type="button" class="persona-button bonds-tool ${m.browsing ? "is-on" : ""}" data-action="togglePartyView" aria-pressed="${!!m.browsing}" title="${esc(this.t("PartyWheelsHint"))}"><i class="fa-solid fa-users" inert></i><span>${esc(this.t("PartyWheels"))}</span></button>` : "",
             !this.#overview && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
             m.overview ? `<button type="button" class="persona-button bonds-tool ${this.#overview ? "is-on" : ""}" data-action="toggleOverview" aria-pressed="${this.#overview}"><i class="fa-solid fa-table-cells" inert></i><span>${esc(this.t("Overview"))}</span></button>` : "",
             m.isGM && m.players.length ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>` : ""
@@ -4752,6 +4772,13 @@ class BondsView {
                 <button type="button" class="${st.show === "focus" ? "is-on" : ""}" data-action="styleShow" data-show="focus" aria-pressed="${st.show === "focus"}">${esc(this.t("ShowFocus"))}</button>
             </div>
             <p class="bonds-form__hint">${esc(this.t("LinkStyleHint"))}</p>
+            ${!this.#model.isGM && !this.#model.viewingOther ? `
+            <span class="bonds-insp__label">${esc(this.t("ShareWheel"))}</span>
+            <div class="bonds-seg bonds-seg--two" role="group">
+                <button type="button" class="${this.#bonds.shared ? "is-on" : ""}" data-action="shareWheel" data-share="1" aria-pressed="${this.#bonds.shared}">${esc(this.t("ShareParty"))}</button>
+                <button type="button" class="${this.#bonds.shared ? "" : "is-on"}" data-action="shareWheel" data-share="0" aria-pressed="${!this.#bonds.shared}">${esc(this.t("ShareNobody"))}</button>
+            </div>
+            <p class="bonds-form__hint">${esc(this.t("ShareHint"))}</p>` : ""}
         </div>`;
     }
 
@@ -4861,7 +4888,7 @@ class BondsView {
 
         // Where they sit: their category, else their folder.
         let place = "";
-        if (info.kind === "self") place = this.t("You");
+        if (info.kind === "self") place = m.viewingOther ? this.t("WheelOwner") : this.t("You");
         else if (info.kind === "party") place = this.t("Party");
         else if (placement?.sector) place = this.#bonds.sectors.find(s => s.id === placement.sector)?.label ?? "";
         else place = (m.tags ?? []).find(t => t.key === entry?.tag)?.label ?? this.t("NoFolder");
@@ -4895,7 +4922,7 @@ class BondsView {
             return `<li class="bonds-bond ${l.suspect ? "is-suspect" : ""}" style="--c:${type.color}">
                 <button type="button" class="bonds-bond__who" data-action="select" data-id="${esc(other.id)}">
                     <span class="bonds-bond__img"><img src="${esc(other.img)}" alt="" draggable="false"></span>
-                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${esc(l.note)}</em>` : ""}</span>
+                    <span class="bonds-bond__text"><b>${esc(other.name)}</b><small><i class="${type.icon}" inert></i>${esc(label)}${flags}</small>${l.note ? `<em>${!l.official && l.notePrivate && !this.#model.viewingOther ? `<i class="fa-solid fa-lock" title="${esc(this.t("OnlyMe"))}" inert></i> ` : ""}${esc(l.note)}</em>` : ""}</span>
                 </button>
                 ${this.#canEditLink(l) ? `<button type="button" class="bonds-bond__edit" data-action="editLink" data-id="${esc(l.id)}" title="${esc(this.t("EditLink"))}" aria-label="${esc(this.t("EditLink"))}"><i class="fa-solid fa-pen" inert></i></button>` : ""}
             </li>`;
@@ -5277,6 +5304,18 @@ class BondsView {
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
         togglePin: () => this.#commit(togglePin(this.#bonds, this.#selected)),
+        togglePartyView: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePartyView?.(); },
+        shareWheel: el => {
+            Promise.resolve(this.adapter.setShared?.(el.dataset.share === "1")).catch(() => {});
+            this.#bonds = { ...this.#bonds, shared: el.dataset.share === "1" };
+            this.#model = { ...this.#model, bonds: this.#bonds };
+            this.#closePop();
+        },
+        noteVis: el => {
+            const form = el.closest("[data-link-form]");
+            form.querySelectorAll("[data-action=noteVis]").forEach(b => b.classList.toggle("is-on", b === el));
+            form.querySelector('[name="notePrivate"]').value = el.dataset.private;
+        },
         archive: () => this.#commit(archive(this.#bonds, this.#selected)),
         restore: () => this.#commit(restore(this.#bonds, this.#selected)),
         toggleOverview: () => { this.#overview = !this.#overview; this.#cam.auto = true; this.#render(); },
@@ -5448,6 +5487,12 @@ class BondsView {
                     <i class="${t.icon}" inert></i><span>${esc(this.t(`Type.${t.id}`))}</span>
                 </button>`).join("")}</div>
             <input type="text" name="note" maxlength="140" value="${esc(link?.note ?? "")}" placeholder="${esc(this.t("NotePlaceholder"))}" autocomplete="off">
+            ${link?.official ? "" : `<input type="hidden" name="notePrivate" value="${link && link.notePrivate === false ? "0" : "1"}">
+            <div class="bonds-notevis"><span>${esc(this.t("NoteVisibleTo"))}</span>
+                <div class="bonds-seg bonds-seg--two" role="group">
+                    <button type="button" class="${link && link.notePrivate === false ? "" : "is-on"}" data-action="noteVis" data-private="1"><i class="fa-solid fa-lock" inert></i> ${esc(this.t("OnlyMe"))}</button>
+                    <button type="button" class="${link && link.notePrivate === false ? "is-on" : ""}" data-action="noteVis" data-private="0"><i class="fa-solid fa-users" inert></i> ${esc(this.t("Everyone"))}</button>
+                </div></div>`}
             ${link?.official ? "" : `<label class="bonds-check"><input type="checkbox" name="suspect" ${link?.suspect ? "checked" : ""}><span><b>${esc(this.t("Suspected"))}</b>${esc(this.t("SuspectHint"))}</span></label>`}
             ${canOfficial ? `<label class="bonds-check"><input type="checkbox" name="official"><span><b><i class="fa-solid fa-stamp" inert></i> ${esc(this.t("Official"))}</b>${esc(this.t("OfficialHint"))}</span></label>` : ""}
             ${link?.official || canOfficial ? `<label class="bonds-check"><input type="checkbox" name="hidden" ${link?.hidden ? "checked" : ""}><span><b><i class="fa-solid fa-eye-slash" inert></i> ${esc(this.t("HiddenShort"))}</b>${esc(this.t("HiddenHint"))}</span></label>` : ""}
@@ -5471,11 +5516,12 @@ class BondsView {
             if (!type) return;
             const note = linkForm.querySelector('[name="note"]').value.trim();
             const suspect = !!linkForm.querySelector('[name="suspect"]')?.checked;
+            const notePrivate = linkForm.querySelector('[name="notePrivate"]')?.value !== "0";
             const hidden = !!linkForm.querySelector('[name="hidden"]')?.checked;
             const official = linkForm.dataset.official === "1" || !!linkForm.querySelector('[name="official"]')?.checked;
             this.#closePop();
             if (official) return this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], a, b, type, { note, hidden }));
-            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect }));
+            return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect, notePrivate }));
         }
         const form = event.target.closest("[data-sector-form]");
         if (!form) return;
@@ -5574,7 +5620,7 @@ class BondsView {
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [{ id: "e1", sector: null, ring: 3 }, { id: "e3", sector: null, ring: 1 }, { id: "e9", sector: null, ring: 2 }], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [{ id: "e1", sector: null, ring: 3 }, { id: "e3", sector: null, ring: 1 }, { id: "e9", sector: null, ring: 2 }], links: [{ id: "m1", a: "self", b: "e3", type: "love", note: "I'd follow her anywhere", notePrivate: false }, { id: "m2", a: "self", b: "e9", type: "enemy", note: "He knows my secret", notePrivate: true }] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         official: [
@@ -5604,27 +5650,34 @@ class BondsView {
         t,
         getModel() {
             const isGM = S.role === "gm";
-            const ownerId = isGM ? S.gmOwner : S.role;
+            const sharers = PLAYERS.filter(p => p.id === S.role || normalizeBonds(S.wheels[p.id]).shared);
+            if (!isGM && (!S.partyView || !sharers.some(p => p.id === S.viewOwner))) S.viewOwner = S.role;
+            const ownerId = isGM ? S.gmOwner : S.viewOwner;
+            const other = !isGM && ownerId !== S.role;
+            const viewerId = isGM ? ownerId : S.role;
             const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
-            const known = S.entries.filter(e => e.known.includes(ownerId));
+            const known = S.entries.filter(e => e.known.includes(ownerId) && (!other || e.known.includes(S.role)));
             return {
                 isGM,
-                editable: !moment,
+                editable: !moment && !other,
+                viewingOther: other,
+                canBrowse: !isGM && sharers.length > 1,
+                browsing: !isGM && !!S.partyView,
                 owner: { id: owner.id, name: owner.character },
                 self: { name: owner.character, img: avatar(owner.character) },
                 party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
                 entries: known.map(e => ({
                     id: e.id,
-                    name: e.named.includes(ownerId) ? e.name : null,
-                    title: e.named.includes(ownerId) ? e.title : "",
+                    name: e.named.includes(viewerId) ? e.name : null,
+                    title: e.named.includes(viewerId) ? e.title : "",
                     img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
                     isNew: !isGM && e.id === "e14",
                     tag: e.group ?? "_none"
                 })),
-                bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
+                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[ownerId] : S.wheels[ownerId]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
                 tags: TAGS,
-                players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
+                players: (isGM ? PLAYERS : S.partyView ? sharers : []).map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character), self: p.id === S.role })),
                 moments: S.moments.map((mo, i) => {
                     const prev = S.moments[i - 1];
                     const d = diffWheels(prev?.wheels?.[ownerId], mo.wheels?.[ownerId], prev?.statuses ?? {}, mo.statuses ?? {});
@@ -5653,6 +5706,8 @@ class BondsView {
             };
         },
         saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
+        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = S.role; S.momentId = null; view.refresh(); },
+        setShared(shared) { S.wheels[S.role] = { ...normalizeBonds(S.wheels[S.role]), shared }; view.refresh(); },
         openCard(id) {
             const e = S.entries.find(x => x.id === id);
             const ownerId = S.role === "gm" ? S.gmOwner : S.role;
@@ -5665,7 +5720,7 @@ class BondsView {
             document.getElementById("pv-card-text").textContent = lang === "en" ? "This is Persona's card (no Actor sheet). Click outside to close." : "This is Persona's card (never the Actor sheet). Click outside to close.";
             document.getElementById("pv-card").hidden = false;
         },
-        selectPlayer(id) { S.gmOwner = id; S.momentId = null; view.refresh(); },
+        selectPlayer(id) { if (S.role === "gm") S.gmOwner = id; else S.viewOwner = id; S.momentId = null; view.refresh(); },
         selectMoment(id) { S.momentId = id; view.refresh(); },
         recordMoment() {
             const label = prompt(t("PERSONA.Bonds.RecordHint"), t("PERSONA.Bonds.MomentDefault").replace("{n}", S.moments.length + 1));

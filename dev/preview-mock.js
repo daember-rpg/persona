@@ -67,7 +67,7 @@
     const fresh = () => ({
         role: "p1",
         entries: JSON.parse(JSON.stringify(ENTRIES)),
-        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [{ id: "e1", sector: null, ring: 3 }, { id: "e3", sector: null, ring: 1 }, { id: "e9", sector: null, ring: 2 }], links: [] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
+        wheels: { p1: (() => { const w = sample(); ENTRIES.filter(e => e.id.startsWith("x")).forEach((e, i) => w.placements.push({ id: e.id, sector: null, ring: 1 + (i % 3) })); return w; })(), p2: { v: 1, sectors: [], placements: [{ id: "e1", sector: null, ring: 3 }, { id: "e3", sector: null, ring: 1 }, { id: "e9", sector: null, ring: 2 }], links: [{ id: "m1", a: "self", b: "e3", type: "love", note: "I'd follow her anywhere", notePrivate: false }, { id: "m2", a: "self", b: "e9", type: "enemy", note: "He knows my secret", notePrivate: true }] }, p3: { v: 1, sectors: [], placements: [{ id: "e9", sector: null, ring: 1 }], links: [] }, p4: { v: 1, sectors: [], placements: [], links: [] } },
         moments: [],
         momentId: null,
         official: [
@@ -97,27 +97,34 @@
         t,
         getModel() {
             const isGM = S.role === "gm";
-            const ownerId = isGM ? S.gmOwner : S.role;
+            const sharers = PLAYERS.filter(p => p.id === S.role || normalizeBonds(S.wheels[p.id]).shared);
+            if (!isGM && (!S.partyView || !sharers.some(p => p.id === S.viewOwner))) S.viewOwner = S.role;
+            const ownerId = isGM ? S.gmOwner : S.viewOwner;
+            const other = !isGM && ownerId !== S.role;
+            const viewerId = isGM ? ownerId : S.role;
             const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
-            const known = S.entries.filter(e => e.known.includes(ownerId));
+            const known = S.entries.filter(e => e.known.includes(ownerId) && (!other || e.known.includes(S.role)));
             return {
                 isGM,
-                editable: !moment,
+                editable: !moment && !other,
+                viewingOther: other,
+                canBrowse: !isGM && sharers.length > 1,
+                browsing: !isGM && !!S.partyView,
                 owner: { id: owner.id, name: owner.character },
                 self: { name: owner.character, img: avatar(owner.character) },
                 party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
                 entries: known.map(e => ({
                     id: e.id,
-                    name: e.named.includes(ownerId) ? e.name : null,
-                    title: e.named.includes(ownerId) ? e.title : "",
+                    name: e.named.includes(viewerId) ? e.name : null,
+                    title: e.named.includes(viewerId) ? e.title : "",
                     img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
                     isNew: !isGM && e.id === "e14",
                     tag: e.group ?? "_none"
                 })),
-                bonds: moment ? (moment.wheels[ownerId] ?? null) : S.wheels[ownerId],
+                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[ownerId] : S.wheels[ownerId]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
                 tags: TAGS,
-                players: PLAYERS.map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character) })),
+                players: (isGM ? PLAYERS : S.partyView ? sharers : []).map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character), self: p.id === S.role })),
                 moments: S.moments.map((mo, i) => {
                     const prev = S.moments[i - 1];
                     const d = diffWheels(prev?.wheels?.[ownerId], mo.wheels?.[ownerId], prev?.statuses ?? {}, mo.statuses ?? {});
@@ -146,6 +153,8 @@
             };
         },
         saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
+        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = S.role; S.momentId = null; view.refresh(); },
+        setShared(shared) { S.wheels[S.role] = { ...normalizeBonds(S.wheels[S.role]), shared }; view.refresh(); },
         openCard(id) {
             const e = S.entries.find(x => x.id === id);
             const ownerId = S.role === "gm" ? S.gmOwner : S.role;
@@ -158,7 +167,7 @@
             document.getElementById("pv-card-text").textContent = lang === "en" ? "This is Persona's card (no Actor sheet). Click outside to close." : "This is Persona's card (never the Actor sheet). Click outside to close.";
             document.getElementById("pv-card").hidden = false;
         },
-        selectPlayer(id) { S.gmOwner = id; S.momentId = null; view.refresh(); },
+        selectPlayer(id) { if (S.role === "gm") S.gmOwner = id; else S.viewOwner = id; S.momentId = null; view.refresh(); },
         selectMoment(id) { S.momentId = id; view.refresh(); },
         recordMoment() {
             const label = prompt(t("PERSONA.Bonds.RecordHint"), t("PERSONA.Bonds.MomentDefault").replace("{n}", S.moments.length + 1));

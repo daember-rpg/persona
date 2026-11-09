@@ -54,7 +54,9 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - **Built for a whole campaign**: when a ring fills up it gains another lane and the wheel grows outward instead of stacking portraits; narrow slices shorten their names; *Find on the wheel* centres and selects someone; *Hide the dead* thins out a long campaign.
 - **Only what they know**: the wheel only offers people whose face was revealed to that player, with the name hidden until the name is revealed. Clicking a portrait opens the Persona card — never the Actor or its sheet.
 - **Status**: the GM sets *Alive / Dead / Missing* in the entry editor. Dead people turn grey with a skull, missing ones fade with a question mark — on every wheel, the gallery and the card.
-- **Private**: each player sees and edits only their own wheel. The GM can open and edit anyone's from the player chips (the player sees the changes live).
+- **Party wheels**: *Party wheels* lets a player look at the wheels the rest of the party shares — read-only, showing only the people the viewer knows too (as the viewer knows them). Each player chooses in the link-style panel whether their wheel is shared (default) or only theirs.
+- **Note privacy**: each link note is *Only me* (default) or *Everyone*; private notes never show on someone else's screen. The GM sees everything.
+- **Editing**: players change only their own wheel. The GM can open and edit anyone's from the player chips (the player sees the changes live).
 - **Timeline**: the GM presses *Record moment* (e.g. at the end of a session). It saves every wheel and every status at that point. Players click a moment on the timeline to see their wheel as it was then — who was still alive, who they hadn't met yet.
 
 ## Players: the gallery
