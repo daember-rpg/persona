@@ -3694,3 +3694,4 @@
 
 .bonds:not(.has-focus) .bonds-marker:not(:hover) .bonds-marker__badge { display: none; }
 .persona .bonds-marker { transition: width 0.15s ease, height 0.15s ease, margin 0.15s ease, background 0.15s ease; }
+.bonds.is-editable .bonds-sector-label { pointer-events: bounding-box; }

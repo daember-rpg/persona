@@ -62,7 +62,7 @@ const clampRing = ring => Math.min(3, Math.max(1, Math.round(Number(ring) || 2))
 /* -------------------------------------------- */
 
 export function emptyBonds() {
-    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [], shared: true };
+    return { v: 1, sectors: [], placements: [], links: [], pins: [], archived: [], shared: true, tagStyles: [] };
 }
 
 export function normalizeBonds(raw) {
@@ -90,6 +90,17 @@ export function normalizeBonds(raw) {
     out.pins = [...new Set((Array.isArray(raw.pins) ? raw.pins : []).map(String))];
     // Whether the rest of the party may look at this wheel (read-only).
     out.shared = raw.shared !== false;
+    // The player's own name and colour for a folder's slice (the GM's folders stay as they are).
+    const seenTags = new Set();
+    out.tagStyles = (Array.isArray(raw.tagStyles) ? raw.tagStyles : []).filter(t => {
+        if (!t?.key || seenTags.has(t.key)) return false;
+        seenTags.add(t.key);
+        return true;
+    }).map(t => ({
+        key: String(t.key),
+        label: String(t.label ?? "").trim().slice(0, 60),
+        color: /^#[0-9a-f]{6}$/i.test(t.color) ? t.color : ""
+    })).filter(t => t.label || t.color);
     // A category exists only while someone is in it.
     const used = new Set(out.placements.map(p => p.sector).filter(Boolean));
     out.sectors = sectors.filter(s => used.has(s.id));
@@ -182,6 +193,20 @@ export function place(bonds, entryId, sector, ring, beforeId = null) {
     else rest.push(item);
     next.placements = rest;
     return normalizeBonds(next);
+}
+
+/** Renames / recolours a folder's slice on this wheel only; empty values go back to the folder's own. */
+export function setTagStyle(bonds, key, { label = "", color = "" } = {}) {
+    const next = copy(bonds);
+    next.tagStyles = next.tagStyles.filter(t => t.key !== key);
+    if (label || color) next.tagStyles.push({ key, label, color });
+    return normalizeBonds(next);
+}
+
+/** The folder slices as this wheel shows them: the player's names and colours over the GM's. */
+export function styledTags(tags, bonds) {
+    const own = new Map((bonds?.tagStyles ?? []).map(t => [t.key, t]));
+    return tags.map(t => ({ ...t, label: own.get(t.key)?.label || t.label, color: own.get(t.key)?.color || t.color, folderLabel: t.label, folderColor: t.color }));
 }
 
 export function setShared(bonds, shared) {
@@ -310,13 +335,13 @@ export function layout(bonds, visible, partyIds = [], tags = {}, g = GEOMETRY) {
     const defs = [
         ...(tags.list ?? []).filter(t => present.has(t.key)).map(t => ({ id: t.key, label: t.label, color: t.color, custom: false })),
         ...bonds.sectors.filter(s => present.has(s.id)).map(s => ({ id: s.id, label: s.label, color: s.color, custom: true })),
-        ...(present.has(NO_TAG) ? [{ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }] : [])
+        ...(present.has(NO_TAG) ? [{ id: NO_TAG, label: tags.noneLabel ?? "", color: tags.noneColor ?? "#857a65", custom: false }] : [])
     ];
     // A folder the viewer can't see as a tag still shows (its entries are known): fall back to "no folder".
     const known = new Set(defs.map(d => d.id));
     for (const p of placements) if (!known.has(p.key)) {
         p.key = NO_TAG;
-        if (!known.has(NO_TAG)) { defs.push({ id: NO_TAG, label: tags.noneLabel ?? "", color: "#857a65", custom: false }); known.add(NO_TAG); }
+        if (!known.has(NO_TAG)) { defs.push({ id: NO_TAG, label: tags.noneLabel ?? "", color: tags.noneColor ?? "#857a65", custom: false }); known.add(NO_TAG); }
     }
 
     const count = (key, ring) => placements.filter(p => p.key === key && p.ring === ring).length;

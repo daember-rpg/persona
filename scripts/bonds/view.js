@@ -21,7 +21,7 @@ import {
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
     createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG,
     setOfficial, removeOfficial, togglePin, archive, restore,
-    angularPath, normalizeLinkStyle, toPolar
+    angularPath, normalizeLinkStyle, toPolar, setTagStyle, styledTags
 } from "./model.js";
 
 const G = GEOMETRY;
@@ -66,6 +66,7 @@ export class BondsView {
     #laid = null;
     #visible = new Set();
     #tagOf = new Map();
+    #tags = [];
     #linkMode = false;
     /** The portrait shown in the inspector and in focus on the wheel. */
     #selected = null;
@@ -185,7 +186,10 @@ export class BondsView {
             return true;
         }));
         this.#tagOf = new Map(m.entries.map(e => [e.id, e.tag ?? NO_TAG]));
-        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: m.tags ?? [], tagOf: this.#tagOf, noneLabel: this.t("NoFolder") });
+        // Folder slices with this wheel's own names and colours.
+        this.#tags = styledTags([...(m.tags ?? []), { key: NO_TAG, label: this.t("NoFolder"), color: "#857a65" }], this.#bonds);
+        const none = this.#tags.find(t => t.key === NO_TAG);
+        this.#laid = layout(this.#bonds, this.#visible, m.party.map(p => p.id), { list: this.#tags.filter(t => t.key !== NO_TAG), tagOf: this.#tagOf, noneLabel: none.label, noneColor: none.color });
         const placed = new Set(this.#bonds.placements.map(p => p.id));
         const archivedIds = new Set(this.#bonds.archived);
         const loose = m.entries.filter(e => !placed.has(e.id) && !archivedIds.has(e.id));
@@ -328,7 +332,7 @@ export class BondsView {
             const count = [...laid.nodes.values()].filter(n => n.sector === s.id).length;
             const label = full.length > fits ? `${full.slice(0, Math.max(2, fits - 1)).trimEnd()}…` : full;
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
-            parts.push(`<text class="bonds-sector-label" data-sector-label="${esc(s.id)}" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 10 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}<tspan class="bonds-sector-count" dx="10">${count}</tspan></textPath></text>`);
+            parts.push(`<text class="bonds-sector-label" data-sector-label="${esc(s.id)}" ${m.editable ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 10 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}<tspan class="bonds-sector-count" dx="10">${count}</tspan></textPath></text>`);
         }
         // The rings' names, engraved small along one spoke like the scale of an instrument.
         {
@@ -1008,7 +1012,7 @@ export class BondsView {
         if (info.kind === "self") place = m.viewingOther ? this.t("WheelOwner") : this.t("You");
         else if (info.kind === "party") place = this.t("Party");
         else if (placement?.sector) place = this.#bonds.sectors.find(s => s.id === placement.sector)?.label ?? "";
-        else place = (m.tags ?? []).find(t => t.key === entry?.tag)?.label ?? this.t("NoFolder");
+        else place = this.#tags.find(t => t.key === (entry?.tag ?? NO_TAG))?.label ?? this.t("NoFolder");
         const status = entry?.status && entry.status !== "alive"
             ? `<span class="bonds-tag is-${entry.status}"><i class="${entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question"}" inert></i>${esc(this.adapter.t(`PERSONA.Status.${entry.status}`))}</span>` : "";
 
@@ -1518,6 +1522,10 @@ export class BondsView {
             const input = el.closest("form")?.querySelector('[name="color"]');
             if (input) input.value = el.dataset.color;
         },
+        folderReset: el => {
+            this.#commit(setTagStyle(this.#bonds, el.closest("[data-folder-form]").dataset.key, {}));
+            this.#closePop();
+        },
         sectorDelete: el => {
             const id = el.closest("[data-sector-form]").dataset.sector;
             this.#commit(removeSector(this.#bonds, id));
@@ -1592,6 +1600,8 @@ export class BondsView {
 
     /** Name and colour of a category: a new one (for `entryId`, just dropped) or an existing one. */
     #sectorPop(id, anchor, entryId = null) {
+        const tag = id ? this.#tags.find(t => t.key === id) : null;
+        if (tag) return this.#folderPop(tag, anchor);
         const sector = id ? this.#bonds.sectors.find(s => s.id === id) : null;
         const color = sector?.color ?? SECTOR_COLORS[(this.#bonds.sectors.length + 4) % SECTOR_COLORS.length];
         const who = entryId ? this.#model.entries.find(e => e.id === entryId)?.name ?? "???" : "";
@@ -1607,6 +1617,27 @@ export class BondsView {
                 <span class="bonds-form__spacer"></span>
                 <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
                 <button type="submit" class="persona-button">${esc(sector ? this.t("Save") : this.t("Create"))}</button>
+            </div>
+        </form>`;
+        this.#openPop(html, anchor);
+    }
+
+    /** A folder's slice: this wheel's own name and colour for it (the GM's folder stays as it is). */
+    #folderPop(tag, anchor) {
+        const own = this.#bonds.tagStyles.find(t => t.key === tag.key);
+        const color = tag.color;
+        const html = `
+        <form class="bonds-form" data-folder-form data-key="${esc(tag.key)}">
+            <span class="persona-eyebrow">${esc(this.t("EditSlice"))}</span>
+            <input type="text" name="label" maxlength="60" value="${esc(own?.label ?? "")}" placeholder="${esc(tag.folderLabel)}" autocomplete="off">
+            <input type="hidden" name="color" value="${color}">
+            <div class="bonds-swatches">${SECTOR_COLORS.map(c => `<button type="button" class="bonds-swatch ${c === color ? "is-on" : ""}" data-action="swatch" data-color="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+            <p class="bonds-form__hint">${esc(this.adapter.t("PERSONA.Bonds.SliceHint").replace("{folder}", tag.folderLabel))}</p>
+            <div class="bonds-form__row">
+                ${own ? `<button type="button" class="persona-mini" data-action="folderReset"><i class="fa-solid fa-rotate-left" inert></i><span>${esc(this.t("UseFolderName"))}</span></button>` : ""}
+                <span class="bonds-form__spacer"></span>
+                <button type="button" class="persona-mini" data-action="popClose">${esc(this.t("Cancel"))}</button>
+                <button type="submit" class="persona-button">${esc(this.t("Save"))}</button>
             </div>
         </form>`;
         this.#openPop(html, anchor);
@@ -1666,6 +1697,16 @@ export class BondsView {
             this.#closePop();
             if (official) return this.adapter.saveOfficial(setOfficial(this.#model.officialAll ?? [], a, b, type, { note, hidden }));
             return this.#commit(setLink(this.#bonds, a, b, type, { note, suspect, notePrivate }));
+        }
+        const folderForm = event.target.closest("[data-folder-form]");
+        if (folderForm) {
+            event.preventDefault();
+            const key = folderForm.dataset.key;
+            const tag = this.#tags.find(t => t.key === key);
+            const label = folderForm.querySelector('[name="label"]').value.trim();
+            const picked = folderForm.querySelector('[name="color"]').value;
+            this.#closePop();
+            return this.#commit(setTagStyle(this.#bonds, key, { label, color: picked && picked !== tag?.folderColor ? picked : "" }));
         }
         const form = event.target.closest("[data-sector-form]");
         if (!form) return;

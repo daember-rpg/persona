@@ -345,7 +345,10 @@
       "NoPlayer": "No player",
       "NoCharacters": "No player characters yet: give a player a character, or ownership of a character sheet.",
       "SubRetired": "{name} is retired. This wheel is kept as it was.",
-      "SheetsHint": "Sheets of this character (same person, one wheel)"
+      "SheetsHint": "Sheets of this character (same person, one wheel)",
+      "EditSlice": "Name this slice your way",
+      "UseFolderName": "Use the folder's name",
+      "SliceHint": "Only on this wheel: everyone else keeps their own names. The GM's folder '{folder}' isn't changed."
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

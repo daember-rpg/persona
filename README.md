@@ -34,6 +34,7 @@ Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astro
 - **Retire at the end of a chapter**: *Retire* in *Characters* keeps a character's wheel, read-only, under *Past characters* and takes them off the party ring; new characters start fresh. *Bring back* undoes it.
 - **Centre**: the character. **Inner ring**: the rest of the party, always there and always close.
 - **Slices come from the Persona folders**: drag a portrait onto the wheel and the person lands in their folder's slice (the GM's tags, in folder order; people without a folder go to *No folder*). The ring you drop on sets the distance: Close (inner), Known, Distant (outer). *Put everyone on the wheel* drops all the rest on the outer ring.
+- **Name the slices your way**: click any slice's name to give it your own name and colour on your wheel ("Kurdrax" can be "The Burning Court" for you). Everyone else keeps their own, and the GM's folder isn't changed; *Use the folder's name* undoes it.
 - **Categories of their own**: while dragging, drop on *create a category of your own* to start one ("don't trust", "owes us a favour"…) with a name and colour; drop anyone onto it to add them. Click its label to rename, recolour or dissolve it (people go back to their folders).
 - **Never empty**: a slice or category with nobody in it disappears.
 - **Take off**: drag a portrait back to the list (or past the rim).
