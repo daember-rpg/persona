@@ -28,7 +28,7 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Video**: give an entry an mp4/webm and press *Video*, or the film button to play any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
 
 ## Bonds: each player's relationship wheel
-Inspired by the *People* screen of Final Fantasy XVI.
+Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astrolabe: hairline gold structure, faction colour as a lit arc on the rim, links as fine trails of light, portraits as medallions; the dial turns into place when the window opens.
 - **One wheel per character of the story**: every player character sheet (type *character* owned by a player, or a player's assigned character) starts as its own character. A player with several characters switches between them with the chips at the top, and selecting one of their tokens opens that character's wheel (the GM: any player character's).
 - **Same person, several sheets**: in *Characters* (GM), point a sheet at another character — the same hero in another reality, another class — and both sheets share one wheel. The centre shows the sheet in use; the inspector lists all of them.
 - **Retire at the end of a chapter**: *Retire* in *Characters* keeps a character's wheel, read-only, under *Past characters* and takes them off the party ring; new characters start fresh. *Bring back* undoes it.

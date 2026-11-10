@@ -44,6 +44,8 @@ export class BondsView {
     #hideDead = false;
     #sceneOnly = false;
     #overview = false;
+    /** The opening flourish plays once per window. */
+    #intro = true;
     #charsPanel = false;
     #overviewQuery = "";
     /** What this view saw last time, to animate what changes live (a reveal, a death). */
@@ -169,7 +171,7 @@ export class BondsView {
             ${this.#renderBar()}
             ${this.#charsPanel ? this.#renderCharacters() : this.#overview ? this.#renderOverview() : `<div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
-                    <div class="bonds-stage" data-stage>
+                    <div class="bonds-stage ${this.#intro ? "is-intro" : ""}" data-stage>
                         ${this.#renderSvg()}
                         <div class="bonds-layer">${this.#renderNodes(entries)}${this.#renderLinkMarkers()}</div>
                     </div>
@@ -198,6 +200,7 @@ export class BondsView {
         if (keepPop) this.#closePop();
         this.#applyFocus(this.#selected);
         this.#filterLoose();
+        if (this.#intro && this.host.querySelector("[data-stage]")) setTimeout(() => { this.#intro = false; }, 1200);
     }
 
     #renderBar() {
@@ -246,55 +249,67 @@ export class BondsView {
         const inner = g.ringBands[0][0];
         const parts = [];
 
-        // Gradients per slice colour, brightest near the party, fading outward.
-        const defs = [`<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#3a2a22"/><stop offset="0.55" stop-color="#211d19"/><stop offset="1" stop-color="#14120f" stop-opacity="0"/></radialGradient>`];
+        // Astrolabe: an engraved instrument. Structure is hairline gold; faction colour lives only in
+        // the lit arc on the rim and a faint aura behind each slice's portraits; links are light.
+        const bezelIn = outer + 10, bezelOut = outer + 22;
+        const defs = [
+            `<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2b211a"/><stop offset="0.5" stop-color="#18140f"/><stop offset="1" stop-color="#0d0c0a" stop-opacity="0"/></radialGradient>`,
+            `<radialGradient id="bonds-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c9a35a" stop-opacity="0.22"/><stop offset="1" stop-color="#c9a35a" stop-opacity="0"/></radialGradient>`,
+            `<filter id="bonds-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>`
+        ];
         const colors = [...new Set(laid.sectors.map(s => s.color))];
-        colors.forEach((color, i) => defs.push(`<radialGradient id="bonds-g${i}" gradientUnits="userSpaceOnUse" cx="${C}" cy="${C}" r="${outer}"><stop offset="${(inner / outer).toFixed(3)}" stop-color="${color}" stop-opacity="0.42"/><stop offset="0.7" stop-color="${color}" stop-opacity="0.16"/><stop offset="1" stop-color="${color}" stop-opacity="0.05"/></radialGradient>`));
-        defs.push(`<pattern id="bonds-etch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 7h14M7 0v14" stroke="rgba(214,138,92,0.14)" stroke-width="1"/></pattern>`);
+        colors.forEach((color, i) => defs.push(`<radialGradient id="bonds-g${i}" gradientUnits="userSpaceOnUse" cx="${C}" cy="${C}" r="${outer}"><stop offset="${(inner / outer).toFixed(3)}" stop-color="${color}" stop-opacity="0.13"/><stop offset="0.8" stop-color="${color}" stop-opacity="0.05"/><stop offset="1" stop-color="${color}" stop-opacity="0.11"/></radialGradient>`));
         for (const type of LINK_TYPES.filter(t => t.directed)) {
-            defs.push(`<marker id="bonds-arrow-${type.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${type.color}"/></marker>`);
+            defs.push(`<marker id="bonds-arrow-${type.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 1L10 5L0 9z" fill="${type.color}"/></marker>`);
         }
-        const gradient = color => `url(#bonds-g${colors.indexOf(color)})`;
+        const aura = color => `url(#bonds-g${colors.indexOf(color)})`;
+        const P = (r, a) => { const pt = polar(r, a); return `${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`; };
 
-        parts.push(`<circle cx="${C}" cy="${C}" r="${g.labelRadius + 16}" fill="url(#bonds-bg)"/>`);
-        // Fine radial grid, like an astrolabe.
-        const spokes = [];
-        for (let a = 0; a < 360; a += 6) {
-            const p = polar(inner, a * Math.PI / 180), q = polar(outer, a * Math.PI / 180);
-            spokes.push(`M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`);
+        parts.push(`<circle cx="${C}" cy="${C}" r="${g.labelRadius + 44}" fill="url(#bonds-bg)"/>`);
+        // The bezel: two hairlines and graduation ticks, longer every ten degrees.
+        const ticks = [];
+        for (let i = 0; i < 144; i++) {
+            const a = (i / 144) * Math.PI * 2;
+            const len = i % 4 === 0 ? 8 : 3.5;
+            ticks.push(`M${P(bezelIn, a)}L${P(bezelIn + len, a)}`);
         }
-        parts.push(`<path class="bonds-grid" d="${spokes.join("")}"/>`);
-        for (const r of [inner, g.ringBands[0][1], g.ringBands[1][1], outer]) parts.push(`<circle class="bonds-ring" cx="${C}" cy="${C}" r="${r}"/>`);
+        parts.push(`<g class="bonds-bezel"><circle class="bonds-hair bonds-hair--strong" cx="${C}" cy="${C}" r="${bezelIn}"/><circle class="bonds-hair" cx="${C}" cy="${C}" r="${bezelOut + 26}"/><path class="bonds-ticks" d="${ticks.join("")}"/></g>`);
+        // Rings: distance bands, hairline.
+        parts.push(`<circle class="bonds-hair bonds-hair--strong" cx="${C}" cy="${C}" r="${inner}"/>`);
+        for (const r of [g.ringBands[0][1], g.ringBands[1][1]]) parts.push(`<circle class="bonds-hair bonds-hair--dash" cx="${C}" cy="${C}" r="${r}"/>`);
+        parts.push(`<circle class="bonds-hair" cx="${C}" cy="${C}" r="${outer}"/>`);
 
-        // Slices: a wedge per ring (drop targets), divider arcs, the label along the rim.
+        // Slices: faint aura, drop-target cells, a spoke between slices, the lit rim and the name.
         for (const s of laid.sectors) {
-            parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${gradient(s.color)}" stroke="${s.color}"/>`);
+            parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${aura(s.color)}"/>`);
             for (const ring of RINGS) {
                 const [r1, r2] = g.ringBands[ring - 1];
                 parts.push(`<path class="bonds-cell" data-cell="${esc(s.id)}|${ring}" d="${wedgePath(r1, r2, s.start, s.end)}"/>`);
             }
-            for (const r of [g.ringBands[0][1], g.ringBands[1][1]]) {
-                parts.push(`<path class="bonds-divider" d="${arcPath(r, s.start, s.end).d}" stroke="${s.color}"/>`);
+            if (laid.sectors.length > 1) {
+                const gapAngle = s.end + G.gap / 2;
+                parts.push(`<path class="bonds-spoke" d="M${P(inner - 4, gapAngle)}L${P(bezelIn + 12, gapAngle)}"/>`);
             }
-            const arc = arcPath(g.labelRadius, s.start, s.end);
+            const rim = arcPath(outer + 4, s.start + 0.012, s.end - 0.012).d;
+            parts.push(`<path class="bonds-rim-glow" d="${rim}" stroke="${s.color}" filter="url(#bonds-glow)"/><path class="bonds-rim" d="${rim}" stroke="${s.color}"/>`);
+            const arc = arcPath(g.labelRadius + 12, s.start, s.end);
             // Narrow slices (a campaign with many folders) shorten their label to fit the arc.
-            const fits = Math.max(3, Math.floor(((s.end - s.start) * g.labelRadius) / 15));
+            const fits = Math.max(3, Math.floor(((s.end - s.start) * (g.labelRadius + 12)) / 12));
             const full = s.label || this.t("Unnamed");
             const label = full.length > fits ? `${full.slice(0, Math.max(2, fits - 1)).trimEnd()}…` : full;
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
-            parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 12 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
+            parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 10 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
         }
         if (!laid.sectors.length) {
             parts.push(`<circle class="bonds-empty-ring" cx="${C}" cy="${C}" r="${(inner + outer) / 2}"/>`);
             parts.push(`<text class="bonds-empty-text" x="${C}" y="${C - (inner + outer) / 2 - 12}" text-anchor="middle">${esc(m.editable ? this.t("EmptyWheel") : this.t("EmptyWheelReadOnly"))}</text>`);
         }
 
-        // The party ring and the centre.
+        // The party: an inner bezel of two hairlines and the gold thread the companions sit on; a halo at the centre.
         parts.push(`<circle class="bonds-party-band" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0]}"/>`);
-        parts.push(`<circle class="bonds-ring bonds-ring--party" cx="${C}" cy="${C}" r="${G.partyBand[1]}"/>`);
-        parts.push(`<circle class="bonds-ring bonds-ring--self" cx="${C}" cy="${C}" r="${G.partyBand[0]}"/>`);
-        // The party needs no caption: an engraved band, and a gold thread the companions sit on.
-        parts.push(`<circle class="bonds-party-etch" cx="${C}" cy="${C}" r="${(G.partyBand[0] + G.partyBand[1]) / 2}" stroke-width="${G.partyBand[1] - G.partyBand[0] - 6}" fill="none" stroke="url(#bonds-etch)"/>`);
+        parts.push(`<circle class="bonds-hair bonds-hair--gold" cx="${C}" cy="${C}" r="${G.partyBand[1]}"/>`);
+        parts.push(`<circle class="bonds-hair bonds-hair--gold" cx="${C}" cy="${C}" r="${G.partyBand[0]}"/>`);
+        parts.push(`<circle cx="${C}" cy="${C}" r="${G.partyBand[0] + 20}" fill="url(#bonds-halo)"/>`);
         if (m.party.length) parts.push(`<circle class="bonds-party-thread" cx="${C}" cy="${C}" r="${G.partyRadius}"/>`);
 
         // Links between portraits.
@@ -306,6 +321,8 @@ export class BondsView {
             const cls = `${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}`;
             // Official links: a dark casing under the line, like an inked seal.
             if (link.official) links.push(`<path class="bonds-link-casing ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}"/>`);
+            // Each link is a trail of light: a soft glow under a fine line.
+            links.push(`<path class="bonds-link-glow ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}"/>`);
             links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
@@ -493,7 +510,7 @@ export class BondsView {
         const m = this.#model;
         const laid = this.#laid;
         const g = laid.g;
-        const R = g.labelRadius + 46;
+        const R = g.labelRadius + 58;
         const scale = 2;
         const size = Math.ceil(2 * R * scale);
         const canvas = document.createElement("canvas");
@@ -931,7 +948,7 @@ export class BondsView {
         const near = new Set(id ? [id] : []);
         if (id) for (const l of this.#linksOf(id)) { near.add(l.a); near.add(l.b); }
         root.querySelectorAll("[data-node]").forEach(el => el.classList.toggle("is-near", near.has(el.dataset.node)));
-        root.querySelectorAll(".bonds-link, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
+        root.querySelectorAll(".bonds-link, .bonds-link-glow, .bonds-link-casing, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
     }
 
     #onOver = event => {
@@ -953,7 +970,7 @@ export class BondsView {
         const g = this.#laid.g ?? G;
         const all = this.#allLinks();
         const byKey = new Map(all.map(l => [`${l.a}|${l.b}`, l]));
-        this.host.querySelectorAll(".bonds-link, .bonds-link-casing").forEach(el => {
+        this.host.querySelectorAll(".bonds-link, .bonds-link-casing, .bonds-link-glow").forEach(el => {
             const link = byKey.get(`${el.dataset.a}|${el.dataset.b}`);
             const a = link && this.#laid.nodes.get(link.a), b = link && this.#laid.nodes.get(link.b);
             if (!a || !b) return;
@@ -1032,7 +1049,7 @@ export class BondsView {
         const { width, height } = viewport.getBoundingClientRect();
         if (!width || !height) return;
         // The wheel grows with the campaign: fit its real outer edge, labels included.
-        const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 34;
+        const R = (this.#laid?.g?.labelRadius ?? G.labelRadius) + 50;
         // Keep a strip at the top for the finder and notices, so they never cover the top slice's name.
         const top = 52;
         const s = Math.min(width, height - top) / (2 * R);
