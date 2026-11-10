@@ -25,6 +25,33 @@ import {
 } from "./model.js";
 
 const G = GEOMETRY;
+
+/** Reverses a path made of absolute M, L, Q, C and A commands (the ones the wheel draws). */
+function reversePath(d) {
+    const tokens = d.match(/[MLQCA]|-?[\d.]+/g) ?? [];
+    const segs = [];
+    let i = 0, cur = null, start = null;
+    const num = () => Number(tokens[i++]);
+    while (i < tokens.length) {
+        const cmd = tokens[i++];
+        if (cmd === "M") { cur = [num(), num()]; start = cur; continue; }
+        if (cmd === "L") { const to = [num(), num()]; segs.push({ cmd, from: cur, to }); cur = to; }
+        else if (cmd === "Q") { const c = [num(), num()], to = [num(), num()]; segs.push({ cmd, from: cur, c, to }); cur = to; }
+        else if (cmd === "C") { const c1 = [num(), num()], c2 = [num(), num()], to = [num(), num()]; segs.push({ cmd, from: cur, c1, c2, to }); cur = to; }
+        else if (cmd === "A") { const rx = num(), ry = num(), rot = num(), large = num(), sweep = num(), to = [num(), num()]; segs.push({ cmd, from: cur, rx, ry, rot, large, sweep, to }); cur = to; }
+    }
+    if (!segs.length) return d;
+    const p = pt => `${pt[0]} ${pt[1]}`;
+    let out = `M${p(cur)}`;
+    for (const sg of segs.reverse()) {
+        if (sg.cmd === "L") out += `L${p(sg.from)}`;
+        else if (sg.cmd === "Q") out += `Q${p(sg.c)} ${p(sg.from)}`;
+        else if (sg.cmd === "C") out += `C${p(sg.c2)} ${p(sg.c1)} ${p(sg.from)}`;
+        else out += `A${sg.rx} ${sg.ry} ${sg.rot} ${sg.large} ${sg.sweep ? 0 : 1} ${p(sg.from)}`;
+    }
+    void start;
+    return out;
+}
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const NODE_R = { self: 58, party: 38, entry: 31 };
 /** Closer is bigger: a portrait's radius on each distance ring. */
@@ -339,7 +366,7 @@ export class BondsView {
             // Each link is a trail of light: a soft glow under a fine line. From the centre, a faint stem first.
             if (geo.stem) links.push(`<path class="bonds-link-stem ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.stem}" stroke="${type.color}" ${type.directed && link.b === SELF ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
             links.push(`<path class="bonds-link-glow ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}"/>`);
-            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed && link.b !== SELF ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -368,20 +395,37 @@ export class BondsView {
 
         const other = selfEnd === "a" ? b : a;
         const otherId = selfEnd === "a" ? link.b : link.a;
-        const exit = this.#exitAngle(toPolar(other.x, other.y, g).angle);
-        const rim = polar(NODE_R.self + 4, exit, g);
-        const gate = polar(G.partyBand[1] + 2, exit, g);
-        // A party member as the other end: no stem, straight to them.
+        // A party member as the other end: a short direct line.
         if (this.#model.party.some(p => p.id === otherId)) {
             return { stem: "", ...draw(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5) };
         }
-        const stem = selfEnd === "a"
-            ? `M${rim.x.toFixed(1)} ${rim.y.toFixed(1)}L${gate.x.toFixed(1)} ${gate.y.toFixed(1)}`
-            : `M${gate.x.toFixed(1)} ${gate.y.toFixed(1)}L${rim.x.toFixed(1)} ${rim.y.toFixed(1)}`;
-        const main = selfEnd === "a" ? draw(gate, other, 0, this.#radiusOf(otherId) + 5) : draw(other, gate, this.#radiusOf(otherId) + 3, 0);
-        // The icon belongs next to the other person, whichever way the link points.
-        const near = selfEnd === "a" ? main.near : linkPath(gate, other, 0, this.#radiusOf(otherId) + 5, g, style.shape === "angular" ? 0 : style.bend).near;
-        return { ...main, stem, near };
+        // One continuous line: it leaves the centre straight out, between the party portraits, and
+        // bends toward its target only once it has cleared the party band.
+        const exit = this.#exitAngle(toPolar(other.x, other.y, g).angle);
+        const rim = polar(NODE_R.self + 4, exit, g);
+        const gate = polar(G.partyBand[1] + 4, exit, g);
+        const ro = this.#radiusOf(otherId) + 5;
+        let d, near;
+        if (style.shape === "angular") {
+            const tail = angularPath(gate, other, 0, ro, g);
+            d = `M${rim.x.toFixed(1)} ${rim.y.toFixed(1)}L${tail.d.slice(1)}`;
+            near = tail.near;
+        } else {
+            const reach = polar(G.partyBand[1] + 40 + 60 * style.bend, exit, g);
+            const vx = other.x - reach.x, vy = other.y - reach.y;
+            const len = Math.hypot(vx, vy) || 1;
+            const end = { x: other.x - (vx / len) * ro, y: other.y - (vy / len) * ro };
+            const c2 = { x: reach.x + (end.x - reach.x) * 0.55, y: reach.y + (end.y - reach.y) * 0.55 };
+            d = `M${rim.x.toFixed(1)} ${rim.y.toFixed(1)}L${gate.x.toFixed(1)} ${gate.y.toFixed(1)}C${reach.x.toFixed(1)} ${reach.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${end.x.toFixed(1)} ${end.y.toFixed(1)}`;
+            const t = 0.8, u = 1 - t;
+            near = {
+                x: u ** 3 * gate.x + 3 * u * u * t * reach.x + 3 * u * t * t * c2.x + t ** 3 * end.x,
+                y: u ** 3 * gate.y + 3 * u * u * t * reach.y + 3 * u * t * t * c2.y + t ** 3 * end.y
+            };
+        }
+        // Pointing into the centre: the same line, drawn the other way so the arrow lands on the centre.
+        if (selfEnd === "b") d = reversePath(d);
+        return { d, stem: "", mid: near, near };
     }
 
     /** The angle a link leaves the centre at: toward its target, nudged to pass between party portraits. */
