@@ -21,12 +21,14 @@ import {
     normalizeBonds, layout, hitTest, wedgePath, arcPath, linkPath, polar,
     createSector, updateSector, removeSector, place, unplace, setLink, removeLink, placeAll, NO_TAG,
     setOfficial, removeOfficial, togglePin, archive, restore,
-    angularPath, normalizeLinkStyle
+    angularPath, normalizeLinkStyle, toPolar
 } from "./model.js";
 
 const G = GEOMETRY;
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const NODE_R = { self: 58, party: 38, entry: 31 };
+/** Closer is bigger: a portrait's radius on each distance ring. */
+const RING_R = { 1: 35, 2: 30, 3: 25 };
 const DRAG_THRESHOLD = 5;
 
 export class BondsView {
@@ -281,7 +283,7 @@ export class BondsView {
 
         // Slices: faint aura, drop-target cells, a spoke between slices, the lit rim and the name.
         for (const s of laid.sectors) {
-            parts.push(`<path class="bonds-sector" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${aura(s.color)}"/>`);
+            parts.push(`<path class="bonds-sector" data-sector="${esc(s.id)}" d="${wedgePath(inner, outer, s.start, s.end)}" fill="${aura(s.color)}"/>`);
             for (const ring of RINGS) {
                 const [r1, r2] = g.ringBands[ring - 1];
                 parts.push(`<path class="bonds-cell" data-cell="${esc(s.id)}|${ring}" d="${wedgePath(r1, r2, s.start, s.end)}"/>`);
@@ -296,9 +298,22 @@ export class BondsView {
             // Narrow slices (a campaign with many folders) shorten their label to fit the arc.
             const fits = Math.max(3, Math.floor(((s.end - s.start) * (g.labelRadius + 12)) / 12));
             const full = s.label || this.t("Unnamed");
+            const count = [...laid.nodes.values()].filter(n => n.sector === s.id).length;
             const label = full.length > fits ? `${full.slice(0, Math.max(2, fits - 1)).trimEnd()}…` : full;
             parts.push(`<path id="bonds-arc-${esc(s.id)}" d="${arc.d}" fill="none"/>`);
-            parts.push(`<text class="bonds-sector-label" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 10 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}</textPath></text>`);
+            parts.push(`<text class="bonds-sector-label" data-sector-label="${esc(s.id)}" ${m.editable && s.custom ? `data-action="editSector" data-id="${esc(s.id)}"` : ""} fill="${s.color}" dy="${arc.bottom ? 10 : 0}"><textPath href="#bonds-arc-${esc(s.id)}" startOffset="50%" text-anchor="middle">${esc(label)}<tspan class="bonds-sector-count" dx="10">${count}</tspan></textPath></text>`);
+        }
+        // The rings' names, engraved small along one spoke like the scale of an instrument.
+        {
+            const first = laid.sectors[0];
+            const at = laid.sectors.length > 1 ? first.start - G.gap / 2 : (laid.sectors.length ? first.start : -0.02);
+            const deg = (at * 180) / Math.PI - 90;
+            const flip = Math.cos(at) < 0 ? 180 : 0;
+            RINGS.forEach(ring => {
+                const [r1, r2] = g.ringBands[ring - 1];
+                const pt = polar((r1 + r2) / 2, at);
+                parts.push(`<text class="bonds-ring-name" x="${pt.x.toFixed(1)}" y="${pt.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" transform="rotate(${(deg + flip).toFixed(1)} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)})">${esc(this.t(`Ring${ring}`))}</text>`);
+            });
         }
         if (!laid.sectors.length) {
             parts.push(`<circle class="bonds-empty-ring" cx="${C}" cy="${C}" r="${(inner + outer) / 2}"/>`);
@@ -321,9 +336,10 @@ export class BondsView {
             const cls = `${link.suspect ? "is-suspect" : ""} ${link.official ? "is-official" : ""} ${link.hidden ? "is-hidden" : ""}`;
             // Official links: a dark casing under the line, like an inked seal.
             if (link.official) links.push(`<path class="bonds-link-casing ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}"/>`);
-            // Each link is a trail of light: a soft glow under a fine line.
+            // Each link is a trail of light: a soft glow under a fine line. From the centre, a faint stem first.
+            if (geo.stem) links.push(`<path class="bonds-link-stem ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.stem}" stroke="${type.color}" ${type.directed && link.b === SELF ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
             links.push(`<path class="bonds-link-glow ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}"/>`);
-            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
+            links.push(`<path class="bonds-link bonds-link--${type.id} ${cls}" data-a="${esc(link.a)}" data-b="${esc(link.b)}" d="${geo.d}" stroke="${type.color}" ${type.directed && link.b !== SELF ? `marker-end="url(#bonds-arrow-${type.id})"` : ""}/>`);
         }
         parts.push(`<g class="bonds-links">${links.join("")}<path class="bonds-rubber" data-rubber d="" /></g>`);
 
@@ -332,17 +348,96 @@ export class BondsView {
 
     #radiusOf(id) {
         if (id === SELF) return NODE_R.self;
-        return this.#model.party.some(p => p.id === id) ? NODE_R.party : NODE_R.entry;
+        if (this.#model.party.some(p => p.id === id)) return NODE_R.party;
+        return RING_R[this.#laid?.nodes.get(id)?.ring] ?? NODE_R.entry;
     }
 
-    #linkGeometry(link) {
+    /**
+     * A link's path. Links to or from the centre leave it on a faint spoke that slips between the
+     * party portraits, then travel from the party band's edge — so the centre stays readable.
+     * Returns { d, stem, mid, near } (stem: the spoke inside the band, or "").
+     */
+    #linkGeometry(link, styleOverride = null) {
         const a = this.#laid.nodes.get(link.a), b = this.#laid.nodes.get(link.b);
         if (!a || !b) return null;
-        const style = this.#linkStyle();
+        const style = styleOverride ?? this.#linkStyle();
         const g = this.#laid.g ?? G;
-        return style.shape === "angular"
-            ? angularPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g)
-            : linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend);
+        const draw = (p, q, rp, rq) => (style.shape === "angular" ? angularPath(p, q, rp, rq, g) : linkPath(p, q, rp, rq, g, style.bend));
+        const selfEnd = link.a === SELF ? "a" : link.b === SELF ? "b" : null;
+        if (!selfEnd) return { stem: "", ...draw(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5) };
+
+        const other = selfEnd === "a" ? b : a;
+        const otherId = selfEnd === "a" ? link.b : link.a;
+        const exit = this.#exitAngle(toPolar(other.x, other.y, g).angle);
+        const rim = polar(NODE_R.self + 4, exit, g);
+        const gate = polar(G.partyBand[1] + 2, exit, g);
+        // A party member as the other end: no stem, straight to them.
+        if (this.#model.party.some(p => p.id === otherId)) {
+            return { stem: "", ...draw(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5) };
+        }
+        const stem = selfEnd === "a"
+            ? `M${rim.x.toFixed(1)} ${rim.y.toFixed(1)}L${gate.x.toFixed(1)} ${gate.y.toFixed(1)}`
+            : `M${gate.x.toFixed(1)} ${gate.y.toFixed(1)}L${rim.x.toFixed(1)} ${rim.y.toFixed(1)}`;
+        const main = selfEnd === "a" ? draw(gate, other, 0, this.#radiusOf(otherId) + 5) : draw(other, gate, this.#radiusOf(otherId) + 3, 0);
+        // The icon belongs next to the other person, whichever way the link points.
+        const near = selfEnd === "a" ? main.near : linkPath(gate, other, 0, this.#radiusOf(otherId) + 5, g, style.shape === "angular" ? 0 : style.bend).near;
+        return { ...main, stem, near };
+    }
+
+    /** The angle a link leaves the centre at: toward its target, nudged to pass between party portraits. */
+    #exitAngle(angle) {
+        const TAU = Math.PI * 2;
+        const half = Math.asin(Math.min(1, (NODE_R.party + 8) / G.partyRadius));
+        let out = angle;
+        for (let pass = 0; pass < 3; pass++) {
+            for (const p of this.#laid.party) {
+                let d = out - p.angle;
+                while (d > Math.PI) d -= TAU;
+                while (d < -Math.PI) d += TAU;
+                if (Math.abs(d) < half) out = p.angle + Math.sign(d || 1) * half;
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Where each link's icon sits: near the person it points to, pushed apart so icons never pile up
+     * and never sit on a portrait. Computed once per render.
+     */
+    #markerPositions() {
+        const g = this.#laid.g ?? G;
+        const items = [];
+        for (const link of this.#allLinks()) {
+            const geo = this.#linkGeometry(link);
+            if (geo) items.push({ id: link.id, x: geo.near.x, y: geo.near.y, ox: geo.near.x, oy: geo.near.y });
+        }
+        const nodes = [...this.#laid.nodes.entries()].map(([id, n]) => ({ x: n.x, y: n.y, r: this.#radiusOf(id) + 12 }));
+        for (let iter = 0; iter < 40; iter++) {
+            let moved = false;
+            for (let i = 0; i < items.length; i++) {
+                const m = items[i];
+                for (let j = i + 1; j < items.length; j++) {
+                    const o = items[j];
+                    const dx = o.x - m.x, dy = o.y - m.y;
+                    const d = Math.hypot(dx, dy) || 0.01;
+                    if (d < 24) {
+                        const push = (24 - d) / 2;
+                        const ux = dx / d || 1, uy = dy / d;
+                        m.x -= ux * push; m.y -= uy * push; o.x += ux * push; o.y += uy * push;
+                        moved = true;
+                    }
+                }
+                for (const n of nodes) {
+                    const dx = m.x - n.x, dy = m.y - n.y;
+                    const d = Math.hypot(dx, dy) || 0.01;
+                    if (d < n.r) { m.x = n.x + (dx / d) * n.r; m.y = n.y + (dy / d) * n.r; moved = true; }
+                }
+                // A gentle pull back toward its own line.
+                m.x += (m.ox - m.x) * 0.04; m.y += (m.oy - m.y) * 0.04;
+            }
+            if (!moved) break;
+        }
+        return new Map(items.map(i => [i.id, { x: i.x, y: i.y }]));
     }
 
     #renderNodes(entries) {
@@ -369,7 +464,7 @@ export class BondsView {
             const pos = laid.nodes.get(placement.id);
             if (!entry || !pos) continue;
             const color = sectors.get(placement.sector)?.color ?? SECTOR_COLORS[0];
-            out.push(this.#entryNode(entry, `left:${pos.x}px;top:${pos.y}px;--c:${color}`, `${picked(entry.id)} ${this.#liveClass(entry.id)}`));
+            out.push(this.#entryNode(entry, `left:${pos.x}px;top:${pos.y}px;--c:${color}`, `${picked(entry.id)} ${this.#liveClass(entry.id)} is-ring${pos.ring}`));
         }
         return out.join("");
     }
@@ -386,9 +481,12 @@ export class BondsView {
     }
 
     #renderLinkMarkers() {
+        const spots = this.#markerPositions();
+        this.#markerSpots = spots;
         return this.#allLinks().map(link => {
-            const geo = this.#linkGeometry(link);
-            if (!geo) return "";
+            const at = spots.get(link.id);
+            if (!at) return "";
+            const geo = { mid: at };
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
             const label = [this.t(`Type.${type.id}`), link.suspect ? this.t("Suspected") : "", link.official ? this.t("Official") : "", link.note].filter(Boolean).join(" — ");
             const badge = link.suspect ? `<span class="bonds-marker__badge">?</span>` : link.official ? `<span class="bonds-marker__badge is-seal"><i class="fa-solid fa-stamp" inert></i></span>` : "";
@@ -397,6 +495,8 @@ export class BondsView {
     }
 
     /** The player's links plus the GM's official ones this viewer may see. */
+    #markerSpots = new Map();
+
     #allLinks() {
         return [...this.#bonds.links, ...(this.#model.official ?? []).map(l => ({ ...l, official: true, suspect: false }))];
     }
@@ -586,10 +686,10 @@ export class BondsView {
         };
         // Link icons: a dot in the link's colour at its middle.
         for (const link of this.#allLinks()) {
-            const geo = this.#linkGeometry(link);
-            if (!geo) continue;
+            const at = this.#markerSpots.get(link.id);
+            if (!at) continue;
             const type = LINK_TYPES.find(t => t.id === link.type) ?? LINK_TYPES[0];
-            ctx.beginPath(); ctx.arc(geo.mid.x, geo.mid.y, 6, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
+            ctx.beginPath(); ctx.arc(at.x, at.y, 6, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
             ctx.lineWidth = 2; ctx.strokeStyle = type.color; ctx.stroke();
         }
         const entries = this.#entryMap();
@@ -597,7 +697,7 @@ export class BondsView {
         for (const p of this.#bonds.placements) {
             const pos = laid.nodes.get(p.id), e = entries.get(p.id);
             if (!pos || !e) continue;
-            await drawPortrait(pos.x, pos.y, NODE_R.entry, e.img, { frame: e.frame, ring: sectors.get(pos.sector)?.color, status: e.status, label: e.name ?? "???" });
+            await drawPortrait(pos.x, pos.y, RING_R[pos.ring] ?? NODE_R.entry, e.img, { frame: e.frame, ring: sectors.get(pos.sector)?.color, status: e.status, label: e.name ?? "???" });
         }
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
@@ -777,8 +877,9 @@ export class BondsView {
         const rings = [this.t("Ring1"), this.t("Ring2"), this.t("Ring3")];
         const used = new Set(this.#bonds.links.map(l => l.type));
         const types = LINK_TYPES.filter(t => used.has(t.id));
+        if (!types.length) return "";
         return `<div class="bonds-legend">
-            <div class="bonds-legend__rings">${rings.map((r, i) => `<span><b>${i + 1}</b>${esc(r)}</span>`).join("")}</div>
+
             ${types.length ? `<div class="bonds-legend__types">${types.map(t => `<span style="--c:${t.color}"><i class="${t.icon}" inert></i>${esc(this.t(`Type.${t.id}`))}</span>`).join("")}</div>` : ""}
         </div>`;
     }
@@ -945,19 +1046,40 @@ export class BondsView {
         const root = this.host.querySelector(".bonds");
         if (!root) return;
         root.classList.toggle("has-focus", !!id);
+        const sectorOf = id ? this.#laid?.nodes.get(id)?.sector : null;
+        this.#lightSector(sectorOf ?? this.#hoverSector);
         const near = new Set(id ? [id] : []);
         if (id) for (const l of this.#linksOf(id)) { near.add(l.a); near.add(l.b); }
         root.querySelectorAll("[data-node]").forEach(el => el.classList.toggle("is-near", near.has(el.dataset.node)));
-        root.querySelectorAll(".bonds-link, .bonds-link-glow, .bonds-link-casing, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
+        root.querySelectorAll(".bonds-link, .bonds-link-glow, .bonds-link-casing, .bonds-link-stem, .bonds-marker").forEach(el => el.classList.toggle("is-near", !!id && (el.dataset.a === id || el.dataset.b === id)));
+    }
+
+    #hoverSector = null;
+
+    /** The slice under the pointer or of the person in focus glows a little. */
+    #lightSector(key) {
+        this.host.querySelectorAll(".bonds-sector.is-lit, .bonds-sector-label.is-lit").forEach(el => el.classList.remove("is-lit"));
+        if (!key) return;
+        this.host.querySelector(`.bonds-sector[data-sector="${CSS.escape(key)}"]`)?.classList.add("is-lit");
+        this.host.querySelector(`[data-sector-label="${CSS.escape(key)}"]`)?.classList.add("is-lit");
     }
 
     #onOver = event => {
+        const cell = event.target.closest?.(".bonds-cell");
+        if (cell && !this.#gesture?.dragging) {
+            this.#hoverSector = cell.dataset.cell.split("|")[0];
+            if (!this.#selected) this.#lightSector(this.#hoverSector);
+        }
         if (this.#gesture?.dragging || this.#linkMode) return;
         const node = event.target.closest?.("[data-node]");
         if (node) this.#applyFocus(node.dataset.node);
     };
 
     #onOut = event => {
+        if (event.target.closest?.(".bonds-cell") && !event.relatedTarget?.closest?.(".bonds-cell")) {
+            this.#hoverSector = null;
+            if (!this.#selected) this.#lightSector(null);
+        }
         if (this.#gesture?.dragging || this.#linkMode) return;
         const node = event.target.closest?.("[data-node]");
         if (node && !node.contains(event.relatedTarget)) this.#applyFocus(this.#selected);
@@ -967,22 +1089,23 @@ export class BondsView {
 
     /** Redraws only the lines and their icons (for the bend slider, so it stays smooth). */
     #redrawLinks(style) {
-        const g = this.#laid.g ?? G;
-        const all = this.#allLinks();
-        const byKey = new Map(all.map(l => [`${l.a}|${l.b}`, l]));
+        const byKey = new Map(this.#allLinks().map(l => [`${l.a}|${l.b}`, l]));
+        const geos = new Map();
+        const geoOf = link => {
+            if (!geos.has(link.id)) geos.set(link.id, this.#linkGeometry(link, style));
+            return geos.get(link.id);
+        };
         this.host.querySelectorAll(".bonds-link, .bonds-link-casing, .bonds-link-glow").forEach(el => {
             const link = byKey.get(`${el.dataset.a}|${el.dataset.b}`);
-            const a = link && this.#laid.nodes.get(link.a), b = link && this.#laid.nodes.get(link.b);
-            if (!a || !b) return;
-            el.setAttribute("d", linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend).d);
+            const geo = link && geoOf(link);
+            if (geo) el.setAttribute("d", geo.d);
         });
         this.host.querySelectorAll(".bonds-marker").forEach(el => {
             const link = byKey.get(`${el.dataset.a}|${el.dataset.b}`);
-            const a = link && this.#laid.nodes.get(link.a), b = link && this.#laid.nodes.get(link.b);
-            if (!a || !b) return;
-            const mid = linkPath(a, b, this.#radiusOf(link.a) + 3, this.#radiusOf(link.b) + 5, g, style.bend).mid;
-            el.style.left = `${mid.x}px`;
-            el.style.top = `${mid.y}px`;
+            const geo = link && geoOf(link);
+            if (!geo) return;
+            el.style.left = `${geo.near.x}px`;
+            el.style.top = `${geo.near.y}px`;
         });
     }
 

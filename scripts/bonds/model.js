@@ -486,7 +486,10 @@ export function linkPath(p, q, rp = 0, rq = 0, g = GEOMETRY, bend = 0.5) {
     const s = toward(p, rp), e = toward(q, rq);
     // Midpoint of the quadratic curve, for the relation icon.
     const ix = 0.25 * s.x + 0.5 * cx + 0.25 * e.x, iy = 0.25 * s.y + 0.5 * cy + 0.25 * e.y;
-    return { d: `M${f(s.x)} ${f(s.y)}Q${f(cx)} ${f(cy)} ${f(e.x)} ${f(e.y)}`, mid: { x: ix, y: iy } };
+    // A point near the far end (t = 0.78): where the link's icon sits, next to whoever it describes.
+    const t = 0.78, u = 1 - t;
+    const near = { x: u * u * s.x + 2 * u * t * cx + t * t * e.x, y: u * u * s.y + 2 * u * t * cy + t * t * e.y };
+    return { d: `M${f(s.x)} ${f(s.y)}Q${f(cx)} ${f(cy)} ${f(e.x)} ${f(e.y)}`, mid: { x: ix, y: iy }, near };
 }
 
 /** How a viewer likes links drawn (their own preference, kept per user). */
@@ -513,7 +516,9 @@ export function angularPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
         const [c, o, ro, rc] = P.r < 1 ? [P, Q, rq, rp] : [Q, P, rp, rq];
         const s = polar(rc, o.angle, g), e = polar(o.r - ro, o.angle, g);
         const [a, b] = P.r < 1 ? [s, e] : [e, s];
-        return { d: `M${f(a.x)} ${f(a.y)}L${f(b.x)} ${f(b.y)}`, mid: { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 } };
+        const tip = P.r < 1 ? e : s;
+        const base = P.r < 1 ? s : e;
+        return { d: `M${f(a.x)} ${f(a.y)}L${f(b.x)} ${f(b.y)}`, mid: { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 }, near: { x: base.x + (tip.x - base.x) * 0.78, y: base.y + (tip.y - base.y) * 0.78 } };
     }
     // The ring to travel around: just inside whoever is nearer the centre, never inside the party band.
     const inner = Math.min(P.r, Q.r);
@@ -536,7 +541,9 @@ export function angularPath(p, q, rp = 0, rq = 0, g = GEOMETRY) {
         Q.r === rm ? "" : `L${f(e.x)} ${f(e.y)}`
     ].join("");
     const mid = Math.abs(delta) > 0.05 ? polar(rm, P.angle + delta / 2, g) : { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 };
-    return { d, mid };
+    // Near the far end: on its last spoke, or late on the arc when it ends on the travel ring.
+    const near = Q.r === rm ? polar(rm, P.angle + delta * 0.82, g) : polar(rm + (Q.r - rq - rm) * 0.65, Q.angle, g);
+    return { d, mid, near };
 }
 
 /* -------------------------------------------- */

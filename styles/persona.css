@@ -3640,3 +3640,57 @@
 }
 .bonds-sector-label { font-size: 15px; letter-spacing: 0.3em; }
 .bonds-legend { background: rgba(12, 11, 9, 0.55); border-color: rgba(214, 190, 140, 0.14); }
+
+/* ==========================================================================
+   Bonds — polish: distance as size, quiet slices, icons where they belong
+   ========================================================================== */
+
+/* Closer is bigger, distant is smaller and a touch dimmer. */
+.persona .bonds-node--entry.is-ring1 { width: 70px; height: 70px; margin: -35px 0 0 -35px; }
+.persona .bonds-node--entry.is-ring2 { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+.persona .bonds-node--entry.is-ring3 { width: 50px; height: 50px; margin: -25px 0 0 -25px; }
+.persona .bonds-node--entry.is-ring3:not(:hover):not(.is-selected) .bonds-node__img img { filter: brightness(0.82) saturate(0.85); }
+.persona .bonds-node--entry.is-ring3.is-dead .bonds-node__img img { filter: grayscale(1) brightness(0.55); }
+
+/* Ring names, engraved along a spoke. */
+.bonds-ring-name {
+    font-family: var(--dp-display);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    fill: rgba(214, 190, 140, 0.5);
+    paint-order: stroke;
+    stroke: #0e0c0a;
+    stroke-width: 4px;
+    pointer-events: none;
+}
+
+/* Slices: almost no fill; the one under the pointer or in focus glows. */
+.bonds-sector { fill-opacity: 0.35; transition: fill-opacity 0.25s ease; }
+.bonds-sector.is-lit { fill-opacity: 1; }
+.bonds.has-focus .bonds-sector { fill-opacity: 0.25; }
+.bonds.has-focus .bonds-sector.is-lit { fill-opacity: 0.9; }
+.bonds-sector-label { transition: opacity 0.2s ease, filter 0.2s ease; }
+.bonds-sector-label.is-lit { opacity: 1; filter: brightness(1.35); }
+.bonds-sector-count { font-family: var(--dp-body); font-size: 12px; letter-spacing: 0.05em; opacity: 0.55; }
+
+/* Links from the centre: a faint stem through the party band. */
+.bonds-link-stem { fill: none; stroke-width: 1.2; stroke-opacity: 0.35; stroke-dasharray: 1 3; stroke-linecap: round; }
+.bonds.has-focus .bonds-link-stem:not(.is-near) { stroke-opacity: 0.05; }
+.bonds.has-focus .bonds-link-stem.is-near { stroke-opacity: 0.8; }
+.bonds.is-lines-focus .bonds-link-stem:not(.is-near) { visibility: hidden; }
+
+/* Link icons: a coloured bead until they matter (hover, focus). */
+.bonds:not(.has-focus) .bonds-marker:not(:hover):not(:focus-visible) {
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-width: 2px;
+    background: var(--c);
+    box-shadow: 0 0 0 2px #0e0c0a, 0 0 8px color-mix(in srgb, var(--c) 60%, transparent);
+    font-size: 0;
+}
+
+.bonds:not(.has-focus) .bonds-marker:not(:hover) .bonds-marker__badge { display: none; }
+.persona .bonds-marker { transition: width 0.15s ease, height 0.15s ease, margin 0.15s ease, background 0.15s ease; }
