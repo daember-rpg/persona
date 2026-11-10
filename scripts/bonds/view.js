@@ -44,6 +44,7 @@ export class BondsView {
     #hideDead = false;
     #sceneOnly = false;
     #overview = false;
+    #charsPanel = false;
     #overviewQuery = "";
     /** What this view saw last time, to animate what changes live (a reveal, a death). */
     #lastSeen = null;
@@ -64,6 +65,7 @@ export class BondsView {
         host.addEventListener("pointerover", this.#onOver);
         host.addEventListener("pointerout", this.#onOut);
         host.addEventListener("input", this.#onInput);
+        host.addEventListener("change", this.#onChange);
         host.addEventListener("wheel", this.#onWheel, { passive: false });
         host.addEventListener("keydown", this.#onKey);
         host.addEventListener("submit", this.#onSubmit);
@@ -80,6 +82,7 @@ export class BondsView {
         this.host.removeEventListener("pointerover", this.#onOver);
         this.host.removeEventListener("pointerout", this.#onOut);
         this.host.removeEventListener("input", this.#onInput);
+        this.host.removeEventListener("change", this.#onChange);
         this.host.removeEventListener("wheel", this.#onWheel);
         this.host.removeEventListener("keydown", this.#onKey);
         this.host.removeEventListener("submit", this.#onSubmit);
@@ -156,6 +159,7 @@ export class BondsView {
         const archivedIds = new Set(this.#bonds.archived);
         const loose = m.entries.filter(e => !placed.has(e.id) && !archivedIds.has(e.id));
         if (this.#overview && !m.overview) this.#overview = false;
+        if (this.#charsPanel && !m.characters) this.#charsPanel = false;
         if (this.#selected && !this.#nodeInfo(this.#selected)) this.#selected = null;
         const pop = this.host.querySelector(".bonds-pop");
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
@@ -163,7 +167,7 @@ export class BondsView {
         this.host.innerHTML = `
         <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""} ${this.#linkStyle().show === "focus" ? "is-lines-focus" : ""}" tabindex="-1">
             ${this.#renderBar()}
-            ${this.#overview ? this.#renderOverview() : `<div class="bonds-main">
+            ${this.#charsPanel ? this.#renderCharacters() : this.#overview ? this.#renderOverview() : `<div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
                     <div class="bonds-stage" data-stage>
                         ${this.#renderSvg()}
@@ -181,7 +185,7 @@ export class BondsView {
                 </div>
                 ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
             </div>`}
-            ${this.#overview ? "" : this.#renderTimeline()}
+            ${this.#overview || this.#charsPanel ? "" : this.#renderTimeline()}
             <div class="bonds-pop" hidden></div>
         </div>`;
 
@@ -201,18 +205,21 @@ export class BondsView {
         const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
         const players = m.players.length
             ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
-                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
+                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""} ${p.retired ? "is-retired" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
                     <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
                     <span class="bonds-player__name">${esc(p.self ? this.t("You") : p.name)}</span>
                 </button>`).join("")}</nav>`
             : "";
         const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.retired ? this.adapter.t("PERSONA.Bonds.SubRetired").replace("{name}", m.owner.name)
             : m.viewingOther ? this.adapter.t("PERSONA.Bonds.SubOther").replace("{name}", m.owner.name)
             : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
             : m.editable ? this.t("SubPlayer") : "";
         const tools = [
+            m.hasPast ? `<button type="button" class="persona-button bonds-tool ${m.pastView ? "is-on" : ""}" data-action="togglePast" aria-pressed="${!!m.pastView}" title="${esc(this.t("PastHint"))}"><i class="fa-solid fa-hourglass-end" inert></i><span>${esc(this.t("Past"))}</span></button>` : "",
+            m.characters ? `<button type="button" class="persona-button bonds-tool ${this.#charsPanel ? "is-on" : ""}" data-action="toggleChars" aria-pressed="${this.#charsPanel}" title="${esc(this.t("CharactersHint"))}"><i class="fa-solid fa-people-arrows" inert></i><span>${esc(this.t("Characters"))}</span></button>` : "",
             m.canBrowse ? `<button type="button" class="persona-button bonds-tool ${m.browsing ? "is-on" : ""}" data-action="togglePartyView" aria-pressed="${!!m.browsing}" title="${esc(this.t("PartyWheelsHint"))}"><i class="fa-solid fa-users" inert></i><span>${esc(this.t("PartyWheels"))}</span></button>` : "",
-            !this.#overview && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
+            !this.#overview && !this.#charsPanel && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
             m.overview ? `<button type="button" class="persona-button bonds-tool ${this.#overview ? "is-on" : ""}" data-action="toggleOverview" aria-pressed="${this.#overview}"><i class="fa-solid fa-table-cells" inert></i><span>${esc(this.t("Overview"))}</span></button>` : "",
             m.isGM && m.players.length ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>` : ""
         ].join("");
@@ -620,6 +627,50 @@ export class BondsView {
         });
     }
 
+    /**
+     * GM: which sheets are the same person (one wheel), and which characters are retired.
+     * One card per character; each of its sheets can be pointed at another character.
+     */
+    #renderCharacters() {
+        const data = this.#model.characters;
+        const byKey = new Map();
+        for (const sh of data.sheets) {
+            if (!byKey.has(sh.key)) byKey.set(sh.key, []);
+            byKey.get(sh.key).push(sh);
+        }
+        const options = (sheet) => [`<option value="">${esc(this.t("OwnCharacter"))}</option>`,
+            ...data.characters.filter(c => c.key !== sheet.id).map(c => `<option value="${esc(c.key)}" ${sheet.key === c.key && !sheet.primary ? "selected" : ""}>${esc(c.name)}${c.owner ? ` (${esc(c.owner)})` : ""}${c.retired ? ` · ${esc(this.t("Retired"))}` : ""}</option>`)].join("");
+        const card = c => {
+            const sheets = byKey.get(c.key) ?? [];
+            return `<article class="bonds-char ${c.retired ? "is-retired" : ""}">
+                <header class="bonds-char__head">
+                    <span class="bonds-char__img"><img src="${esc(sheets.find(x => x.primary)?.img ?? sheets[0]?.img ?? "")}" alt=""></span>
+                    <div class="bonds-char__text"><b>${esc(c.name)}</b><small>${esc(c.owner || this.t("NoPlayer"))}${c.retired ? ` · ${esc(this.t("Retired"))}` : ""}</small></div>
+                    <button type="button" class="persona-mini" data-action="charOpen" data-id="${esc(c.key)}"><i class="fa-solid fa-circle-nodes" inert></i><span>${esc(this.t("OpenWheel"))}</span></button>
+                    <button type="button" class="persona-mini ${c.retired ? "" : "bonds-danger"}" data-action="charRetire" data-id="${esc(c.key)}" data-retire="${c.retired ? "0" : "1"}"><i class="fa-solid ${c.retired ? "fa-rotate-left" : "fa-hourglass-end"}" inert></i><span>${esc(c.retired ? this.t("Unretire") : this.t("Retire"))}</span></button>
+                </header>
+                <ul class="bonds-char__sheets">${sheets.map(sh => `
+                    <li><span class="bonds-char__sheet"><img src="${esc(sh.img)}" alt=""><span>${esc(sh.name)}${sh.primary ? ` <small>${esc(this.t("PrimarySheet"))}</small>` : ""}</span></span>
+                        ${sh.primary && sheets.length > 1 ? `<span class="bonds-char__note">${esc(this.t("PrimaryNote"))}</span>` : `<label class="bonds-char__same"><span>${esc(this.t("SamePersonAs"))}</span><select data-same="${esc(sh.id)}">${options(sh)}</select></label>`}
+                    </li>`).join("")}</ul>
+            </article>`;
+        };
+        const activeCards = data.characters.filter(c => !c.retired).map(card).join("");
+        const retiredCards = data.characters.filter(c => c.retired).map(card).join("");
+        return `<div class="bonds-ov bonds-chars">
+            <div class="bonds-ov__bar"><p>${esc(this.t("CharactersIntro"))}</p></div>
+            <div class="bonds-chars__scroll">
+                ${activeCards || `<p class="bonds-insp__empty">${esc(this.t("NoCharacters"))}</p>`}
+                ${retiredCards ? `<h3 class="bonds-chars__past">${esc(this.t("Past"))}</h3>${retiredCards}` : ""}
+            </div>
+        </div>`;
+    }
+
+    #onChange = event => {
+        const select = event.target.closest?.("[data-same]");
+        if (select) this.adapter.setSamePerson?.(select.dataset.same, select.value);
+    };
+
     /** GM: who knows whom, and how close each player keeps them — at a glance. */
     #renderOverview() {
         const o = this.#model.overview;
@@ -853,6 +904,7 @@ export class BondsView {
                 <span class="bonds-insp__portrait ${info.kind}"><img class="persona-fit" src="${esc(info.img)}" style="${esc(entry?.frame ?? "")}" alt="" draggable="false"></span>
                 <h3>${esc(info.name)}${info.kind === "entry" && editable ? `<button type="button" class="bonds-pin ${pinned ? "is-on" : ""}" data-action="togglePin" aria-pressed="${pinned}" title="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}" aria-label="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}"><i class="fa-${pinned ? "solid" : "regular"} fa-star" inert></i></button>` : ""}</h3>
                 ${entry?.title ? `<p class="bonds-insp__title">${esc(entry.title)}</p>` : ""}
+                ${info.kind === "self" && m.self.sheets?.length ? `<div class="bonds-sheets" title="${esc(this.t("SheetsHint"))}">${m.self.sheets.map(sh => `<span class="bonds-sheet ${sh.active ? "is-active" : ""}"><img src="${esc(sh.img)}" alt="">${esc(sh.name)}</span>`).join("")}</div>` : ""}
                 <div class="bonds-insp__tags"><span class="bonds-tag">${esc(archived ? this.t("Archived") : place)}</span>${status}</div>
             </div>
             ${distance}
@@ -1208,6 +1260,10 @@ export class BondsView {
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
         togglePin: () => this.#commit(togglePin(this.#bonds, this.#selected)),
+        togglePast: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePastView?.(); },
+        toggleChars: () => { this.#charsPanel = !this.#charsPanel; this.#overview = false; this.#cam.auto = true; this.#render(); },
+        charRetire: el => this.adapter.setRetired?.(el.dataset.id, el.dataset.retire === "1"),
+        charOpen: el => { this.#charsPanel = false; this.#cam.auto = true; this.adapter.selectPlayer(el.dataset.id); },
         togglePartyView: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePartyView?.(); },
         shareWheel: el => {
             Promise.resolve(this.adapter.setShared?.(el.dataset.share === "1")).catch(() => {});
@@ -1222,7 +1278,7 @@ export class BondsView {
         },
         archive: () => this.#commit(archive(this.#bonds, this.#selected)),
         restore: () => this.#commit(restore(this.#bonds, this.#selected)),
-        toggleOverview: () => { this.#overview = !this.#overview; this.#cam.auto = true; this.#render(); },
+        toggleOverview: () => { this.#overview = !this.#overview; this.#charsPanel = false; this.#cam.auto = true; this.#render(); },
         ovJump: el => {
             this.#overview = false;
             this.#selected = el.dataset.id;

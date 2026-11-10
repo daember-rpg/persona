@@ -3481,3 +3481,36 @@
 .bonds-notevis .bonds-seg button i { margin-right: 4px; font-size: 11px; }
 .bonds-bond__text em i { font-size: 10px; color: var(--dp-parchment-faint); }
 .bonds.is-readonly .bonds-who__img { border-color: var(--dp-clay-light); }
+
+/* ==========================================================================
+   Bonds — characters (same person across sheets, retired)
+   ========================================================================== */
+
+.persona .bonds-player.is-retired .bonds-player__img { filter: grayscale(0.8) brightness(0.8); border-style: dashed; }
+
+.bonds-sheets { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 4px; }
+.bonds-sheet { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; background: var(--dp-charcoal-3); font-size: 12px; color: var(--dp-parchment-dim); }
+.bonds-sheet img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 0; }
+.bonds-sheet.is-active { color: var(--dp-parchment); box-shadow: inset 0 0 0 1px var(--dp-gold); }
+
+.bonds-chars__scroll { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-content: start; gap: var(--dp-2); padding-bottom: var(--dp-2); }
+.bonds-chars__past { grid-column: 1 / -1; margin: var(--dp-2) 0 0; border: 0; font-family: var(--dp-display); font-size: 14px; letter-spacing: 0.06em; color: var(--dp-parchment-faint); }
+
+.bonds-char { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--dp-line); background: var(--dp-charcoal-2); }
+.bonds-char.is-retired { opacity: 0.7; border-style: dashed; }
+.bonds-char__head { display: flex; align-items: center; gap: 10px; }
+.bonds-char__img { flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--dp-gold); }
+.bonds-char__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-char.is-retired .bonds-char__img img { filter: grayscale(0.8); }
+.bonds-char__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.bonds-char__text b { font-family: var(--dp-display); font-weight: 600; font-size: 15px; color: var(--dp-parchment); }
+.bonds-char__text small { font-size: 12px; color: var(--dp-parchment-faint); }
+
+.bonds-char__sheets { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--dp-line); list-style: none; }
+.bonds-char__sheets li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.bonds-char__sheet { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dp-parchment); }
+.bonds-char__sheet img { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 0; }
+.bonds-char__sheet small { margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--dp-charcoal-3); font-size: 10px; color: var(--dp-gold); }
+.bonds-char__note { font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-char__same { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-char__same select { height: 28px; max-width: 190px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--dp-line-strong); background: var(--dp-night); color: var(--dp-parchment); font-family: var(--dp-body); font-size: 12px; }

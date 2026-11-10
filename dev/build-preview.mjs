@@ -62,6 +62,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
     <label>View as <select id="pv-role"></select></label>
     <button type="button" id="pv-reveal">Reveal someone</button>
     <button type="button" id="pv-kill">Kill Captain Ilsa</button>
+    <button type="button" id="pv-reality">Thorne: switch reality</button>
     <button type="button" id="pv-reset">Reset</button>
     <span class="pv-note">Preview: the module's own wheel code, with sample data.</span>
   </div>

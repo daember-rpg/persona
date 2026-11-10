@@ -86,7 +86,7 @@ Hooks.once("ready", () => {
     const api = {
         open, close, toggle,
         openCard: id => card.open(id),
-        openBonds: userId => openBonds(userId),
+        openBonds: key => openBonds(key),
         playVideo: (path, title, subtitle) => VideoPlayer.playForAll({ path, title, subtitle }),
         stopVideo: () => VideoPlayer.stopForAll()
     };
@@ -149,9 +149,9 @@ Hooks.on("getSceneControlButtons", controls => {
     };
 });
 
-/** The Bonds wheel: players open their own, the GM opens any player's (read-only). */
-function openBonds(userId = null) {
-    return bonds?.show(userId);
+/** The Bonds wheel: opens on a character (key = its primary sheet's actor id), or the one in use. */
+function openBonds(key = null) {
+    return bonds?.show(key);
 }
 
 function openEditor(id) {
@@ -260,6 +260,7 @@ Hooks.on(`${MODULE_ID}.changed`, key => {
             break;
         case "moments":
         case "officialLinks":
+        case "characters":
             bonds?.refresh();
             break;
         case "video":
@@ -292,8 +293,11 @@ Hooks.on("deleteCombat", combat => autoMomentAfterCombat(combat));
 for (const hook of ["canvasReady", "createToken", "deleteToken"]) Hooks.on(hook, () => bonds?.refresh());
 // A party member's portrait or name.
 Hooks.on("updateActor", (actor, changes) => {
-    if (!("img" in changes || "name" in changes)) return;
-    if (game.users.some(u => u.character?.id === actor.id)) bonds?.refresh();
+    if (!("img" in changes || "name" in changes || "ownership" in changes)) return;
+    if (actor.type === "character" || game.users.some(u => u.character?.id === actor.id)) bonds?.refresh();
 });
+for (const hook of ["createActor", "deleteActor"]) Hooks.on(hook, actor => { if (actor.type === "character") bonds?.refresh(); });
+// Selecting a player character's token opens that character's wheel (players: their own characters).
+Hooks.on("controlToken", (token, controlled) => { if (controlled) bonds?.followToken(token.actor); });
 
 Hooks.on("updateJournalEntryPage", page => syncFromJournal(page));

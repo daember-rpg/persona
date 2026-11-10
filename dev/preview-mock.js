@@ -11,7 +11,7 @@
     const PLAYERS = [
         { id: "p1", name: "Ana", character: "Kaelen Vasthorn" },
         { id: "p2", name: "Bruno", character: "Mira Solenne" },
-        { id: "p3", name: "Caio", character: "Thorne Ashgrave" },
+        { id: "p3", name: "Caio", character: "Thorne Ashgrave (Cleric)" },
         { id: "p4", name: "Duda", character: "Ysolde of the Reeds" }
     ];
     const ALLP = PLAYERS.map(p => p.id);
@@ -60,7 +60,7 @@
             { id: "l3", a: "e1", b: "e2", type: "ally" },
             { id: "l4", a: "self", b: "e9", type: "rival", note: "Humiliated me at the Kurdrax tourney" },
             { id: "l5", a: "e7", b: "e5", type: "betrayed" },
-            { id: "l6", a: "u:p2", b: "e3", type: "love" }
+            { id: "l6", a: "c:p2", b: "e3", type: "love" }
         ]
     });
 
@@ -75,7 +75,18 @@
             { id: "o2", a: "e5", b: "e2", type: "ally", note: "Secret pact", hidden: true }
         ],
         acked: false,
-        gmOwner: "p1"
+        gmOwner: "p1",
+        // Sheets: Thorne has two (same person, two realities); Ana has a retired character from chapter one.
+        sheets: [
+            { id: "p1", name: "Kaelen Vasthorn", owner: "p1", key: "p1" },
+            { id: "p2", name: "Mira Solenne", owner: "p2", key: "p2" },
+            { id: "p3", name: "Thorne Ashgrave (Cleric)", owner: "p3", key: "p3" },
+            { id: "p3b", name: "Thorne Ashgrave (Paladin)", owner: "p3", key: "p3" },
+            { id: "p4", name: "Ysolde of the Reeds", owner: "p4", key: "p4" },
+            { id: "r1", name: "Brannoc the Elder", owner: "p1", key: "r1" }
+        ],
+        retired: ["r1"],
+        activeSheet: {}
     });
     let S = fresh();
     // One older moment: before Bram died and before the Order and Nyx were met.
@@ -84,77 +95,111 @@
     older.links = older.links.filter(l => !["l5"].includes(l.id));
     older.placements.find(p => p.id === "e1").ring = 3; // Captain Ilsa was a stranger back then
     older.placements.find(p => p.id === "e9").ring = 3;
-    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: { e4: "dead" } }];
+    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older, r1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: { e4: "dead" } }];
     S.moments = seedMoments();
+    S.wheels.r1 = (() => { const w = normalizeBonds(older); w.links = w.links.filter(l => !l.a.startsWith("c:") && !l.b.startsWith("c:")); return w; })();
 
     let lang = "en";
     const t = key => key.split(".").reduce((o, k) => o?.[k], LANG[lang]) ?? key;
 
     const playerById = id => PLAYERS.find(p => p.id === id);
-    const portrait = p => ({ id: `u:${p.id}`, name: p.character, img: avatar(p.character) });
+    // Characters: sheets grouped by the character they belong to.
+    const chars = () => {
+        const map = new Map();
+        for (const sh of S.sheets) {
+            const c = map.get(sh.key) ?? { key: sh.key, owner: sh.owner, sheets: [], retired: S.retired.includes(sh.key) };
+            c.sheets.push(sh);
+            map.set(sh.key, c);
+        }
+        return [...map.values()].map(c => ({ ...c, display: c.sheets.find(x => x.id === S.activeSheet[c.key]) ?? c.sheets.find(x => x.id === c.key) ?? c.sheets[0] }));
+    };
+    const portrait = c => ({ id: `c:${c.key}`, name: c.display.name, img: avatar(c.display.name) });
+    const curKey = () => (S.role === "gm" ? S.gmOwner : S.viewOwner);
 
     const adapter = {
         t,
         getModel() {
             const isGM = S.role === "gm";
-            const sharers = PLAYERS.filter(p => p.id === S.role || normalizeBonds(S.wheels[p.id]).shared);
-            if (!isGM && (!S.partyView || !sharers.some(p => p.id === S.viewOwner))) S.viewOwner = S.role;
-            const ownerId = isGM ? S.gmOwner : S.viewOwner;
-            const other = !isGM && ownerId !== S.role;
+            const all = chars();
+            const mine = c => c.owner === S.role;
+            const active = all.filter(c => !c.retired);
+            const shares = c => mine(c) || normalizeBonds(S.wheels[c.key]).shared;
+            const allowed = c => isGM || mine(c) || (S.partyView && !c.retired && shares(c));
+            let current = all.find(c => c.key === curKey() && allowed(c)) ?? (isGM ? active[0] : active.find(mine));
+            const pastList = all.filter(c => c.retired && (isGM || mine(c)));
+            if (S.pastView && !current.retired && pastList.length) current = pastList[0];
+            if (isGM) S.gmOwner = current.key; else S.viewOwner = current.key;
+            if (current.retired) S.pastView = true;
+            const past = all.filter(c => c.retired && (isGM || mine(c)));
+            const ownActive = active.filter(mine);
+            const chips = (S.pastView ? past : active.filter(c => isGM || mine(c) || (S.partyView && shares(c))))
+                .map(c => ({ id: c.key, name: c.display.name, user: playerById(c.owner).name, img: avatar(c.display.name), self: !isGM && mine(c), retired: c.retired }));
+            const ownerId = current.owner;            // whose knowledge
+            const other = !isGM && !mine(current);
             const viewerId = isGM ? ownerId : S.role;
-            const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
             const known = S.entries.filter(e => e.known.includes(ownerId) && (!other || e.known.includes(S.role)));
+            const party = active.filter(c => c.key !== current.key);
             return {
                 isGM,
-                editable: !moment && !other,
+                editable: !moment && !other && !current.retired,
+                retired: current.retired,
                 viewingOther: other,
-                canBrowse: !isGM && sharers.length > 1,
+                canBrowse: !isGM && active.some(c => !mine(c) && shares(c)),
                 browsing: !isGM && !!S.partyView,
-                owner: { id: owner.id, name: owner.character },
-                self: { name: owner.character, img: avatar(owner.character) },
-                party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
+                hasPast: past.length > 0,
+                pastView: !!S.pastView,
+                owner: { id: current.key, name: current.display.name },
+                self: { name: current.display.name, img: avatar(current.display.name), sheets: current.sheets.length > 1 ? current.sheets.map(x => ({ name: x.name, img: avatar(x.name), active: x.id === current.display.id })) : [] },
+                party: party.map(portrait),
                 entries: known.map(e => ({
                     id: e.id,
                     name: e.named.includes(viewerId) ? e.name : null,
                     title: e.named.includes(viewerId) ? e.title : "",
                     img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
-                    isNew: !isGM && e.id === "e14",
+                    isNew: !isGM && !other && e.id === "e14",
                     tag: e.group ?? "_none"
                 })),
-                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[ownerId] : S.wheels[ownerId]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
+                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[current.key] : S.wheels[current.key]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
                 tags: TAGS,
-                players: (isGM ? PLAYERS : S.partyView ? sharers : []).map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character), self: p.id === S.role })),
+                players: (isGM || S.partyView || S.pastView || ownActive.length > 1) ? chips : [],
                 moments: S.moments.map((mo, i) => {
                     const prev = S.moments[i - 1];
-                    const d = diffWheels(prev?.wheels?.[ownerId], mo.wheels?.[ownerId], prev?.statuses ?? {}, mo.statuses ?? {});
+                    const d = diffWheels(prev?.wheels?.[current.key], mo.wheels?.[current.key], prev?.statuses ?? {}, mo.statuses ?? {});
                     return { id: mo.id, label: mo.label, ts: mo.ts, auto: mo.auto ?? null, diff: { ...d, moves: [...d.moves] } };
                 }),
-                peers: PLAYERS.filter(p => p.id !== ownerId).map(p => ({
-                    id: p.id, name: p.character, img: avatar(p.character),
-                    rings: Object.fromEntries((S.wheels[p.id]?.placements ?? []).filter(x => known.some(e => e.id === x.id)).map(x => [x.id, x.ring]))
+                peers: party.map(c => ({
+                    id: c.key, name: c.display.name, img: avatar(c.display.name),
+                    rings: Object.fromEntries((S.wheels[c.key]?.placements ?? []).filter(x => known.some(e => e.id === x.id)).map(x => [x.id, x.ring]))
                 })),
                 overview: isGM ? {
-                    players: PLAYERS.map(p => ({ id: p.id, name: p.character, img: avatar(p.character) })),
-                    rows: S.entries.filter(e => PLAYERS.some(p => e.known.includes(p.id))).map(e => ({
+                    players: active.map(c => ({ id: c.key, name: c.display.name, img: avatar(c.display.name) })),
+                    rows: S.entries.filter(e => active.some(c => e.known.includes(c.owner))).map(e => ({
                         id: e.id, name: e.name, title: e.title, img: e.img, frame: "", status: e.status,
-                        cells: Object.fromEntries(PLAYERS.map(p => {
-                            const w = normalizeBonds(S.wheels[p.id]);
+                        cells: Object.fromEntries(active.map(c => {
+                            const w = normalizeBonds(S.wheels[c.key]);
                             const pl = w.placements.find(x => x.id === e.id);
-                            return [p.id, { known: e.known.includes(p.id), ring: pl?.ring ?? null, archived: w.archived.includes(e.id), pinned: w.pins.includes(e.id), links: w.links.filter(l => l.a === e.id || l.b === e.id).length }];
+                            return [c.key, { known: e.known.includes(c.owner), ring: pl?.ring ?? null, archived: w.archived.includes(e.id), pinned: w.pins.includes(e.id), links: w.links.filter(l => l.a === e.id || l.b === e.id).length }];
                         }))
                     }))
+                } : null,
+                characters: isGM ? {
+                    sheets: S.sheets.map(sh => ({ id: sh.id, name: sh.name, img: avatar(sh.name), owners: playerById(sh.owner).name, key: sh.key, primary: sh.id === sh.key, retired: S.retired.includes(sh.key) })),
+                    characters: all.map(c => ({ key: c.key, name: (c.sheets.find(x => x.id === c.key) ?? c.sheets[0]).name, retired: c.retired, owner: playerById(c.owner).name }))
                 } : null,
                 momentId: moment?.id ?? null,
                 official: moment ? [] : S.official.filter(l => known.some(e => e.id === l.a) && known.some(e => e.id === l.b) && (isGM || !l.hidden)),
                 officialAll: S.official,
-                changes: !isGM && !moment && ownerId === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
+                changes: !isGM && !moment && current.key === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
                 inScene: moment ? null : ["e1", "e9", "e10", "e14"].filter(id => known.some(e => e.id === id))
             };
         },
-        saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
-        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = S.role; S.momentId = null; view.refresh(); },
-        setShared(shared) { S.wheels[S.role] = { ...normalizeBonds(S.wheels[S.role]), shared }; view.refresh(); },
+        togglePastView() { S.pastView = !S.pastView; S.momentId = null; if (!S.pastView) { if (S.role === "gm") S.gmOwner = null; else S.viewOwner = null; } view.refresh(); },
+        setSamePerson(sheetId, key) { const sh = S.sheets.find(x => x.id === sheetId); sh.key = key || sh.id; S.sheets.filter(x => x.key === sheetId && x.id !== sheetId).forEach(x => { x.key = sh.key; }); view.refresh(); },
+        setRetired(key, retired) { S.retired = S.retired.filter(k => k !== key); if (retired) S.retired.push(key); view.refresh(); },
+        saveBonds(bonds) { S.wheels[curKey()] = bonds; },
+        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = null; S.momentId = null; view.refresh(); },
+        setShared(shared) { S.wheels[curKey()] = { ...normalizeBonds(S.wheels[curKey()]), shared }; view.refresh(); },
         openCard(id) {
             const e = S.entries.find(x => x.id === id);
             const ownerId = S.role === "gm" ? S.gmOwner : S.role;
@@ -168,6 +213,7 @@
             document.getElementById("pv-card").hidden = false;
         },
         selectPlayer(id) { if (S.role === "gm") S.gmOwner = id; else S.viewOwner = id; S.momentId = null; view.refresh(); },
+        // Preview only: switch Thorne's active sheet (what selecting the other token does in Foundry).
         selectMoment(id) { S.momentId = id; view.refresh(); },
         recordMoment() {
             const label = prompt(t("PERSONA.Bonds.RecordHint"), t("PERSONA.Bonds.MomentDefault").replace("{n}", S.moments.length + 1));
@@ -185,7 +231,12 @@
 
     const role = document.getElementById("pv-role");
     role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Game Master</option>`;
-    role.addEventListener("change", () => { S.role = role.value; S.momentId = null; view.refresh(); });
+    role.addEventListener("change", () => { S.role = role.value; S.momentId = null; S.viewOwner = null; S.pastView = false; S.partyView = false; view.refresh(); });
+    // Thorne's player switches reality: the other sheet becomes the face of the same wheel.
+    document.getElementById("pv-reality")?.addEventListener("click", () => {
+        S.activeSheet.p3 = S.activeSheet.p3 === "p3b" ? "p3" : "p3b";
+        view.refresh();
+    });
 
     document.getElementById("pv-reset").addEventListener("click", () => { const r = S.role; S = fresh(); S.moments = seedMoments(); S.role = r; view.refresh(); });
     // Live moments: what the table sees when the GM reveals someone or someone dies.

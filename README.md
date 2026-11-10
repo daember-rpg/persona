@@ -29,7 +29,10 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 
 ## Bonds: each player's relationship wheel
 Inspired by the *People* screen of Final Fantasy XVI.
-- **Centre**: the player's character. **Inner ring**: the rest of the party, always there and always close.
+- **One wheel per character of the story**: every player character sheet (type *character* owned by a player, or a player's assigned character) starts as its own character. A player with several characters switches between them with the chips at the top, and selecting one of their tokens opens that character's wheel (the GM: any player character's).
+- **Same person, several sheets**: in *Characters* (GM), point a sheet at another character — the same hero in another reality, another class — and both sheets share one wheel. The centre shows the sheet in use; the inspector lists all of them.
+- **Retire at the end of a chapter**: *Retire* in *Characters* keeps a character's wheel, read-only, under *Past characters* and takes them off the party ring; new characters start fresh. *Bring back* undoes it.
+- **Centre**: the character. **Inner ring**: the rest of the party, always there and always close.
 - **Slices come from the Persona folders**: drag a portrait onto the wheel and the person lands in their folder's slice (the GM's tags, in folder order; people without a folder go to *No folder*). The ring you drop on sets the distance: Close (inner), Known, Distant (outer). *Put everyone on the wheel* drops all the rest on the outer ring.
 - **Categories of their own**: while dragging, drop on *create a category of your own* to start one ("don't trust", "owes us a favour"…) with a name and colour; drop anyone onto it to add them. Click its label to rename, recolour or dissolve it (people go back to their folders).
 - **Never empty**: a slice or category with nobody in it disappears.
@@ -69,7 +72,7 @@ Inspired by the *People* screen of Final Fantasy XVI.
 - A GM online for party notes.
 
 ## Data
-World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`. Per user (flags, written by the player): `seen`, `notes`, `bonds`, `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
+World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`, `characters` (same-person links and retired characters). Per user (flags, written by the player): `seen`, `notes`, `wheels` (one per character key; `bonds` from before 0.12 is read as the assigned character's wheel), `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
 
 ## Structure
 ```
@@ -90,6 +93,7 @@ scripts/
     model.js     Bonds data and geometry (pure, no Foundry)
     view.js      the wheel (framework-free DOM, shared with the preview)
     app.js       Bonds window, Foundry adapter, moments
+    characters.js  characters of the story: sheets, same person, retired; where each wheel lives
 templates/       panel, card, editor + partials
 styles/          persona.css (Embermark)
 lang/            en

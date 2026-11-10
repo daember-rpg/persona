@@ -3488,6 +3488,39 @@
 .bonds-bond__text em i { font-size: 10px; color: var(--dp-parchment-faint); }
 .bonds.is-readonly .bonds-who__img { border-color: var(--dp-clay-light); }
 
+/* ==========================================================================
+   Bonds — characters (same person across sheets, retired)
+   ========================================================================== */
+
+.persona .bonds-player.is-retired .bonds-player__img { filter: grayscale(0.8) brightness(0.8); border-style: dashed; }
+
+.bonds-sheets { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 4px; }
+.bonds-sheet { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 2px; border-radius: 999px; background: var(--dp-charcoal-3); font-size: 12px; color: var(--dp-parchment-dim); }
+.bonds-sheet img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 0; }
+.bonds-sheet.is-active { color: var(--dp-parchment); box-shadow: inset 0 0 0 1px var(--dp-gold); }
+
+.bonds-chars__scroll { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-content: start; gap: var(--dp-2); padding-bottom: var(--dp-2); }
+.bonds-chars__past { grid-column: 1 / -1; margin: var(--dp-2) 0 0; border: 0; font-family: var(--dp-display); font-size: 14px; letter-spacing: 0.06em; color: var(--dp-parchment-faint); }
+
+.bonds-char { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--dp-line); background: var(--dp-charcoal-2); }
+.bonds-char.is-retired { opacity: 0.7; border-style: dashed; }
+.bonds-char__head { display: flex; align-items: center; gap: 10px; }
+.bonds-char__img { flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--dp-gold); }
+.bonds-char__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
+.bonds-char.is-retired .bonds-char__img img { filter: grayscale(0.8); }
+.bonds-char__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.bonds-char__text b { font-family: var(--dp-display); font-weight: 600; font-size: 15px; color: var(--dp-parchment); }
+.bonds-char__text small { font-size: 12px; color: var(--dp-parchment-faint); }
+
+.bonds-char__sheets { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 10px 0 0; border-top: 1px solid var(--dp-line); list-style: none; }
+.bonds-char__sheets li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.bonds-char__sheet { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dp-parchment); }
+.bonds-char__sheet img { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 0; }
+.bonds-char__sheet small { margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--dp-charcoal-3); font-size: 10px; color: var(--dp-gold); }
+.bonds-char__note { font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-char__same { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dp-parchment-faint); }
+.bonds-char__same select { height: 28px; max-width: 190px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--dp-line-strong); background: var(--dp-night); color: var(--dp-parchment); font-family: var(--dp-body); font-size: 12px; }
+
 /* Preview chrome (not part of the module) */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; background: #0b0a09; }
@@ -3526,6 +3559,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
     <label>View as <select id="pv-role"></select></label>
     <button type="button" id="pv-reveal">Reveal someone</button>
     <button type="button" id="pv-kill">Kill Captain Ilsa</button>
+    <button type="button" id="pv-reality">Thorne: switch reality</button>
     <button type="button" id="pv-reset">Reset</button>
     <span class="pv-note">Preview: the module's own wheel code, with sample data.</span>
   </div>
@@ -3533,7 +3567,7 @@ body { font-family: var(--dp-body); color: var(--dp-parchment); }
 </div>
 <div class="pv-card" id="pv-card" hidden><article><img id="pv-card-img" alt=""><div class="body"><span class="persona-eyebrow" id="pv-card-kind"></span><h3 id="pv-card-name"></h3><p id="pv-card-title"></p><p id="pv-card-text"></p></div></article></div>
 <script>
-const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."},"autoMoment":{"Name":"Bonds: record moments automatically","Hint":"Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.","off":"Never","session":"At the start of each session","combat":"After each combat","both":"Both"}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})","Suspected":"Suspicion","SuspectHint":"You think so, but aren't sure yet. Drawn as a dashed line.","Official":"Official","OfficialHint":"Shows on every wheel that knows both people. Players can't change it.","HiddenShort":"Hidden","HiddenHint":"Only you see it, until you untick this.","NotePlaceholder":"Why? (optional, e.g. owes us 50 gold)","SinceLast":"Since you last looked","GotIt":"Got it","ChangeNew1":"{n} new person","ChangeNew":"{n} new people","ChangeDead1":"{n} death","ChangeDead":"{n} deaths","ChangeStatus1":"{n} went missing or came back","ChangeStatus":"{n} went missing or came back","ChangeLinks1":"{n} new revealed bond","ChangeLinks":"{n} new revealed bonds","InScene":"In scene ({n})","InSceneHint":"Only the people with a token on the current scene","Export":"Save the wheel as an image","ExportFailed":"Couldn't save the image: a portrait comes from another site that doesn't allow it.","Overview":"Overview","OverviewHint":"Every person the players know, and where each player keeps them. Click a cell to open that wheel on that person.","OverviewEmpty":"No one has been revealed to the players yet.","OvUnknown":"Not revealed to this player","OvNotPlaced":"Not placed","Archived":"Archived","Archive":"Archive","ArchiveHint":"Takes them off the wheel and out of the list, but keeps them in the timeline.","Restore":"Restore","Pin":"Pin","Unpin":"Unpin","Pinned":"Pinned","PartyThinks":"What the party thinks","NoChangesInMoment":"Nothing changed on this wheel in this moment.","DiffDied":"{name} died","DiffMissing":"{name} went missing","DiffAdded":"{name} joined the wheel","AutoSession":"Session {n} · {date}","AutoCombat":"After the fight · {scene}","LinkStyle":"Link style","ShapeCurve":"Curved","ShapeAngular":"Angular","Bend":"How much curves bend","BendStraight":"Straight","BendLoose":"Loose","ShowLines":"Show lines","ShowAlways":"Always","ShowFocus":"Only in focus","LinkStyleHint":"Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them.","PartyWheels":"Party wheels","PartyWheelsHint":"Look at the wheels the rest of the party shares. You can only change your own.","SubOther":"{name}'s wheel, as they see it. You can look, not change it. Their private notes stay hidden.","ShareWheel":"Your wheel","ShareParty":"Party can see it","ShareNobody":"Only me","ShareHint":"When shared, the party can look at your wheel (never change it). They only see people they know too, and only the notes you set to Everyone.","NoteVisibleTo":"Note visible to","OnlyMe":"Only me","Everyone":"Everyone","WheelOwner":"Whose wheel this is"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}}};
+const LANG = {"en":{"PERSONA":{"Title":"Persona","Close":"Close","GM":"GM","New":"New","OnlyYou":"Only you know this one","Unnamed":"Unnamed","Controls":{"Toggle":"Persona"},"Keybindings":{"Toggle":"Open or close Persona","Bonds":"Open Bonds"},"Panel":{"Director":"Director","Known":"People and places","Search":"Search by name","Cast":"Cast","DropHint":"Drag Actors, Journal entries, Journal pages or Scenes here to add them","NobodyYet":"Nobody yet. The GM reveals people and places as the story unfolds.","NothingHere":"Nothing in this group yet.","NothingFilter":"Nothing matches this filter."},"Filter":{"All":"Everyone","Places":"Places"},"Kind":{"npc":"Person","place":"Place","people":"People","places":"Places"},"Layer":{"face":"Face","name":"Name","summary":"Story","secret":"Secret"},"Reveal":{"All":"Everyone","Everyone":"Every player","Nobody":"Hidden from everyone","NoPlayers":"There are no player accounts in this world yet, so there is nobody to reveal to.","Edit":"Choose who sees what","Layer":"Layer","GridHint":"Each eye shows or hides a layer for one player. Everyone covers the whole table. Showing a layer also shows the ones above it.","ShowAll":"Show everything to everyone","HideAll":"Hide from everyone"},"Card":{"Open":"Open card","Secret":"Secret uncovered","LittleKnown":"You don't know much about them yet.","Unknown":"You don't know who this is yet.","PeopleHere":"People here","SeenAt":"Places","WhoKnows":"What players know"},"Notes":{"Mine":"My notes","Party":"Party notes","MinePlaceholder":"Only you can see this.","MineHint":"Private to you. Saved as you type.","PartyPlaceholder":"Write to the party","Send":"Send","None":"No party notes yet.","Delete":"Delete note"},"Video":{"PlayAll":"Play for everyone","Short":"Video","PlayFile":"Play a video file for everyone","Preview":"Watch video","Replay":"Watch again","Pause":"Pause","Resume":"Resume","Restart":"From the start","Stop":"Stop for everyone","Mute":"Mute","Unmute":"Unmute","ForEveryone":"Playing for everyone","JustYou":"Just for you","ClickToPlay":"Click to play with sound"},"Toast":{"Face":"Someone new","Name":"Name revealed","Summary":"You learned more","Secret":"Secret uncovered"},"Entry":{"New":"New person or place","Edit":"Edit","EditTitle":"Edit: {name}","Added":"{name} added to Persona.","Kind":"Type","Name":"Name","TitleField":"Title","TitlePlaceholder":"Blacksmith, Lord of Ashford…","PickImage":"Choose image","Journal":"Journal page","JournalDrop":"Drag a Journal entry or page here to link it","PullJournal":"Copy text again","Unlink":"Unlink","SyncJournal":"Update the story when the Journal page changes","OpenJournal":"Open in Journal","Summary":"Story","SummaryHint":"what players read once revealed (HTML allowed)","SecretHint":"revealed separately","Groups":"Groups","Video":"Video","VideoHint":"mp4 or webm, played in full screen","Browse":"Browse","ClearVideo":"Remove video","Save":"Save","Delete":"Delete","DeleteConfirm":"Delete {name}? Notes about them are deleted too.","SummaryFromJournal":"from the Journal page; turn off updating above to edit it here","Places":"Places","PlacesHint":"where this person lives or appears","NoPlaces":"No places yet. Create one with the Place type.","People":"People here","PeopleHint":"shown on this place's card","NoPeople":"No people yet.","FrameHint":"Drag the picture to choose what players see; zoom with the slider","Drag":"Drag to frame","Zoom":"Zoom","ResetFrame":"Reset framing"},"Group":{"Add":"Add","Delete":"Delete group","DeleteConfirm":"Delete the group \"{name}\"? People and places stay; they just leave this group.","NewPlaceholder":"New group: Ashford, Smiths' Guild, Chapter 2…","Icon":"Group icon","None":"No groups yet.","Ungrouped":"No group","AddedTo":"{name} added to {group}."},"Settings":{"dockInTriad":{"Name":"Show as a Triad tab","Hint":"With Triad installed, Persona opens as a tab in Triad's tray instead of its own window."},"videoVolume":{"Name":"Video volume","Hint":"Volume of videos played by the GM, on this computer."},"revealToasts":{"Name":"Reveal notices","Hint":"Show a notice when the GM reveals someone or something new to you."},"autoMoment":{"Name":"Bonds: record moments automatically","Hint":"Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.","off":"Never","session":"At the start of each session","combat":"After each combat","both":"Both"}},"Warn":{"NoRelay":"Party notes need the socketlib module and a GM online.","NoSocketlib":"Persona: install socketlib so players can write party notes.","ActionFailed":"That didn't work. The console (F12) has the details.","JournalMissing":"The linked Journal page no longer exists.","DropType":"Drop an Actor, Journal entry, Journal page or Scene.","DropJournal":"Drop a Journal entry or Journal page.","NameRequired":"Give it a name first."},"Handout":{"Show":"Show","Hint":"Open this card on players' screens, like a handout","ShowTo":"Show to","RevealNote":"Their face and name are revealed to them, so the card stays in their gallery.","Shown":"{name} shown to {who}."},"Status":{"Label":"Status","alive":"Alive","dead":"Dead","missing":"Missing"},"Bonds":{"Title":"Bonds","Open":"Bonds — your relationship wheel","Party":"Party","Unnamed":"Unnamed","NewSector":"New category","EditSector":"Edit category","SectorPlaceholder":"Don't trust, owe us a favour…","Cancel":"Cancel","Save":"Save","Create":"Create","Flip":"Flip direction","DeleteLink":"Remove link","ZoomIn":"Zoom in","ZoomOut":"Zoom out","Fit":"Fit the wheel","Ring1":"Close","Ring2":"Known","Ring3":"Distant","Unplaced":"Not placed yet","DragHint":"Drag a portrait onto the wheel: each person goes to their folder's slice; the ring you drop on sets the distance. Closer to the centre, closer to you.","AllPlaced":"Everyone you know is on the wheel.","NobodyKnown":"Nobody revealed to you yet.","NobodyKnownGM":"Nothing revealed to this player yet.","EmptyWheel":"Drag someone onto the wheel to start","EmptyWheelReadOnly":"This wheel is still empty","Record":"Record moment","RecordHint":"Saves how every player's wheel and every status look right now, so the table can look back later.","Recorded":"Moment recorded: {label}","MomentDefault":"Session {n}","Timeline":"Timeline","Now":"Now","Viewing":"Looking back at","BackToNow":"Back to now","NoMoments":"Record a moment at the end of a session to build the timeline.","DeleteMoment":"Delete moment","DeleteMomentConfirm":"Delete the moment \"{label}\"? Players lose this point in their timeline.","Type":{"ally":"Ally","family":"Family","love":"Love","rival":"Rival","enemy":"Enemy","serves":"Serves","betrayed":"Betrayed"},"NoFolder":"No folder","PlaceAll":"Put everyone on the wheel","NewCategoryDrop":"Drop here to create a category of your own","TakeOffDrop":"Drop here to take off the wheel","Dissolve":"Dissolve","DissolveHint":"Dissolving sends its people back to their folders' slices. A category disappears on its own when nobody is left in it.","Players":"Players","TitleOf":"{name}'s bonds","SubPlayer":"Click someone to see their bonds. Drag portraits to arrange the wheel.","SubGM":"You're editing {name}'s wheel. The player sees your changes.","SubPast":"As it was at {label}. Go back to now to make changes.","LinkPickTarget":"Click who {name} is linked to","Search":"Find someone","You":"You","Distance":"Distance","PutOnWheel":"Put on the wheel","Bonds":"Bonds","NoBondsYet":"No bonds yet. Link them to someone to show how they relate.","NoBonds":"No bonds.","LinkTo":"Link to someone","OpenCard":"Open card","TakeOff":"Take off the wheel","BackToList":"Not on the wheel ({n})","Close":"Close","EditLink":"Change or remove","TypeDir":{"serves":{"out":"Serves","in":"Served by"},"betrayed":{"out":"Betrayed","in":"Betrayed by"}},"FindOnWheel":"Find on the wheel","HideDead":"Hide the dead ({n})","ShowDead":"Show the dead ({n})","Suspected":"Suspicion","SuspectHint":"You think so, but aren't sure yet. Drawn as a dashed line.","Official":"Official","OfficialHint":"Shows on every wheel that knows both people. Players can't change it.","HiddenShort":"Hidden","HiddenHint":"Only you see it, until you untick this.","NotePlaceholder":"Why? (optional, e.g. owes us 50 gold)","SinceLast":"Since you last looked","GotIt":"Got it","ChangeNew1":"{n} new person","ChangeNew":"{n} new people","ChangeDead1":"{n} death","ChangeDead":"{n} deaths","ChangeStatus1":"{n} went missing or came back","ChangeStatus":"{n} went missing or came back","ChangeLinks1":"{n} new revealed bond","ChangeLinks":"{n} new revealed bonds","InScene":"In scene ({n})","InSceneHint":"Only the people with a token on the current scene","Export":"Save the wheel as an image","ExportFailed":"Couldn't save the image: a portrait comes from another site that doesn't allow it.","Overview":"Overview","OverviewHint":"Every person the players know, and where each player keeps them. Click a cell to open that wheel on that person.","OverviewEmpty":"No one has been revealed to the players yet.","OvUnknown":"Not revealed to this player","OvNotPlaced":"Not placed","Archived":"Archived","Archive":"Archive","ArchiveHint":"Takes them off the wheel and out of the list, but keeps them in the timeline.","Restore":"Restore","Pin":"Pin","Unpin":"Unpin","Pinned":"Pinned","PartyThinks":"What the party thinks","NoChangesInMoment":"Nothing changed on this wheel in this moment.","DiffDied":"{name} died","DiffMissing":"{name} went missing","DiffAdded":"{name} joined the wheel","AutoSession":"Session {n} · {date}","AutoCombat":"After the fight · {scene}","LinkStyle":"Link style","ShapeCurve":"Curved","ShapeAngular":"Angular","Bend":"How much curves bend","BendStraight":"Straight","BendLoose":"Loose","ShowLines":"Show lines","ShowAlways":"Always","ShowFocus":"Only in focus","LinkStyleHint":"Only for you. Angular lines follow the rings of the wheel. With 'only in focus', a person's lines show when you hover or select them.","PartyWheels":"Party wheels","PartyWheelsHint":"Look at the wheels the rest of the party shares. You can only change your own.","SubOther":"{name}'s wheel, as they see it. You can look, not change it. Their private notes stay hidden.","ShareWheel":"Your wheel","ShareParty":"Party can see it","ShareNobody":"Only me","ShareHint":"When shared, the party can look at your wheel (never change it). They only see people they know too, and only the notes you set to Everyone.","NoteVisibleTo":"Note visible to","OnlyMe":"Only me","Everyone":"Everyone","WheelOwner":"Whose wheel this is","Past":"Past characters","PastHint":"Wheels of retired characters, kept as they were.","Characters":"Characters","CharactersHint":"Which sheets are the same person, and which characters are retired.","CharactersIntro":"Each character of the story has one wheel. If a player has several sheets for the same person (another class, another reality), point them at that character: they'll share its wheel. Retire characters at the end of a chapter: their wheels are kept, read-only, under Past characters, and new characters start fresh.","OwnCharacter":"Its own character","SamePersonAs":"Same person as","PrimarySheet":"main sheet","PrimaryNote":"Other sheets point here.","Retire":"Retire","Unretire":"Bring back","Retired":"retired","OpenWheel":"Open wheel","NoPlayer":"No player","NoCharacters":"No player characters yet: give a player a character, or ownership of a character sheet.","SubRetired":"{name} is retired. This wheel is kept as it was.","SheetsHint":"Sheets of this character (same person, one wheel)"},"Arrange":{"Moved":"{name} moved to {group}","Hint":"Drag to reorder or move to another folder"}}}};
 /**
  * Bonds — each player's relationship wheel, inspired by the "People" screen of Final Fantasy XVI.
  *
@@ -4140,6 +4174,7 @@ class BondsView {
     #hideDead = false;
     #sceneOnly = false;
     #overview = false;
+    #charsPanel = false;
     #overviewQuery = "";
     /** What this view saw last time, to animate what changes live (a reveal, a death). */
     #lastSeen = null;
@@ -4160,6 +4195,7 @@ class BondsView {
         host.addEventListener("pointerover", this.#onOver);
         host.addEventListener("pointerout", this.#onOut);
         host.addEventListener("input", this.#onInput);
+        host.addEventListener("change", this.#onChange);
         host.addEventListener("wheel", this.#onWheel, { passive: false });
         host.addEventListener("keydown", this.#onKey);
         host.addEventListener("submit", this.#onSubmit);
@@ -4176,6 +4212,7 @@ class BondsView {
         this.host.removeEventListener("pointerover", this.#onOver);
         this.host.removeEventListener("pointerout", this.#onOut);
         this.host.removeEventListener("input", this.#onInput);
+        this.host.removeEventListener("change", this.#onChange);
         this.host.removeEventListener("wheel", this.#onWheel);
         this.host.removeEventListener("keydown", this.#onKey);
         this.host.removeEventListener("submit", this.#onSubmit);
@@ -4252,6 +4289,7 @@ class BondsView {
         const archivedIds = new Set(this.#bonds.archived);
         const loose = m.entries.filter(e => !placed.has(e.id) && !archivedIds.has(e.id));
         if (this.#overview && !m.overview) this.#overview = false;
+        if (this.#charsPanel && !m.characters) this.#charsPanel = false;
         if (this.#selected && !this.#nodeInfo(this.#selected)) this.#selected = null;
         const pop = this.host.querySelector(".bonds-pop");
         const keepPop = pop && !pop.hidden ? pop.outerHTML : null;
@@ -4259,7 +4297,7 @@ class BondsView {
         this.host.innerHTML = `
         <div class="bonds ${m.editable ? "is-editable" : "is-readonly"} ${this.#linkMode ? "is-linking" : ""} ${m.momentId ? "is-past" : ""} ${this.#bonds.links.length > 14 ? "is-dense" : ""} ${this.#linkStyle().show === "focus" ? "is-lines-focus" : ""}" tabindex="-1">
             ${this.#renderBar()}
-            ${this.#overview ? this.#renderOverview() : `<div class="bonds-main">
+            ${this.#charsPanel ? this.#renderCharacters() : this.#overview ? this.#renderOverview() : `<div class="bonds-main">
                 <div class="bonds-viewport" data-viewport>
                     <div class="bonds-stage" data-stage>
                         ${this.#renderSvg()}
@@ -4277,7 +4315,7 @@ class BondsView {
                 </div>
                 ${this.#selected ? this.#renderInspector(loose) : this.#renderDrawer(loose)}
             </div>`}
-            ${this.#overview ? "" : this.#renderTimeline()}
+            ${this.#overview || this.#charsPanel ? "" : this.#renderTimeline()}
             <div class="bonds-pop" hidden></div>
         </div>`;
 
@@ -4297,18 +4335,21 @@ class BondsView {
         const moment = m.momentId ? m.moments.find(x => x.id === m.momentId) : null;
         const players = m.players.length
             ? `<nav class="bonds-players" aria-label="${esc(this.t("Players"))}">${m.players.map(p => `
-                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
+                <button type="button" class="bonds-player ${p.id === m.owner.id ? "is-active" : ""} ${p.retired ? "is-retired" : ""}" data-action="player" data-id="${esc(p.id)}" aria-pressed="${p.id === m.owner.id}" title="${esc(p.name)}${p.user ? ` (${esc(p.user)})` : ""}">
                     <span class="bonds-player__img"><img src="${esc(p.img)}" alt="" draggable="false"></span>
                     <span class="bonds-player__name">${esc(p.self ? this.t("You") : p.name)}</span>
                 </button>`).join("")}</nav>`
             : "";
         const sub = moment ? this.adapter.t("PERSONA.Bonds.SubPast").replace("{label}", moment.label)
+            : m.retired ? this.adapter.t("PERSONA.Bonds.SubRetired").replace("{name}", m.owner.name)
             : m.viewingOther ? this.adapter.t("PERSONA.Bonds.SubOther").replace("{name}", m.owner.name)
             : m.isGM && m.editable ? this.adapter.t("PERSONA.Bonds.SubGM").replace("{name}", m.owner.name)
             : m.editable ? this.t("SubPlayer") : "";
         const tools = [
+            m.hasPast ? `<button type="button" class="persona-button bonds-tool ${m.pastView ? "is-on" : ""}" data-action="togglePast" aria-pressed="${!!m.pastView}" title="${esc(this.t("PastHint"))}"><i class="fa-solid fa-hourglass-end" inert></i><span>${esc(this.t("Past"))}</span></button>` : "",
+            m.characters ? `<button type="button" class="persona-button bonds-tool ${this.#charsPanel ? "is-on" : ""}" data-action="toggleChars" aria-pressed="${this.#charsPanel}" title="${esc(this.t("CharactersHint"))}"><i class="fa-solid fa-people-arrows" inert></i><span>${esc(this.t("Characters"))}</span></button>` : "",
             m.canBrowse ? `<button type="button" class="persona-button bonds-tool ${m.browsing ? "is-on" : ""}" data-action="togglePartyView" aria-pressed="${!!m.browsing}" title="${esc(this.t("PartyWheelsHint"))}"><i class="fa-solid fa-users" inert></i><span>${esc(this.t("PartyWheels"))}</span></button>` : "",
-            !this.#overview && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
+            !this.#overview && !this.#charsPanel && m.owner?.id ? `<button type="button" class="persona-icon-btn" data-action="exportImage" title="${esc(this.t("Export"))}" aria-label="${esc(this.t("Export"))}"><i class="fa-solid fa-image" inert></i></button>` : "",
             m.overview ? `<button type="button" class="persona-button bonds-tool ${this.#overview ? "is-on" : ""}" data-action="toggleOverview" aria-pressed="${this.#overview}"><i class="fa-solid fa-table-cells" inert></i><span>${esc(this.t("Overview"))}</span></button>` : "",
             m.isGM && m.players.length ? `<button type="button" class="persona-button bonds-tool bonds-tool--accent" data-action="recordMoment" title="${esc(this.t("RecordHint"))}"><i class="fa-solid fa-camera-retro" inert></i><span>${esc(this.t("Record"))}</span></button>` : ""
         ].join("");
@@ -4716,6 +4757,50 @@ class BondsView {
         });
     }
 
+    /**
+     * GM: which sheets are the same person (one wheel), and which characters are retired.
+     * One card per character; each of its sheets can be pointed at another character.
+     */
+    #renderCharacters() {
+        const data = this.#model.characters;
+        const byKey = new Map();
+        for (const sh of data.sheets) {
+            if (!byKey.has(sh.key)) byKey.set(sh.key, []);
+            byKey.get(sh.key).push(sh);
+        }
+        const options = (sheet) => [`<option value="">${esc(this.t("OwnCharacter"))}</option>`,
+            ...data.characters.filter(c => c.key !== sheet.id).map(c => `<option value="${esc(c.key)}" ${sheet.key === c.key && !sheet.primary ? "selected" : ""}>${esc(c.name)}${c.owner ? ` (${esc(c.owner)})` : ""}${c.retired ? ` · ${esc(this.t("Retired"))}` : ""}</option>`)].join("");
+        const card = c => {
+            const sheets = byKey.get(c.key) ?? [];
+            return `<article class="bonds-char ${c.retired ? "is-retired" : ""}">
+                <header class="bonds-char__head">
+                    <span class="bonds-char__img"><img src="${esc(sheets.find(x => x.primary)?.img ?? sheets[0]?.img ?? "")}" alt=""></span>
+                    <div class="bonds-char__text"><b>${esc(c.name)}</b><small>${esc(c.owner || this.t("NoPlayer"))}${c.retired ? ` · ${esc(this.t("Retired"))}` : ""}</small></div>
+                    <button type="button" class="persona-mini" data-action="charOpen" data-id="${esc(c.key)}"><i class="fa-solid fa-circle-nodes" inert></i><span>${esc(this.t("OpenWheel"))}</span></button>
+                    <button type="button" class="persona-mini ${c.retired ? "" : "bonds-danger"}" data-action="charRetire" data-id="${esc(c.key)}" data-retire="${c.retired ? "0" : "1"}"><i class="fa-solid ${c.retired ? "fa-rotate-left" : "fa-hourglass-end"}" inert></i><span>${esc(c.retired ? this.t("Unretire") : this.t("Retire"))}</span></button>
+                </header>
+                <ul class="bonds-char__sheets">${sheets.map(sh => `
+                    <li><span class="bonds-char__sheet"><img src="${esc(sh.img)}" alt=""><span>${esc(sh.name)}${sh.primary ? ` <small>${esc(this.t("PrimarySheet"))}</small>` : ""}</span></span>
+                        ${sh.primary && sheets.length > 1 ? `<span class="bonds-char__note">${esc(this.t("PrimaryNote"))}</span>` : `<label class="bonds-char__same"><span>${esc(this.t("SamePersonAs"))}</span><select data-same="${esc(sh.id)}">${options(sh)}</select></label>`}
+                    </li>`).join("")}</ul>
+            </article>`;
+        };
+        const activeCards = data.characters.filter(c => !c.retired).map(card).join("");
+        const retiredCards = data.characters.filter(c => c.retired).map(card).join("");
+        return `<div class="bonds-ov bonds-chars">
+            <div class="bonds-ov__bar"><p>${esc(this.t("CharactersIntro"))}</p></div>
+            <div class="bonds-chars__scroll">
+                ${activeCards || `<p class="bonds-insp__empty">${esc(this.t("NoCharacters"))}</p>`}
+                ${retiredCards ? `<h3 class="bonds-chars__past">${esc(this.t("Past"))}</h3>${retiredCards}` : ""}
+            </div>
+        </div>`;
+    }
+
+    #onChange = event => {
+        const select = event.target.closest?.("[data-same]");
+        if (select) this.adapter.setSamePerson?.(select.dataset.same, select.value);
+    };
+
     /** GM: who knows whom, and how close each player keeps them — at a glance. */
     #renderOverview() {
         const o = this.#model.overview;
@@ -4949,6 +5034,7 @@ class BondsView {
                 <span class="bonds-insp__portrait ${info.kind}"><img class="persona-fit" src="${esc(info.img)}" style="${esc(entry?.frame ?? "")}" alt="" draggable="false"></span>
                 <h3>${esc(info.name)}${info.kind === "entry" && editable ? `<button type="button" class="bonds-pin ${pinned ? "is-on" : ""}" data-action="togglePin" aria-pressed="${pinned}" title="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}" aria-label="${esc(pinned ? this.t("Unpin") : this.t("Pin"))}"><i class="fa-${pinned ? "solid" : "regular"} fa-star" inert></i></button>` : ""}</h3>
                 ${entry?.title ? `<p class="bonds-insp__title">${esc(entry.title)}</p>` : ""}
+                ${info.kind === "self" && m.self.sheets?.length ? `<div class="bonds-sheets" title="${esc(this.t("SheetsHint"))}">${m.self.sheets.map(sh => `<span class="bonds-sheet ${sh.active ? "is-active" : ""}"><img src="${esc(sh.img)}" alt="">${esc(sh.name)}</span>`).join("")}</div>` : ""}
                 <div class="bonds-insp__tags"><span class="bonds-tag">${esc(archived ? this.t("Archived") : place)}</span>${status}</div>
             </div>
             ${distance}
@@ -5304,6 +5390,10 @@ class BondsView {
         select: (_el, id) => this.#select(id),
         toggleDead: () => { this.#hideDead = !this.#hideDead; this.#render(); },
         togglePin: () => this.#commit(togglePin(this.#bonds, this.#selected)),
+        togglePast: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePastView?.(); },
+        toggleChars: () => { this.#charsPanel = !this.#charsPanel; this.#overview = false; this.#cam.auto = true; this.#render(); },
+        charRetire: el => this.adapter.setRetired?.(el.dataset.id, el.dataset.retire === "1"),
+        charOpen: el => { this.#charsPanel = false; this.#cam.auto = true; this.adapter.selectPlayer(el.dataset.id); },
         togglePartyView: () => { this.#selected = null; this.#cam.auto = true; this.adapter.togglePartyView?.(); },
         shareWheel: el => {
             Promise.resolve(this.adapter.setShared?.(el.dataset.share === "1")).catch(() => {});
@@ -5318,7 +5408,7 @@ class BondsView {
         },
         archive: () => this.#commit(archive(this.#bonds, this.#selected)),
         restore: () => this.#commit(restore(this.#bonds, this.#selected)),
-        toggleOverview: () => { this.#overview = !this.#overview; this.#cam.auto = true; this.#render(); },
+        toggleOverview: () => { this.#overview = !this.#overview; this.#charsPanel = false; this.#cam.auto = true; this.#render(); },
         ovJump: el => {
             this.#overview = false;
             this.#selected = el.dataset.id;
@@ -5564,7 +5654,7 @@ class BondsView {
     const PLAYERS = [
         { id: "p1", name: "Ana", character: "Kaelen Vasthorn" },
         { id: "p2", name: "Bruno", character: "Mira Solenne" },
-        { id: "p3", name: "Caio", character: "Thorne Ashgrave" },
+        { id: "p3", name: "Caio", character: "Thorne Ashgrave (Cleric)" },
         { id: "p4", name: "Duda", character: "Ysolde of the Reeds" }
     ];
     const ALLP = PLAYERS.map(p => p.id);
@@ -5613,7 +5703,7 @@ class BondsView {
             { id: "l3", a: "e1", b: "e2", type: "ally" },
             { id: "l4", a: "self", b: "e9", type: "rival", note: "Humiliated me at the Kurdrax tourney" },
             { id: "l5", a: "e7", b: "e5", type: "betrayed" },
-            { id: "l6", a: "u:p2", b: "e3", type: "love" }
+            { id: "l6", a: "c:p2", b: "e3", type: "love" }
         ]
     });
 
@@ -5628,7 +5718,18 @@ class BondsView {
             { id: "o2", a: "e5", b: "e2", type: "ally", note: "Secret pact", hidden: true }
         ],
         acked: false,
-        gmOwner: "p1"
+        gmOwner: "p1",
+        // Sheets: Thorne has two (same person, two realities); Ana has a retired character from chapter one.
+        sheets: [
+            { id: "p1", name: "Kaelen Vasthorn", owner: "p1", key: "p1" },
+            { id: "p2", name: "Mira Solenne", owner: "p2", key: "p2" },
+            { id: "p3", name: "Thorne Ashgrave (Cleric)", owner: "p3", key: "p3" },
+            { id: "p3b", name: "Thorne Ashgrave (Paladin)", owner: "p3", key: "p3" },
+            { id: "p4", name: "Ysolde of the Reeds", owner: "p4", key: "p4" },
+            { id: "r1", name: "Brannoc the Elder", owner: "p1", key: "r1" }
+        ],
+        retired: ["r1"],
+        activeSheet: {}
     });
     let S = fresh();
     // One older moment: before Bram died and before the Order and Nyx were met.
@@ -5637,77 +5738,111 @@ class BondsView {
     older.links = older.links.filter(l => !["l5"].includes(l.id));
     older.placements.find(p => p.id === "e1").ring = 3; // Captain Ilsa was a stranger back then
     older.placements.find(p => p.id === "e9").ring = 3;
-    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: { e4: "dead" } }];
+    const seedMoments = () => [{ id: "m1", label: "Session 11", ts: 1, wheels: { p1: older, r1: older }, statuses: { e4: "alive" } }, { id: "m2", label: "Session 12", ts: 2, wheels: { p1: sample() }, statuses: { e4: "dead" } }];
     S.moments = seedMoments();
+    S.wheels.r1 = (() => { const w = normalizeBonds(older); w.links = w.links.filter(l => !l.a.startsWith("c:") && !l.b.startsWith("c:")); return w; })();
 
     let lang = "en";
     const t = key => key.split(".").reduce((o, k) => o?.[k], LANG[lang]) ?? key;
 
     const playerById = id => PLAYERS.find(p => p.id === id);
-    const portrait = p => ({ id: `u:${p.id}`, name: p.character, img: avatar(p.character) });
+    // Characters: sheets grouped by the character they belong to.
+    const chars = () => {
+        const map = new Map();
+        for (const sh of S.sheets) {
+            const c = map.get(sh.key) ?? { key: sh.key, owner: sh.owner, sheets: [], retired: S.retired.includes(sh.key) };
+            c.sheets.push(sh);
+            map.set(sh.key, c);
+        }
+        return [...map.values()].map(c => ({ ...c, display: c.sheets.find(x => x.id === S.activeSheet[c.key]) ?? c.sheets.find(x => x.id === c.key) ?? c.sheets[0] }));
+    };
+    const portrait = c => ({ id: `c:${c.key}`, name: c.display.name, img: avatar(c.display.name) });
+    const curKey = () => (S.role === "gm" ? S.gmOwner : S.viewOwner);
 
     const adapter = {
         t,
         getModel() {
             const isGM = S.role === "gm";
-            const sharers = PLAYERS.filter(p => p.id === S.role || normalizeBonds(S.wheels[p.id]).shared);
-            if (!isGM && (!S.partyView || !sharers.some(p => p.id === S.viewOwner))) S.viewOwner = S.role;
-            const ownerId = isGM ? S.gmOwner : S.viewOwner;
-            const other = !isGM && ownerId !== S.role;
+            const all = chars();
+            const mine = c => c.owner === S.role;
+            const active = all.filter(c => !c.retired);
+            const shares = c => mine(c) || normalizeBonds(S.wheels[c.key]).shared;
+            const allowed = c => isGM || mine(c) || (S.partyView && !c.retired && shares(c));
+            let current = all.find(c => c.key === curKey() && allowed(c)) ?? (isGM ? active[0] : active.find(mine));
+            const pastList = all.filter(c => c.retired && (isGM || mine(c)));
+            if (S.pastView && !current.retired && pastList.length) current = pastList[0];
+            if (isGM) S.gmOwner = current.key; else S.viewOwner = current.key;
+            if (current.retired) S.pastView = true;
+            const past = all.filter(c => c.retired && (isGM || mine(c)));
+            const ownActive = active.filter(mine);
+            const chips = (S.pastView ? past : active.filter(c => isGM || mine(c) || (S.partyView && shares(c))))
+                .map(c => ({ id: c.key, name: c.display.name, user: playerById(c.owner).name, img: avatar(c.display.name), self: !isGM && mine(c), retired: c.retired }));
+            const ownerId = current.owner;            // whose knowledge
+            const other = !isGM && !mine(current);
             const viewerId = isGM ? ownerId : S.role;
-            const owner = playerById(ownerId);
             const moment = S.momentId ? S.moments.find(m => m.id === S.momentId) : null;
             const known = S.entries.filter(e => e.known.includes(ownerId) && (!other || e.known.includes(S.role)));
+            const party = active.filter(c => c.key !== current.key);
             return {
                 isGM,
-                editable: !moment && !other,
+                editable: !moment && !other && !current.retired,
+                retired: current.retired,
                 viewingOther: other,
-                canBrowse: !isGM && sharers.length > 1,
+                canBrowse: !isGM && active.some(c => !mine(c) && shares(c)),
                 browsing: !isGM && !!S.partyView,
-                owner: { id: owner.id, name: owner.character },
-                self: { name: owner.character, img: avatar(owner.character) },
-                party: PLAYERS.filter(p => p.id !== ownerId).map(portrait),
+                hasPast: past.length > 0,
+                pastView: !!S.pastView,
+                owner: { id: current.key, name: current.display.name },
+                self: { name: current.display.name, img: avatar(current.display.name), sheets: current.sheets.length > 1 ? current.sheets.map(x => ({ name: x.name, img: avatar(x.name), active: x.id === current.display.id })) : [] },
+                party: party.map(portrait),
                 entries: known.map(e => ({
                     id: e.id,
                     name: e.named.includes(viewerId) ? e.name : null,
                     title: e.named.includes(viewerId) ? e.title : "",
                     img: e.img, frame: e.id === "e2" ? "--fx: 50%; --fy: 20%; --zoom: 2.2;" : "", status: moment?.statuses?.[e.id] ?? e.status,
-                    isNew: !isGM && e.id === "e14",
+                    isNew: !isGM && !other && e.id === "e14",
                     tag: e.group ?? "_none"
                 })),
-                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[ownerId] : S.wheels[ownerId]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
+                bonds: (() => { const w = normalizeBonds(moment ? moment.wheels[current.key] : S.wheels[current.key]); return other ? { ...w, links: w.links.map(l => l.notePrivate ? { ...l, note: "" } : l) } : w; })(),
                 tags: TAGS,
-                players: (isGM ? PLAYERS : S.partyView ? sharers : []).map(p => ({ id: p.id, name: p.character, user: p.name, img: avatar(p.character), self: p.id === S.role })),
+                players: (isGM || S.partyView || S.pastView || ownActive.length > 1) ? chips : [],
                 moments: S.moments.map((mo, i) => {
                     const prev = S.moments[i - 1];
-                    const d = diffWheels(prev?.wheels?.[ownerId], mo.wheels?.[ownerId], prev?.statuses ?? {}, mo.statuses ?? {});
+                    const d = diffWheels(prev?.wheels?.[current.key], mo.wheels?.[current.key], prev?.statuses ?? {}, mo.statuses ?? {});
                     return { id: mo.id, label: mo.label, ts: mo.ts, auto: mo.auto ?? null, diff: { ...d, moves: [...d.moves] } };
                 }),
-                peers: PLAYERS.filter(p => p.id !== ownerId).map(p => ({
-                    id: p.id, name: p.character, img: avatar(p.character),
-                    rings: Object.fromEntries((S.wheels[p.id]?.placements ?? []).filter(x => known.some(e => e.id === x.id)).map(x => [x.id, x.ring]))
+                peers: party.map(c => ({
+                    id: c.key, name: c.display.name, img: avatar(c.display.name),
+                    rings: Object.fromEntries((S.wheels[c.key]?.placements ?? []).filter(x => known.some(e => e.id === x.id)).map(x => [x.id, x.ring]))
                 })),
                 overview: isGM ? {
-                    players: PLAYERS.map(p => ({ id: p.id, name: p.character, img: avatar(p.character) })),
-                    rows: S.entries.filter(e => PLAYERS.some(p => e.known.includes(p.id))).map(e => ({
+                    players: active.map(c => ({ id: c.key, name: c.display.name, img: avatar(c.display.name) })),
+                    rows: S.entries.filter(e => active.some(c => e.known.includes(c.owner))).map(e => ({
                         id: e.id, name: e.name, title: e.title, img: e.img, frame: "", status: e.status,
-                        cells: Object.fromEntries(PLAYERS.map(p => {
-                            const w = normalizeBonds(S.wheels[p.id]);
+                        cells: Object.fromEntries(active.map(c => {
+                            const w = normalizeBonds(S.wheels[c.key]);
                             const pl = w.placements.find(x => x.id === e.id);
-                            return [p.id, { known: e.known.includes(p.id), ring: pl?.ring ?? null, archived: w.archived.includes(e.id), pinned: w.pins.includes(e.id), links: w.links.filter(l => l.a === e.id || l.b === e.id).length }];
+                            return [c.key, { known: e.known.includes(c.owner), ring: pl?.ring ?? null, archived: w.archived.includes(e.id), pinned: w.pins.includes(e.id), links: w.links.filter(l => l.a === e.id || l.b === e.id).length }];
                         }))
                     }))
+                } : null,
+                characters: isGM ? {
+                    sheets: S.sheets.map(sh => ({ id: sh.id, name: sh.name, img: avatar(sh.name), owners: playerById(sh.owner).name, key: sh.key, primary: sh.id === sh.key, retired: S.retired.includes(sh.key) })),
+                    characters: all.map(c => ({ key: c.key, name: (c.sheets.find(x => x.id === c.key) ?? c.sheets[0]).name, retired: c.retired, owner: playerById(c.owner).name }))
                 } : null,
                 momentId: moment?.id ?? null,
                 official: moment ? [] : S.official.filter(l => known.some(e => e.id === l.a) && known.some(e => e.id === l.b) && (isGM || !l.hidden)),
                 officialAll: S.official,
-                changes: !isGM && !moment && ownerId === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
+                changes: !isGM && !moment && current.key === "p1" && !S.acked ? { newIds: ["e14"], statusIds: ["e4"], linkIds: ["o1"] } : null,
                 inScene: moment ? null : ["e1", "e9", "e10", "e14"].filter(id => known.some(e => e.id === id))
             };
         },
-        saveBonds(bonds) { S.wheels[S.role === "gm" ? S.gmOwner : S.role] = bonds; },
-        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = S.role; S.momentId = null; view.refresh(); },
-        setShared(shared) { S.wheels[S.role] = { ...normalizeBonds(S.wheels[S.role]), shared }; view.refresh(); },
+        togglePastView() { S.pastView = !S.pastView; S.momentId = null; if (!S.pastView) { if (S.role === "gm") S.gmOwner = null; else S.viewOwner = null; } view.refresh(); },
+        setSamePerson(sheetId, key) { const sh = S.sheets.find(x => x.id === sheetId); sh.key = key || sh.id; S.sheets.filter(x => x.key === sheetId && x.id !== sheetId).forEach(x => { x.key = sh.key; }); view.refresh(); },
+        setRetired(key, retired) { S.retired = S.retired.filter(k => k !== key); if (retired) S.retired.push(key); view.refresh(); },
+        saveBonds(bonds) { S.wheels[curKey()] = bonds; },
+        togglePartyView() { S.partyView = !S.partyView; if (!S.partyView) S.viewOwner = null; S.momentId = null; view.refresh(); },
+        setShared(shared) { S.wheels[curKey()] = { ...normalizeBonds(S.wheels[curKey()]), shared }; view.refresh(); },
         openCard(id) {
             const e = S.entries.find(x => x.id === id);
             const ownerId = S.role === "gm" ? S.gmOwner : S.role;
@@ -5721,6 +5856,7 @@ class BondsView {
             document.getElementById("pv-card").hidden = false;
         },
         selectPlayer(id) { if (S.role === "gm") S.gmOwner = id; else S.viewOwner = id; S.momentId = null; view.refresh(); },
+        // Preview only: switch Thorne's active sheet (what selecting the other token does in Foundry).
         selectMoment(id) { S.momentId = id; view.refresh(); },
         recordMoment() {
             const label = prompt(t("PERSONA.Bonds.RecordHint"), t("PERSONA.Bonds.MomentDefault").replace("{n}", S.moments.length + 1));
@@ -5738,7 +5874,12 @@ class BondsView {
 
     const role = document.getElementById("pv-role");
     role.innerHTML = PLAYERS.map(p => `<option value="${p.id}">${p.name} (${p.character})</option>`).join("") + `<option value="gm">Game Master</option>`;
-    role.addEventListener("change", () => { S.role = role.value; S.momentId = null; view.refresh(); });
+    role.addEventListener("change", () => { S.role = role.value; S.momentId = null; S.viewOwner = null; S.pastView = false; S.partyView = false; view.refresh(); });
+    // Thorne's player switches reality: the other sheet becomes the face of the same wheel.
+    document.getElementById("pv-reality")?.addEventListener("click", () => {
+        S.activeSheet.p3 = S.activeSheet.p3 === "p3b" ? "p3" : "p3b";
+        view.refresh();
+    });
 
     document.getElementById("pv-reset").addEventListener("click", () => { const r = S.role; S = fresh(); S.moments = seedMoments(); S.role = r; view.refresh(); });
     // Live moments: what the table sees when the GM reveals someone or someone dies.
