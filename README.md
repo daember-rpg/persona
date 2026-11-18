@@ -5,7 +5,7 @@ The people and places of your story, revealed when you choose. Players keep a ga
 ## Install
 Manifest URL: `https://raw.githubusercontent.com/daember-rpg/persona/main/module.json`
 
-Third module of the Triad suite (Triad · First Strike · Persona). Works on its own as a window, or as a tab in Triad's tray.
+Third module of the Triad suite (Triad · First Strike · Persona). Works on its own as a window, or as a tab in Triad's tray. Its look follows the suite's shared design (Triad 0.9 / Kronos): smoked glass, hairlines, pills and one gold thread for what matters now.
 
 ## Access
 - **Scene control**: masks button in the Token controls.
@@ -99,7 +99,7 @@ scripts/
 templates/       panel, card, editor + partials
 styles/          persona.css (Embermark)
 lang/            en
-dev/             bonds-preview.html (standalone preview, not shipped) and its build script
+dev/             bonds-preview.html and panel-preview.html (standalone previews, not shipped) and their build scripts
 ```
 
 ## Credits

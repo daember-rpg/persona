@@ -287,7 +287,7 @@ export class BondsView {
         const bezelIn = outer + 10, bezelOut = outer + 22;
         const defs = [
             `<radialGradient id="bonds-bg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2b211a"/><stop offset="0.5" stop-color="#18140f"/><stop offset="1" stop-color="#0d0c0a" stop-opacity="0"/></radialGradient>`,
-            `<radialGradient id="bonds-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c9a35a" stop-opacity="0.22"/><stop offset="1" stop-color="#c9a35a" stop-opacity="0"/></radialGradient>`,
+            `<radialGradient id="bonds-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d4b25a" stop-opacity="0.22"/><stop offset="1" stop-color="#d4b25a" stop-opacity="0"/></radialGradient>`,
             `<filter id="bonds-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>`
         ];
         const colors = [...new Set(laid.sectors.map(s => s.color))];
@@ -717,7 +717,7 @@ export class BondsView {
             ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = ring; ctx.stroke();
             if (status === "dead" || status === "missing") {
                 ctx.beginPath(); ctx.arc(x + r * 0.72, y + r * 0.72, 8, 0, Math.PI * 2); ctx.fillStyle = "#0f0e0c"; ctx.fill();
-                ctx.fillStyle = "#eadfc4"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillStyle = "#efe3c8"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(status === "dead" ? "✝" : "?", x + r * 0.72, y + r * 0.72 + 0.5);
             }
             if (label) {
@@ -728,7 +728,7 @@ export class BondsView {
                 if (ctx.roundRect) ctx.roundRect(x - w / 2, y + r + 4, w, 16, 3);
                 else ctx.rect(x - w / 2, y + r + 4, w, 16);
                 ctx.fill();
-                ctx.fillStyle = "#eadfc4"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillStyle = "#efe3c8"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(label, x, y + r + 12.5);
             }
         };
@@ -749,12 +749,12 @@ export class BondsView {
         }
         for (const p of m.party) {
             const pos = laid.nodes.get(p.id);
-            if (pos) await drawPortrait(pos.x, pos.y, NODE_R.party, p.img, { ring: "#d68a5c", label: p.name });
+            if (pos) await drawPortrait(pos.x, pos.y, NODE_R.party, p.img, { ring: "#d4b25a", label: p.name });
         }
-        await drawPortrait(G.center, G.center, NODE_R.self, m.self.img, { ring: "#c9a35a", label: m.self.name });
+        await drawPortrait(G.center, G.center, NODE_R.self, m.self.img, { ring: "#ecd28a", label: m.self.name });
 
         // 3. Title.
-        ctx.fillStyle = "#eadfc4";
+        ctx.fillStyle = "#efe3c8";
         ctx.textAlign = "left"; ctx.textBaseline = "top";
         ctx.font = "600 22px Cinzel, Georgia, serif";
         const title = this.adapter.t("PERSONA.Bonds.TitleOf").replace("{name}", m.owner?.name ?? "");

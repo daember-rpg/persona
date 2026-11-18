@@ -6,27 +6,48 @@
    ========================================================================== */
 
 :root {
-    --dp-charcoal: #1c1a17;
-    --dp-charcoal-2: #25221e;
-    --dp-charcoal-3: #302b26;
-    --dp-night: #0f0e0c;
-    --dp-line: rgba(234, 223, 196, 0.12);
-    --dp-line-strong: rgba(234, 223, 196, 0.24);
-    --dp-parchment: #eadfc4;
-    --dp-parchment-dim: #b9ab8d;
-    --dp-parchment-faint: #857a65;
-    --dp-clay: #b4643e;
-    --dp-clay-light: #d68a5c;
-    --dp-clay-soft: rgba(180, 100, 62, 0.22);
-    --dp-moss: #74864a;
-    --dp-moss-soft: rgba(116, 134, 74, 0.25);
-    --dp-ember: #c8452f;
-    --dp-ember-soft: rgba(200, 69, 47, 0.2);
-    --dp-gold: #c9a35a;
+    /* Embermark in the Kronos dialect (shared with Triad 0.9): smoked glass, parchment ink,
+       a gold thread for what matters now, ember for danger. */
+    --dp-glass: rgba(20, 17, 15, 0.86);
+    --dp-glass-deep: rgba(12, 10, 9, 0.72);
+    --dp-fill: rgba(255, 255, 255, 0.035);
+    --dp-fill-2: rgba(255, 255, 255, 0.065);
+    --dp-fill-3: rgba(255, 255, 255, 0.11);
+    --dp-hair: rgba(255, 255, 255, 0.08);
+    --dp-hair-2: rgba(255, 255, 255, 0.14);
+    --dp-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --dp-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+    --dp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --dp-gold-light: #ecd28a;
+    --dp-gold-soft: rgba(212, 178, 90, 0.15);
+    --dp-gold-line: rgba(212, 178, 90, 0.45);
+    --dp-on-gold: #1c1712;
+    --dp-sky: #8fb0c9;
+
+    /* Older names, re-pointed so every existing rule follows the new palette. */
+    --dp-charcoal: #15120f;
+    --dp-charcoal-2: #1d1a16;
+    --dp-charcoal-3: #2a2520;
+    --dp-night: #0c0a09;
+    --dp-line: var(--dp-hair);
+    --dp-line-strong: var(--dp-hair-2);
+    --dp-parchment: #efe3c8;
+    --dp-parchment-dim: rgba(239, 227, 200, 0.62);
+    --dp-parchment-faint: rgba(239, 227, 200, 0.4);
+    /* Clay was the old accent; the accent is the gold thread now. */
+    --dp-clay: #c9a24a;
+    --dp-clay-light: #ecd28a;
+    --dp-clay-soft: rgba(212, 178, 90, 0.15);
+    --dp-moss: #8a9a5b;
+    --dp-moss-soft: rgba(138, 154, 91, 0.2);
+    --dp-ember: #c8553d;
+    --dp-ember-light: #e07a5f;
+    --dp-ember-soft: rgba(200, 85, 61, 0.18);
+    --dp-gold: #d4b25a;
     --dp-scrim: rgba(10, 9, 8, 0.72);
     --dp-display: "Cinzel", "Palatino Linotype", "Book Antiqua", serif;
     --dp-body: "Spectral", Georgia, "Times New Roman", serif;
-    --dp-radius: 6px;
+    --dp-radius: 10px;
     --dp-1: 8px;
     --dp-2: 16px;
     --dp-3: 24px;
@@ -220,7 +241,7 @@
 .persona .persona-button--danger {
     background: transparent;
     border: 1px solid var(--dp-ember);
-    color: #e58a74;
+    color: var(--dp-ember-light);
 }
 
 .persona .persona-button--danger:hover {
@@ -460,7 +481,7 @@
 .persona .persona-row__img,
 .persona-card__art,
 .persona-toast img {
-    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+    background: radial-gradient(ellipse at 50% 38%, rgba(212, 178, 90, 0.16), transparent 62%), linear-gradient(#1d1a16, #2b241b);
 }
 
 .persona-tile__img {
@@ -835,7 +856,7 @@
 }
 
 .persona-status__layer.is-some {
-    background: rgba(201, 163, 90, 0.16);
+    background: rgba(212, 178, 90, 0.16);
     color: var(--dp-parchment);
 }
 
@@ -1214,7 +1235,7 @@
 }
 
 .persona-secret .persona-eyebrow {
-    color: #e58a74;
+    color: var(--dp-ember-light);
 }
 
 .persona-secret p { margin: 0; }
@@ -1255,7 +1276,7 @@
     object-position: center 20%;
     border: 1px solid var(--dp-line-strong);
     border-radius: 4px;
-    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+    background: radial-gradient(ellipse at 50% 38%, rgba(212, 178, 90, 0.16), transparent 62%), linear-gradient(#1d1a16, #2b241b);
 }
 
 .persona-link:hover img {
@@ -1354,7 +1375,7 @@
 }
 
 .persona .persona-note__delete:hover {
-    color: #e58a74;
+    color: var(--dp-ember-light);
     background: var(--dp-ember-soft);
 }
 
@@ -1613,7 +1634,7 @@
     overflow: hidden;
     border: 1px solid var(--dp-line-strong);
     border-radius: var(--dp-radius);
-    background: radial-gradient(ellipse at 50% 38%, rgba(214, 138, 92, 0.28), transparent 62%), linear-gradient(var(--dp-charcoal-2), #3a2a1c);
+    background: radial-gradient(ellipse at 50% 38%, rgba(212, 178, 90, 0.16), transparent 62%), linear-gradient(#1d1a16, #2b241b);
     cursor: grab;
     touch-action: none;
 }
@@ -1759,7 +1780,7 @@
 }
 
 .persona .persona-chip-remove:hover {
-    color: #e58a74;
+    color: var(--dp-ember-light);
 }
 
 .persona-icons {
@@ -1909,8 +1930,8 @@
     color: var(--dp-parchment-dim);
 }
 
-.persona-status-tag.is-dead { background: rgba(234, 223, 196, 0.1); color: var(--dp-parchment); }
-.persona-status-tag.is-missing { background: rgba(201, 163, 90, 0.18); color: var(--dp-gold); }
+.persona-status-tag.is-dead { background: rgba(239, 227, 200, 0.1); color: var(--dp-parchment); }
+.persona-status-tag.is-missing { background: rgba(212, 178, 90, 0.18); color: var(--dp-gold); }
 .persona-status-tag--card { margin-top: 6px; }
 
 /* ==========================================================================
@@ -1939,7 +1960,7 @@
     grid-template-rows: auto minmax(0, 1fr) auto;
     height: 100%;
     background:
-        radial-gradient(ellipse at 42% 52%, rgba(180, 100, 62, 0.14), transparent 60%),
+        radial-gradient(ellipse at 42% 52%, rgba(212, 178, 90, 0.08), transparent 60%),
         linear-gradient(160deg, #1d1915, var(--dp-night) 70%);
     outline: none;
     user-select: none;
@@ -2050,17 +2071,17 @@
     overflow: visible;
 }
 
-.bonds-grid { stroke: rgba(234, 223, 196, 0.05); stroke-width: 1; fill: none; }
-.bonds-ring { stroke: rgba(234, 223, 196, 0.16); stroke-width: 1; fill: none; }
-.bonds-ring--party { stroke: rgba(214, 138, 92, 0.45); stroke-width: 1.5; }
-.bonds-ring--self { stroke: rgba(201, 163, 90, 0.5); }
-.bonds-party-band { stroke: rgba(180, 100, 62, 0.16); fill: none; }
+.bonds-grid { stroke: rgba(239, 227, 200, 0.05); stroke-width: 1; fill: none; }
+.bonds-ring { stroke: rgba(239, 227, 200, 0.16); stroke-width: 1; fill: none; }
+.bonds-ring--party { stroke: rgba(212, 178, 90, 0.45); stroke-width: 1.5; }
+.bonds-ring--self { stroke: rgba(212, 178, 90, 0.5); }
+.bonds-party-band { stroke: rgba(212, 178, 90, 0.12); fill: none; }
 .bonds-party-label { font-family: var(--dp-display); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; fill: var(--dp-clay-light); opacity: 0.8; }
 
 .bonds-sector { stroke-width: 1.5; stroke-opacity: 0.7; }
 .bonds-divider { fill: none; stroke-width: 1; stroke-opacity: 0.35; stroke-dasharray: 3 5; }
 .bonds-cell { fill: transparent; transition: fill 0.12s ease; }
-.bonds-cell.is-target { fill: rgba(234, 223, 196, 0.16); stroke: var(--dp-parchment); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.bonds-cell.is-target { fill: rgba(239, 227, 200, 0.16); stroke: var(--dp-parchment); stroke-width: 1.5; stroke-dasharray: 4 4; }
 
 .bonds-sector-label {
     font-family: var(--dp-display);
@@ -2076,7 +2097,7 @@
 .bonds.is-editable .bonds-sector-label { cursor: pointer; }
 .bonds.is-editable .bonds-sector-label:hover { filter: brightness(1.35); text-decoration: underline; }
 
-.bonds-empty-ring { fill: none; stroke: rgba(234, 223, 196, 0.18); stroke-width: 2; stroke-dasharray: 6 8; }
+.bonds-empty-ring { fill: none; stroke: rgba(239, 227, 200, 0.18); stroke-width: 2; stroke-dasharray: 6 8; }
 .bonds-empty-text { font-family: var(--dp-display); font-size: 18px; letter-spacing: 0.12em; fill: var(--dp-parchment-faint); }
 
 .bonds-link { fill: none; stroke-width: 2.5; stroke-opacity: 0.85; stroke-linecap: round; }
@@ -2137,7 +2158,7 @@
     height: 108px;
     margin: -54px 0 0 -54px;
     border: 3px solid var(--dp-gold);
-    box-shadow: 0 0 0 4px rgba(15, 14, 12, 0.9), 0 0 32px rgba(201, 163, 90, 0.35);
+    box-shadow: 0 0 0 4px rgba(15, 14, 12, 0.9), 0 0 32px rgba(212, 178, 90, 0.35);
 }
 
 .persona .bonds-node--party {
@@ -2155,7 +2176,7 @@
 .persona .bonds-node.is-lifted { opacity: 0.25; }
 
 .persona .bonds-node.is-dead .bonds-node__img img { filter: grayscale(1) brightness(0.62); }
-.persona .bonds-node.is-dead { border-color: rgba(234, 223, 196, 0.35); }
+.persona .bonds-node.is-dead { border-color: rgba(239, 227, 200, 0.35); }
 .persona .bonds-node.is-missing .bonds-node__img img { filter: grayscale(0.6) sepia(0.3) brightness(0.8); }
 .persona .bonds-node.is-missing { border-style: dashed; }
 
@@ -2550,7 +2571,7 @@
 .persona .bonds-type:hover { border-color: var(--c); }
 .persona .bonds-type.is-on { border-color: var(--c); background: var(--dp-charcoal-3); }
 
-.persona .bonds-danger { color: #e58a74; }
+.persona .bonds-danger { color: var(--dp-ember-light); }
 .persona .bonds-danger:hover:not(:disabled) { border-color: var(--dp-ember); color: #f0a08b; }
 .persona .persona-mini:disabled { opacity: 0.35; cursor: default; }
 
@@ -2660,10 +2681,10 @@
 }
 
 .bonds-newcat i { color: var(--dp-gold); font-size: 16px; }
-.bonds-takeoff i { color: #e58a74; font-size: 15px; }
+.bonds-takeoff i { color: var(--dp-ember-light); font-size: 15px; }
 .bonds.is-dragging .bonds-newcat,
 .bonds.is-dragging .bonds-takeoff { display: flex; }
-.bonds-newcat.is-target { border-color: var(--dp-gold); background: rgba(201, 163, 90, 0.14); color: var(--dp-parchment); }
+.bonds-newcat.is-target { border-color: var(--dp-gold); background: rgba(212, 178, 90, 0.14); color: var(--dp-parchment); }
 .bonds-drawer.is-target .bonds-takeoff { border-color: var(--dp-ember); color: var(--dp-parchment); }
 .bonds-form__hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--dp-parchment-faint); }
 
@@ -2692,7 +2713,7 @@
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--dp-gold);
-    box-shadow: 0 0 0 3px rgba(201, 163, 90, 0.15);
+    box-shadow: 0 0 0 3px rgba(212, 178, 90, 0.15);
 }
 
 .bonds-who__img img { width: 100%; height: 100%; object-fit: cover; border: 0; display: block; }
@@ -2777,7 +2798,7 @@
 .persona .bonds-node.is-selected {
     z-index: 7;
     transform: scale(1.14);
-    box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 28px rgba(201, 163, 90, 0.55);
+    box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 28px rgba(212, 178, 90, 0.55);
 }
 
 .persona .bonds-node--self.is-selected { transform: none; }
@@ -2912,8 +2933,8 @@
     color: var(--dp-parchment-dim);
 }
 
-.bonds-tag.is-dead { color: var(--dp-parchment); background: rgba(234, 223, 196, 0.1); }
-.bonds-tag.is-missing { color: var(--dp-gold); background: rgba(201, 163, 90, 0.15); }
+.bonds-tag.is-dead { color: var(--dp-parchment); background: rgba(239, 227, 200, 0.1); }
+.bonds-tag.is-missing { color: var(--dp-gold); background: rgba(212, 178, 90, 0.15); }
 
 .bonds-insp__block { display: flex; flex-direction: column; gap: 8px; }
 
@@ -3018,7 +3039,7 @@
     color: var(--dp-parchment-faint);
 }
 
-.persona .bonds-takeoff-btn:hover { color: #e58a74; }
+.persona .bonds-takeoff-btn:hover { color: var(--dp-ember-light); }
 
 /* The legend only explains the link icons; distance lives in the inspector. */
 .bonds-legend { padding: 8px 12px; }
@@ -3076,7 +3097,7 @@
    ========================================================================== */
 
 /* Party: engraved band, gold thread, name plates always on. */
-.bonds-party-band { stroke: rgba(180, 100, 62, 0.12); }
+.bonds-party-band { stroke: rgba(212, 178, 90, 0.1); }
 .bonds-party-etch { opacity: 0.9; }
 .bonds-party-thread { fill: none; stroke: var(--dp-gold); stroke-width: 1.5; stroke-opacity: 0.55; stroke-dasharray: 2 6; stroke-linecap: round; }
 
@@ -3085,7 +3106,7 @@
 .bonds-node--self .bonds-node__name {
     top: calc(100% - 8px);
     padding: 2px 10px;
-    border-color: rgba(201, 163, 90, 0.45);
+    border-color: rgba(212, 178, 90, 0.45);
     font-size: 11px;
     letter-spacing: 0.04em;
 }
@@ -3283,7 +3304,7 @@
     }
     @keyframes bonds-death-flash {
         0% { box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85); }
-        30% { box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85), 0 0 0 10px rgba(234, 223, 196, 0.25), 0 0 60px rgba(234, 223, 196, 0.6); }
+        30% { box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85), 0 0 0 10px rgba(239, 227, 200, 0.25), 0 0 60px rgba(239, 227, 200, 0.6); }
         100% { box-shadow: 0 0 0 3px rgba(15, 14, 12, 0.85), 0 4px 14px rgba(0, 0, 0, 0.55); }
     }
     @keyframes bonds-mark-in {
@@ -3306,9 +3327,9 @@
    ========================================================================== */
 
 /* Distance colours, shared by every "Close / Known / Distant" chip. */
-.is-ring1 { --ring: #c9a35a; }
-.is-ring2 { --ring: #b4643e; }
-.is-ring3 { --ring: #7d7466; }
+.is-ring1 { --ring: #d4b25a; }
+.is-ring2 { --ring: #8fb0c9; }
+.is-ring3 { --ring: rgba(239, 227, 200, 0.42); }
 
 /* Pins: a gold star on the portrait, a strip at the top of the list. */
 .bonds-node__pin {
@@ -3398,7 +3419,7 @@
 }
 
 /* Moments: what changed, and who */
-.persona .bonds-node.is-moved { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 18px rgba(201, 163, 90, 0.45); }
+.persona .bonds-node.is-moved { box-shadow: 0 0 0 3px var(--dp-night), 0 0 0 5px var(--dp-gold), 0 0 18px rgba(212, 178, 90, 0.45); }
 
 .bonds-banner--moment {
     flex-direction: column;
@@ -3521,7 +3542,7 @@
 
 .bonds {
     background:
-        radial-gradient(ellipse 60% 70% at 45% 50%, rgba(201, 163, 90, 0.07), transparent 70%),
+        radial-gradient(ellipse 60% 70% at 45% 50%, rgba(212, 178, 90, 0.07), transparent 70%),
         radial-gradient(ellipse at 45% 55%, #17130f 0%, #0e0d0b 75%);
 }
 
@@ -3529,7 +3550,7 @@
 .bonds-hair { fill: none; stroke: rgba(214, 190, 140, 0.16); stroke-width: 1; }
 .bonds-hair--strong { stroke: rgba(214, 190, 140, 0.3); }
 .bonds-hair--dash { stroke: rgba(214, 190, 140, 0.12); stroke-dasharray: 1 5; stroke-linecap: round; }
-.bonds-hair--gold { stroke: rgba(201, 163, 90, 0.42); }
+.bonds-hair--gold { stroke: rgba(212, 178, 90, 0.42); }
 .bonds-ticks { fill: none; stroke: rgba(214, 190, 140, 0.32); stroke-width: 1; }
 .bonds-spoke { fill: none; stroke: rgba(214, 190, 140, 0.18); stroke-width: 1; }
 .bonds-grid, .bonds-ring, .bonds-divider, .bonds-party-etch { display: none; }
@@ -3538,7 +3559,7 @@
 .bonds-sector { stroke: none; }
 .bonds-rim { fill: none; stroke-width: 2.5; stroke-linecap: round; opacity: 0.9; }
 .bonds-rim-glow { fill: none; stroke-width: 7; stroke-linecap: round; opacity: 0.45; }
-.bonds-cell.is-target { fill: rgba(234, 223, 196, 0.08); stroke: rgba(234, 223, 196, 0.5); stroke-width: 1; stroke-dasharray: 3 4; }
+.bonds-cell.is-target { fill: rgba(239, 227, 200, 0.08); stroke: rgba(239, 227, 200, 0.5); stroke-width: 1; stroke-dasharray: 3 4; }
 
 .bonds-sector-label {
     font-size: 13px;
@@ -3551,7 +3572,7 @@
 .bonds.is-editable .bonds-sector-label:hover { filter: brightness(1.3); text-decoration: none; opacity: 1; }
 
 /* Party: inner bezel */
-.bonds-party-band { stroke: rgba(201, 163, 90, 0.035); }
+.bonds-party-band { stroke: rgba(212, 178, 90, 0.035); }
 .bonds-party-thread { stroke-opacity: 0.4; stroke-dasharray: 1 7; stroke-width: 2; }
 
 /* Links: trails of light */
@@ -3568,11 +3589,11 @@
 
 /* Portraits: medallions with a fine bevel */
 .persona .bonds-node {
-    border: 1.5px solid color-mix(in srgb, var(--c, #c9a35a) 65%, #e9d9a8);
+    border: 1.5px solid color-mix(in srgb, var(--c, #d4b25a) 65%, #e9d9a8);
     background: #1a1714;
     box-shadow:
         0 0 0 2px #0e0c0a,
-        0 0 0 3px rgba(201, 163, 90, 0.28),
+        0 0 0 3px rgba(212, 178, 90, 0.28),
         0 8px 18px rgba(0, 0, 0, 0.65);
 }
 
@@ -3590,28 +3611,28 @@
 .persona .bonds-node:focus-visible {
     box-shadow:
         0 0 0 2px #0e0c0a,
-        0 0 0 3px color-mix(in srgb, var(--c, #c9a35a) 70%, transparent),
-        0 0 26px color-mix(in srgb, var(--c, #c9a35a) 55%, transparent);
+        0 0 0 3px color-mix(in srgb, var(--c, #d4b25a) 70%, transparent),
+        0 0 26px color-mix(in srgb, var(--c, #d4b25a) 55%, transparent);
 }
 
 .persona .bonds-node--self {
     border: 2px solid var(--dp-gold);
     box-shadow:
         0 0 0 3px #0e0c0a,
-        0 0 0 4px rgba(201, 163, 90, 0.55),
-        0 0 0 9px rgba(201, 163, 90, 0.06),
-        0 0 46px rgba(201, 163, 90, 0.28);
+        0 0 0 4px rgba(212, 178, 90, 0.55),
+        0 0 0 9px rgba(212, 178, 90, 0.06),
+        0 0 46px rgba(212, 178, 90, 0.28);
 }
 
 .persona .bonds-node--party { border-color: rgba(214, 160, 110, 0.9); }
 
 .persona .bonds-node.is-selected {
-    box-shadow: 0 0 0 2px #0e0c0a, 0 0 0 4px var(--dp-gold), 0 0 34px rgba(201, 163, 90, 0.6);
+    box-shadow: 0 0 0 2px #0e0c0a, 0 0 0 4px var(--dp-gold), 0 0 34px rgba(212, 178, 90, 0.6);
 }
 
 /* Status on the medallion itself */
-.persona .bonds-node.is-dead { border-color: rgba(234, 223, 196, 0.28); }
-.persona .bonds-node.is-missing { border-style: dashed; border-color: rgba(201, 163, 90, 0.6); }
+.persona .bonds-node.is-dead { border-color: rgba(239, 227, 200, 0.28); }
+.persona .bonds-node.is-missing { border-style: dashed; border-color: rgba(212, 178, 90, 0.6); }
 .bonds-node__mark { width: 18px; height: 18px; right: -3px; bottom: -3px; z-index: 2; font-size: 9px; background: #0e0c0a; border-color: rgba(214, 190, 140, 0.35); }
 .bonds-node__pin { z-index: 2; }
 
@@ -3695,3 +3716,789 @@
 .bonds:not(.has-focus) .bonds-marker:not(:hover) .bonds-marker__badge { display: none; }
 .persona .bonds-marker { transition: width 0.15s ease, height 0.15s ease, margin 0.15s ease, background 0.15s ease; }
 .bonds.is-editable .bonds-sector-label { pointer-events: bounding-box; }
+
+/* ==========================================================================
+   Kronos dialect (0.16) — the same surface language as Triad 0.9 and Kronos:
+   smoked glass, hairlines instead of borders, pills, a gold thread for what
+   matters now. Docked in Triad, Persona drops its own glass and sits on Triad's.
+   ========================================================================== */
+
+/* ---------- Surfaces ---------- */
+
+.persona-panel {
+    position: relative;
+    background:
+        radial-gradient(120% 220px at 0 0, rgba(212, 178, 90, 0.07), transparent 70%),
+        var(--dp-glass);
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+/* Inside Triad the tray already is the glass; don't stack a second pane on it. */
+.triad-dock[data-dock="persona"] .persona-panel {
+    background: transparent;
+    backdrop-filter: none;
+}
+
+.persona-window .window-content,
+.persona-editor .window-content {
+    background:
+        radial-gradient(120% 260px at 0 0, rgba(212, 178, 90, 0.06), transparent 70%),
+        var(--dp-charcoal);
+}
+
+.persona-body,
+.persona-card__body,
+.bonds-drawer,
+.persona-editor .window-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 178, 90, 0.3) transparent;
+}
+
+.persona-body::-webkit-scrollbar,
+.persona-card__body::-webkit-scrollbar,
+.bonds-drawer::-webkit-scrollbar { width: 6px; }
+.persona-body::-webkit-scrollbar-thumb,
+.persona-card__body::-webkit-scrollbar-thumb,
+.bonds-drawer::-webkit-scrollbar-thumb { background: rgba(212, 178, 90, 0.3); border-radius: 999px; }
+
+/* ---------- Type ---------- */
+
+.persona-eyebrow {
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--dp-gold);
+}
+
+.persona-hint { color: var(--dp-parchment-faint); }
+
+/* ---------- Controls ---------- */
+
+.persona .persona-chip {
+    height: 26px;
+    padding: 0 11px;
+    border: 0;
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+    font-size: 12.5px;
+    color: var(--dp-parchment-dim);
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.persona .persona-chip:hover {
+    background: var(--dp-fill-3);
+    color: var(--dp-parchment);
+}
+
+.persona .persona-chip.is-active {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona .persona-chip.is-active .persona-chip__count { color: rgba(236, 210, 138, 0.7); }
+.persona .persona-chip.is-static { background: var(--dp-fill); }
+
+.persona .persona-mini {
+    height: 26px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+    font-size: 12px;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.persona .persona-mini--icon { width: 26px; padding: 0; }
+
+.persona .persona-mini:hover:not(:disabled) {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona .persona-mini.is-on {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+/* The one gold button in a view: the thing you came to do. */
+.persona .persona-button {
+    height: 34px;
+    padding: 0 16px;
+    border: 1px solid rgba(255, 230, 160, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e0c070, #c9a24a);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 14px rgba(212, 178, 90, 0.22);
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dp-on-gold);
+    transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.persona .persona-button:hover {
+    background: linear-gradient(180deg, #ebcd80, #d4ad55);
+    color: var(--dp-on-gold);
+}
+
+.persona .persona-button:active,
+.persona .persona-icon-btn:active,
+.persona .persona-mini:active:not(:disabled) { transform: scale(0.96); }
+
+.persona .persona-button--danger {
+    border: 0;
+    background: var(--dp-ember-soft);
+    box-shadow: inset 0 0 0 1px rgba(200, 85, 61, 0.45);
+    color: var(--dp-ember-light);
+}
+
+.persona .persona-button--danger:hover {
+    background: rgba(200, 85, 61, 0.28);
+    color: #f3a58f;
+}
+
+.persona .persona-icon-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight);
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.2s ease, transform 0.12s ease;
+}
+
+.persona .persona-icon-btn:hover,
+.persona .persona-icon-btn.is-on {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line), 0 0 12px rgba(212, 178, 90, 0.18);
+    color: var(--dp-gold-light);
+}
+
+.persona .persona-icon-btn--accent,
+.persona .persona-icon-btn--accent:hover {
+    background: linear-gradient(180deg, #e0c070, #c9a24a);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 14px rgba(212, 178, 90, 0.25);
+    color: var(--dp-on-gold);
+}
+
+.persona .persona-icon-btn--accent:hover { background: linear-gradient(180deg, #ebcd80, #d4ad55); }
+
+.persona-badge {
+    background: var(--dp-ember);
+    box-shadow: 0 0 0 2px rgba(20, 17, 15, 0.95), 0 0 8px rgba(200, 85, 61, 0.6);
+    color: #fff3e6;
+}
+
+.persona input[type="text"],
+.persona input[type="search"],
+.persona textarea {
+    border: 0;
+    border-radius: 10px;
+    background: var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2);
+    transition: box-shadow 0.2s ease, background-color 0.15s ease;
+}
+
+.persona input:focus,
+.persona textarea:focus {
+    border: 0;
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line), 0 0 0 3px rgba(212, 178, 90, 0.12);
+}
+
+:where(.persona) button:focus-visible { outline-color: var(--dp-gold); }
+
+/* ---------- Panel header ---------- */
+
+.persona-head {
+    position: relative;
+    gap: var(--dp-2);
+    padding: var(--dp-2) var(--dp-2) var(--dp-2);
+    border-bottom: 0;
+}
+
+/* The gold thread under the header, fading out like Triad's section rules. */
+.persona-head::after {
+    content: "";
+    position: absolute;
+    left: var(--dp-2);
+    right: var(--dp-2);
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(212, 178, 90, 0.4), rgba(212, 178, 90, 0.08) 70%, transparent);
+}
+
+.persona-head__title { align-items: center; }
+
+.persona-head__title h2 {
+    margin-top: 2px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.persona-head__tools { gap: 6px; }
+
+.persona-search {
+    height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2);
+    transition: box-shadow 0.2s ease, background-color 0.15s ease;
+}
+
+.persona-search:focus-within {
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line), 0 0 0 3px rgba(212, 178, 90, 0.12);
+    color: var(--dp-gold);
+}
+
+.persona .persona-search input,
+.persona .persona-search input:focus { box-shadow: none; background: transparent; }
+
+.persona-body { gap: var(--dp-4); }
+
+.persona-section { gap: 12px; }
+
+.persona-section__label {
+    align-items: center;
+    gap: 12px;
+}
+
+.persona-section__label::after {
+    content: "";
+    order: 1;
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(212, 178, 90, 0.35), transparent);
+}
+
+.persona-section__label > span:last-child {
+    order: 2;
+    color: var(--dp-parchment-faint);
+}
+
+/* ---------- Folders: Triad section headers ---------- */
+
+.persona .persona-folder {
+    gap: 10px;
+    padding: 4px 0;
+    border-bottom: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--dp-gold);
+}
+
+.persona .persona-folder::after {
+    content: "";
+    flex: 1;
+    min-width: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(212, 178, 90, 0.35), transparent);
+}
+
+.persona-folder__label { flex: 0 1 auto; }
+
+.persona-folder i { color: var(--dp-gold); opacity: 0.85; }
+
+.persona .persona-folder .persona-folder__chevron {
+    width: 14px;
+    font-size: 9px;
+    color: var(--dp-parchment-faint);
+    transition: transform 0.2s var(--dp-ease);
+}
+
+.persona .persona-folder:hover { color: var(--dp-gold-light); }
+.persona .persona-folder:hover .persona-folder__chevron { color: var(--dp-parchment); }
+
+.persona-folder.is-collapsed { color: var(--dp-parchment-dim) !important; }
+.persona-folder.is-collapsed i:not(.persona-folder__chevron) { color: var(--dp-parchment-faint); }
+.persona .persona-folder.is-collapsed::after { background: linear-gradient(90deg, var(--dp-hair-2), transparent); }
+
+.persona-folder__count {
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--dp-fill-2);
+    font-size: 11px;
+    color: var(--dp-parchment-dim);
+}
+
+/* ---------- Director rows: soft cards, no rules between them ---------- */
+
+.persona-rows { gap: 4px; }
+
+.persona-row {
+    gap: 12px;
+    padding: 8px;
+    border-bottom: 0;
+    border-radius: 12px;
+    transition: background-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.persona-row:last-child { padding-bottom: 8px; }
+
+.persona-row:hover { background: var(--dp-fill); }
+
+.persona-row.is-open {
+    background: var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+}
+
+.persona .persona-row__img {
+    border: 0;
+    border-radius: 9px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2), 0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: box-shadow 0.2s ease, transform 0.12s ease;
+}
+
+.persona .persona-row__img:hover { box-shadow: 0 0 0 1px var(--dp-gold-line), 0 0 12px rgba(212, 178, 90, 0.3); }
+
+.persona-row__name {
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.persona-row__name small { color: var(--dp-parchment-faint); }
+
+/* Who knows what: one segmented strip, like Kronos's controls. */
+.persona .persona-status,
+.persona-status--static {
+    padding: 3px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--dp-glass-deep);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+}
+
+.persona .persona-status:hover { box-shadow: inset 0 0 0 1px var(--dp-hair-2); }
+.persona-row.is-open .persona-status { box-shadow: inset 0 0 0 1px var(--dp-gold-line); }
+
+.persona-status__layer { border-radius: 7px; }
+
+.persona-status__layer.is-all { background: var(--dp-moss-soft); }
+.persona-status__layer.is-all i { color: #b5c487; }
+.persona-status__layer.is-some { background: var(--dp-gold-soft); }
+
+.persona-status__layer b {
+    border-radius: 999px;
+    background: var(--dp-gold);
+    box-shadow: 0 0 0 2px rgba(20, 17, 15, 0.95);
+    color: var(--dp-on-gold);
+}
+
+.persona-reveal,
+.persona-share,
+.persona-audience {
+    padding: 12px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--dp-glass-deep);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight);
+}
+
+.persona-reveal { box-shadow: inset 0 0 0 1px var(--dp-gold-line), var(--dp-highlight); }
+
+.persona .persona-cell {
+    border: 0;
+    border-radius: 8px;
+    background: var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2);
+}
+
+.persona .persona-cell:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--dp-gold-line); color: var(--dp-gold-light); }
+
+.persona .persona-cell.is-on {
+    background: var(--dp-moss);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 10px rgba(138, 154, 91, 0.35);
+    color: #14160d;
+}
+
+.persona .persona-cell.is-some {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona-avatar { box-shadow: 0 0 0 2px rgba(20, 17, 15, 0.9); }
+
+.persona-drop {
+    border: 1px dashed var(--dp-hair-2);
+    border-radius: 12px;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-drop.is-over {
+    border-color: var(--dp-gold-line);
+    background: var(--dp-gold-soft);
+    color: var(--dp-gold-light);
+}
+
+/* ---------- Player gallery ---------- */
+
+.persona-gallery { gap: 12px; }
+
+.persona-tile__img {
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2), 0 8px 18px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s var(--dp-ease), box-shadow 0.2s ease;
+}
+
+.persona-tile:hover .persona-tile__img {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px var(--dp-gold-line), 0 0 16px rgba(212, 178, 90, 0.22), 0 10px 22px rgba(0, 0, 0, 0.4);
+}
+
+.persona-tile__name { padding: 0 2px; font-size: 13px; }
+
+.persona-tile__new {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--dp-ember);
+    box-shadow: 0 0 10px rgba(200, 85, 61, 0.5);
+    letter-spacing: 0.12em;
+    color: #fff3e6;
+}
+
+.persona-tile__private {
+    background: rgba(12, 10, 9, 0.7);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    backdrop-filter: blur(4px);
+}
+
+.persona-empty i { color: rgba(212, 178, 90, 0.35); opacity: 1; font-size: 40px; }
+
+/* ---------- Card ---------- */
+
+.persona-card-layer {
+    background: rgba(8, 7, 6, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+.persona-card {
+    border: 0;
+    border-radius: 16px;
+    background:
+        radial-gradient(90% 260px at 100% 0, rgba(212, 178, 90, 0.06), transparent 70%),
+        rgba(20, 17, 15, 0.94);
+    box-shadow: 0 0 0 1px var(--dp-hair), 0 30px 80px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+/* Kronos runs its gold thread along the top. */
+.persona-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 4%, var(--dp-gold-line) 30%, rgba(212, 178, 90, 0.2) 70%, transparent 96%);
+    pointer-events: none;
+}
+
+.persona .persona-card__close,
+.persona .persona-video__close {
+    border: 0;
+    background: rgba(20, 17, 15, 0.7);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight);
+    backdrop-filter: blur(6px);
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.persona .persona-card__close:hover,
+.persona .persona-video__close:hover {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona-card__body h3 { font-weight: 600; letter-spacing: 0.04em; }
+
+.persona-secret {
+    border: 0;
+    border-radius: 12px;
+    background: var(--dp-ember-soft);
+    box-shadow: inset 0 0 0 1px rgba(200, 85, 61, 0.35);
+}
+
+.persona-secret .persona-eyebrow { color: var(--dp-ember-light); }
+
+.persona .persona-link img {
+    border: 0;
+    border-radius: 9px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2);
+}
+
+.persona .persona-link:hover img { box-shadow: 0 0 0 1px var(--dp-gold-line), 0 0 12px rgba(212, 178, 90, 0.25); }
+
+.persona .persona-tabs {
+    gap: 2px;
+    padding: 3px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--dp-glass-deep);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+}
+
+.persona .persona-tabs button {
+    flex: 1;
+    height: 28px;
+    padding: 0 12px;
+    border: 0 !important;
+    border-radius: 999px;
+    font-family: var(--dp-display);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dp-parchment-dim);
+}
+
+.persona .persona-tabs button[aria-selected="true"] {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona-note {
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: var(--dp-fill);
+}
+
+/* ---------- Toasts and video ---------- */
+
+.persona .persona-toast {
+    border: 0;
+    border-radius: 14px;
+    background: var(--dp-glass);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line), var(--dp-shadow);
+    backdrop-filter: blur(10px) saturate(120%);
+}
+
+.persona .persona-toast img { border-radius: 9px; }
+
+/* ---------- Editor ---------- */
+
+.persona-framer {
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2), 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.persona-framer.is-dragging { box-shadow: 0 0 0 1px var(--dp-gold-line), 0 0 16px rgba(212, 178, 90, 0.25); }
+
+/* ---------- Foundry windows: the same glass frame as Triad and Kronos ---------- */
+
+.application:is(.persona-window, .persona-editor) {
+    border: 0;
+    border-radius: 12px;
+    background: rgba(20, 17, 15, 0.96);
+    box-shadow: 0 0 0 1px var(--dp-hair-2), 0 18px 48px rgba(0, 0, 0, 0.6);
+    color: var(--dp-parchment);
+    overflow: hidden;
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header {
+    position: relative;
+    border-bottom: 0;
+    background: rgba(12, 10, 9, 0.6);
+    color: var(--dp-parchment-dim);
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 2%, var(--dp-gold-line) 25%, rgba(212, 178, 90, 0.15) 70%, transparent 98%);
+    pointer-events: none;
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header .window-title {
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dp-gold);
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header :is(button, a, .header-control):hover { color: var(--dp-gold-light); }
+
+/* ---------- Bonds window chrome ---------- */
+
+.bonds {
+    background:
+        radial-gradient(ellipse at 42% 52%, rgba(212, 178, 90, 0.07), transparent 60%),
+        radial-gradient(120% 300px at 0 0, rgba(212, 178, 90, 0.05), transparent 70%),
+        linear-gradient(160deg, #181512, var(--dp-night) 70%);
+}
+
+.bonds-bar {
+    position: relative;
+    border-bottom: 0;
+    background: var(--dp-glass);
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+.bonds-bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 2%, var(--dp-gold-line) 25%, rgba(212, 178, 90, 0.18) 70%, transparent 98%);
+    pointer-events: none;
+}
+
+.bonds-who__img {
+    border: 0;
+    box-shadow: 0 0 0 1.5px var(--dp-gold), 0 0 0 5px rgba(212, 178, 90, 0.12), 0 0 18px rgba(212, 178, 90, 0.25);
+}
+
+.bonds-who__text h2 { font-weight: 600; letter-spacing: 0.05em; }
+
+.bonds-players {
+    border: 0;
+    background: var(--dp-glass-deep);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+}
+
+.persona .bonds-player.is-active {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+/* Header tools are quiet pills; only "Record moment" is gold. */
+.persona .persona-button.bonds-tool {
+    border: 0;
+    background: var(--dp-fill-2);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight);
+    color: var(--dp-parchment-dim);
+}
+
+.persona .persona-button.bonds-tool:hover,
+.persona .persona-button.bonds-tool.is-on {
+    background: var(--dp-gold-soft);
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line);
+    color: var(--dp-gold-light);
+}
+
+.persona .persona-button.bonds-tool--accent,
+.persona .persona-button.bonds-tool--accent:hover {
+    border: 1px solid rgba(255, 230, 160, 0.5);
+    background: linear-gradient(180deg, #e0c070, #c9a24a);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 14px rgba(212, 178, 90, 0.25);
+    color: var(--dp-on-gold);
+}
+
+.persona .persona-button.bonds-tool--accent:hover { background: linear-gradient(180deg, #ebcd80, #d4ad55); }
+
+.bonds-drawer {
+    border-left: 0;
+    background: var(--dp-glass);
+    box-shadow: inset 1px 0 0 var(--dp-hair);
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+.bonds-pop {
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: rgba(20, 17, 15, 0.95) !important;
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight), 0 16px 40px rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+/* Floating controls on the wheel: glass pills, like Kronos's bar. */
+.bonds-banner,
+.bonds-legend,
+.bonds-changes,
+.bonds-finder__results,
+.persona .bonds-finder .persona-mini,
+.persona .bonds-zoom .persona-icon-btn,
+.bonds-search--wheel {
+    border: 0 !important;
+    background: var(--dp-glass) !important;
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2), var(--dp-highlight), 0 8px 22px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(10px) saturate(120%);
+}
+
+.bonds-legend { border-radius: 12px; }
+.bonds-changes { border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(200, 85, 61, 0.45), var(--dp-highlight), 0 12px 30px rgba(0, 0, 0, 0.5) !important; }
+.bonds-banner { box-shadow: inset 0 0 0 1px var(--dp-gold-line), 0 8px 22px rgba(0, 0, 0, 0.45) !important; }
+.bonds-banner--quiet { box-shadow: inset 0 0 0 1px var(--dp-hair-2), 0 8px 22px rgba(0, 0, 0, 0.45) !important; }
+.bonds-finder__results { border-radius: 12px; }
+.persona .bonds-finder__results button { border-radius: 8px; }
+.persona .bonds-finder__results button:hover { background: var(--dp-fill-3); }
+
+.persona .bonds-finder .persona-mini:hover:not(:disabled),
+.persona .bonds-finder .persona-mini.is-on,
+.persona .bonds-zoom .persona-icon-btn:hover {
+    background: rgba(40, 33, 20, 0.92) !important;
+    box-shadow: inset 0 0 0 1px var(--dp-gold-line), 0 8px 22px rgba(0, 0, 0, 0.4) !important;
+    color: var(--dp-gold-light);
+}
+
+/* The search pill is the box; the field inside it is bare. */
+.persona .bonds-search--wheel input,
+.persona .bonds-search--wheel input:focus {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.bonds-timeline {
+    position: relative;
+    border-top: 0;
+    background: var(--dp-glass);
+    backdrop-filter: blur(12px) saturate(120%);
+}
+
+.bonds-timeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 2%, rgba(212, 178, 90, 0.3) 25%, rgba(212, 178, 90, 0.12) 70%, transparent 98%);
+    pointer-events: none;
+}
+
+/* Long labels in the narrow drawer wrap inside the gold pill instead of overflowing it. */
+.persona .bonds-drawer .persona-button {
+    height: auto;
+    min-height: 34px;
+    padding: 9px 16px;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: center;
+}
+
+.persona-secret > div { font-size: 15px; line-height: 1.5; }
+.persona-secret > div p { margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .persona .persona-button:active,
+    .persona .persona-icon-btn:active,
+    .persona .persona-mini:active:not(:disabled) { transform: none; }
+}
