@@ -83,15 +83,45 @@ export class PanelView {
             const typing = active?.name === "search" && host.contains(active);
             const caret = typing ? active.selectionStart : null;
             const scroll = host.querySelector(".persona-body")?.scrollTop ?? 0;
+            const chipScroll = host.querySelector(".persona-head .persona-chips")?.scrollLeft ?? 0;
             host.innerHTML = html;
             const body = host.querySelector(".persona-body");
             if (body) body.scrollTop = scroll;
+            this.#settleChips(host.querySelector(".persona-head .persona-chips"), chipScroll);
             if (typing) {
                 const input = host.querySelector('input[name="search"]');
                 input?.focus();
                 input?.setSelectionRange(caret, caret);
             }
         }
+    }
+
+    /**
+     * The filter chips are one row that scrolls sideways, so a campaign with many groups
+     * doesn't push the list down. Keep the row where it was and the active chip in view.
+     */
+    #settleChips(row, scrollLeft) {
+        if (!row) return;
+        row.scrollLeft = scrollLeft;
+        const active = row.querySelector(".persona-chip.is-active");
+        if (active) {
+            const left = active.offsetLeft - row.offsetLeft;
+            const right = left + active.offsetWidth;
+            if (left < row.scrollLeft) row.scrollLeft = left - 24;
+            else if (right > row.scrollLeft + row.clientWidth) row.scrollLeft = right - row.clientWidth + 24;
+        }
+        const edges = () => {
+            row.classList.toggle("has-more-left", row.scrollLeft > 2);
+            row.classList.toggle("has-more-right", row.scrollLeft + row.clientWidth < row.scrollWidth - 2);
+        };
+        edges();
+        row.addEventListener("scroll", edges, { passive: true });
+        // A mouse wheel scrolls the row sideways.
+        row.addEventListener("wheel", event => {
+            if (row.scrollWidth <= row.clientWidth || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+            event.preventDefault();
+            row.scrollLeft += event.deltaY;
+        }, { passive: false });
     }
 
     /* -------------------------------------------- */

@@ -43,7 +43,7 @@ function matchesSearch(entry, search, user) {
     return [named ? entry.name : "", named ? entry.title : ""].some(text => text.toLowerCase().includes(query));
 }
 
-/** Filter chips: everyone, each group with something in it (for players: something they know), places. */
+/** Filter chips: everyone, each group with something in it (for players: something they know), places (players: only if they know one). */
 function buildChips(pool, filter, isGM) {
     const count = predicate => pool.filter(predicate).length;
     const groups = getGroups()
@@ -53,7 +53,7 @@ function buildChips(pool, filter, isGM) {
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: pool.length },
         ...groups,
         { id: "places", label: t("PERSONA.Filter.Places"), icon: "fa-solid fa-map-location-dot", count: count(e => e.kind === "place") }
-    ].map(chip => ({ ...chip, active: chip.id === (filter || "all") }));
+    ].filter(chip => chip.id !== "places" || chip.count > 0 || isGM || filter === "places").map(chip => ({ ...chip, active: chip.id === (filter || "all") }));
 }
 
 /**

@@ -4308,6 +4308,46 @@
 
 .persona-framer.is-dragging { box-shadow: 0 0 0 1px var(--dp-gold-line), 0 0 16px rgba(212, 178, 90, 0.25); }
 
+/* ---------- Foundry windows: the same glass frame as Triad and Kronos ---------- */
+
+.application:is(.persona-window, .persona-editor) {
+    border: 0;
+    border-radius: 12px;
+    background: rgba(20, 17, 15, 0.96);
+    box-shadow: 0 0 0 1px var(--dp-hair-2), 0 18px 48px rgba(0, 0, 0, 0.6);
+    color: var(--dp-parchment);
+    overflow: hidden;
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header {
+    position: relative;
+    border-bottom: 0;
+    background: rgba(12, 10, 9, 0.6);
+    color: var(--dp-parchment-dim);
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 2%, var(--dp-gold-line) 25%, rgba(212, 178, 90, 0.15) 70%, transparent 98%);
+    pointer-events: none;
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header .window-title {
+    font-family: var(--dp-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dp-gold);
+}
+
+.application:is(.persona-window, .persona-editor) > .window-header :is(button, a, .header-control):hover { color: var(--dp-gold-light); }
+
 /* ---------- Bonds window chrome ---------- */
 
 .bonds {
@@ -4469,6 +4509,39 @@
     .persona .persona-mini:active:not(:disabled) { transform: none; }
 }
 
+/* ---------- Filter chips: one row that scrolls sideways (0.16.1) ---------- */
+
+/* Many groups used to wrap into a tall stack; now they never take more than one line. */
+.persona-head .persona-chips {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: 0 calc(-1 * var(--dp-2));
+    padding: 2px var(--dp-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    --fade-l: 0px;
+    --fade-r: 0px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+}
+
+.persona-head .persona-chips::-webkit-scrollbar { display: none; }
+.persona-head .persona-chips.has-more-left { --fade-l: 36px; }
+.persona-head .persona-chips.has-more-right { --fade-r: 36px; }
+
+.persona-head .persona-chip { flex: none; }
+
+/* Group chips are text only: the icon repeats on every one and costs width. "Everyone" and "Places" keep theirs. */
+.persona-head .persona-chip:not([data-filter="all"], [data-filter="places"]) > i { display: none; }
+
+/* The row must scroll, never widen the panel or its window. */
+.persona-host,
+.persona-panel,
+.persona-head { min-width: 0; max-width: 100%; }
+.persona-panel { overflow: hidden; }
+
 /* ---------- Preview chrome (not part of the module) ---------- */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; }
@@ -4497,7 +4570,7 @@ body {
 .pv-panel::after { content: ""; position: absolute; top: 0; right: -1px; bottom: 0; width: 1px; background: linear-gradient(180deg, transparent 4%, rgba(212,178,90,.45) 30%, rgba(212,178,90,.2) 70%, transparent 96%); }
 .pv-panel .triad-dock { position: absolute; inset: 0; overflow: hidden; }
 /* A Foundry V13 window for the standalone panel. */
-.pv-window { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 380px; height: min(720px, calc(100% - 88px)); display: grid; grid-template-rows: 36px minmax(0,1fr); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 24px 60px rgba(0,0,0,.55); }
+.pv-window { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 380px; height: min(720px, calc(100% - 88px)); display: grid; grid-template-rows: 36px minmax(0,1fr); grid-template-columns: minmax(0,1fr); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 24px 60px rgba(0,0,0,.55); }
 .pv-window > header { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #15120f; border-bottom: 1px solid rgba(255,255,255,.08); font: 600 13px Cinzel, serif; letter-spacing: .06em; color: rgba(239,227,200,.8); }
 .pv-window > header span { flex: 1; }
 .pv-window > header i { color: rgba(239,227,200,.5); font-size: 12px; }
@@ -4965,8 +5038,26 @@ body {
                 <button type="button" class="persona-chip is-active" data-action="filter" data-filter="all" aria-pressed="true">
                     <i class="fa-solid fa-users" inert></i><span>Everyone</span><span class="persona-chip__count">11</span>
                 </button>
-                <button type="button" class="persona-chip " data-action="filter" data-filter="g1" aria-pressed="false">
-                    <i class="fa-solid fa-chess-rook" inert></i><span>Embermark</span><span class="persona-chip__count">4</span>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x0" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Resistência de Valtoria</span><span class="persona-chip__count">2</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x1" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Elfos de Khaledin</span><span class="persona-chip__count">2</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x2" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Heróis de Tarlan</span><span class="persona-chip__count">2</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x3" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Figuras Históricas</span><span class="persona-chip__count">3</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x4" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Os senhores dos Dragões</span><span class="persona-chip__count">3</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x5" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Aliados</span><span class="persona-chip__count">2</span>
+                </button>
+                <button type="button" class="persona-chip " data-action="filter" data-filter="x6" aria-pressed="false">
+                    <i class="fa-solid fa-city" inert></i><span>Campeões de Kurdrax</span><span class="persona-chip__count">4</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="places" aria-pressed="false">
                     <i class="fa-solid fa-map-location-dot" inert></i><span>Places</span><span class="persona-chip__count">2</span>
@@ -5131,6 +5222,22 @@ body {
 </section>
 
 <script>
+// The chip row's edge fades (the module does this in panel.js).
+document.querySelectorAll(".persona-head .persona-chips").forEach(row => {
+    const edges = () => {
+        row.classList.toggle("has-more-left", row.scrollLeft > 2);
+        row.classList.toggle("has-more-right", row.scrollLeft + row.clientWidth < row.scrollWidth - 2);
+    };
+    row.addEventListener("scroll", edges, { passive: true });
+    row.addEventListener("wheel", e => { if (row.scrollWidth > row.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); row.scrollLeft += e.deltaY; } }, { passive: false });
+    row.addEventListener("click", e => {
+        const chip = e.target.closest(".persona-chip"); if (!chip) return;
+        row.querySelectorAll(".persona-chip").forEach(c => c.classList.toggle("is-active", c === chip));
+        chip.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
+    });
+    new ResizeObserver(edges).observe(row);
+    edges();
+});
 const tabs = document.querySelectorAll(".pv-tabs button");
 const show = view => {
     tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));

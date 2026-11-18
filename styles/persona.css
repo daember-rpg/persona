@@ -4502,3 +4502,36 @@
     .persona .persona-icon-btn:active,
     .persona .persona-mini:active:not(:disabled) { transform: none; }
 }
+
+/* ---------- Filter chips: one row that scrolls sideways (0.16.1) ---------- */
+
+/* Many groups used to wrap into a tall stack; now they never take more than one line. */
+.persona-head .persona-chips {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: 0 calc(-1 * var(--dp-2));
+    padding: 2px var(--dp-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    --fade-l: 0px;
+    --fade-r: 0px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+}
+
+.persona-head .persona-chips::-webkit-scrollbar { display: none; }
+.persona-head .persona-chips.has-more-left { --fade-l: 36px; }
+.persona-head .persona-chips.has-more-right { --fade-r: 36px; }
+
+.persona-head .persona-chip { flex: none; }
+
+/* Group chips are text only: the icon repeats on every one and costs width. "Everyone" and "Places" keep theirs. */
+.persona-head .persona-chip:not([data-filter="all"], [data-filter="places"]) > i { display: none; }
+
+/* The row must scroll, never widen the panel or its window. */
+.persona-host,
+.persona-panel,
+.persona-head { min-width: 0; max-width: 100%; }
+.persona-panel { overflow: hidden; }

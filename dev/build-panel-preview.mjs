@@ -93,7 +93,8 @@ const gallery = {
     isGM: false, search: "", isEmpty: false, total: 11,
     chips: [
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: 11, active: true },
-        { id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", count: 4 },
+        ...[["Resistência de Valtoria", 2], ["Elfos de Khaledin", 2], ["Heróis de Tarlan", 2], ["Figuras Históricas", 3], ["Os senhores dos Dragões", 3], ["Aliados", 2], ["Campeões de Kurdrax", 4]]
+            .map(([label, count], i) => ({ id: `x${i}`, label, icon: "fa-solid fa-city", count })),
         { id: "places", label: t("PERSONA.Filter.Places"), icon: "fa-solid fa-map-location-dot", count: 2 }
     ],
     sections: [
@@ -159,7 +160,7 @@ body {
 .pv-panel::after { content: ""; position: absolute; top: 0; right: -1px; bottom: 0; width: 1px; background: linear-gradient(180deg, transparent 4%, rgba(212,178,90,.45) 30%, rgba(212,178,90,.2) 70%, transparent 96%); }
 .pv-panel .triad-dock { position: absolute; inset: 0; overflow: hidden; }
 /* A Foundry V13 window for the standalone panel. */
-.pv-window { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 380px; height: min(720px, calc(100% - 88px)); display: grid; grid-template-rows: 36px minmax(0,1fr); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 24px 60px rgba(0,0,0,.55); }
+.pv-window { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); width: 380px; height: min(720px, calc(100% - 88px)); display: grid; grid-template-rows: 36px minmax(0,1fr); grid-template-columns: minmax(0,1fr); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 24px 60px rgba(0,0,0,.55); }
 .pv-window > header { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #15120f; border-bottom: 1px solid rgba(255,255,255,.08); font: 600 13px Cinzel, serif; letter-spacing: .06em; color: rgba(239,227,200,.8); }
 .pv-window > header span { flex: 1; }
 .pv-window > header i { color: rgba(239,227,200,.5); font-size: 12px; }
@@ -198,6 +199,22 @@ body {
 </section>
 
 <script>
+// The chip row's edge fades (the module does this in panel.js).
+document.querySelectorAll(".persona-head .persona-chips").forEach(row => {
+    const edges = () => {
+        row.classList.toggle("has-more-left", row.scrollLeft > 2);
+        row.classList.toggle("has-more-right", row.scrollLeft + row.clientWidth < row.scrollWidth - 2);
+    };
+    row.addEventListener("scroll", edges, { passive: true });
+    row.addEventListener("wheel", e => { if (row.scrollWidth > row.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); row.scrollLeft += e.deltaY; } }, { passive: false });
+    row.addEventListener("click", e => {
+        const chip = e.target.closest(".persona-chip"); if (!chip) return;
+        row.querySelectorAll(".persona-chip").forEach(c => c.classList.toggle("is-active", c === chip));
+        chip.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
+    });
+    new ResizeObserver(edges).observe(row);
+    edges();
+});
 const tabs = document.querySelectorAll(".pv-tabs button");
 const show = view => {
     tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
