@@ -385,7 +385,7 @@
       "Dateline": "Place and date",
       "DatelinePlaceholder": "Valtoria, third of Frostfall",
       "Body": "Text",
-      "BodyHint": "(what's written on it; HTML allowed)",
+      "BodyHint": "(what's written on it; a blank line starts a new paragraph)",
       "HiddenHint": "(a passage only shown once you reveal it — after a check, a cipher, a candle held to the paper…)",
       "HintHidden": "Show smudged lines where the hidden passage is, so players know there's more to read",
       "Unreadable": "Something here can't be read yet",

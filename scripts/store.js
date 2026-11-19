@@ -381,6 +381,18 @@ export async function showHandout(entryId, who) {
     await setSetting("handout", { nonce: foundry.utils.randomID(), entryId, who, ts: Date.now() });
 }
 
+/**
+ * Text typed in the editor's plain text box keeps its lines: a blank line starts a paragraph,
+ * a single line break stays a line break. Text that's already HTML (a Journal page) is left as it is.
+ */
+export function plainToHtml(text) {
+    const raw = String(text ?? "");
+    if (!raw.trim() || /<\/?(p|br|div|h[1-6]|ul|ol|li|em|strong|b|i|u|span|a|img|section|blockquote|table|hr)\b[^>]*>/i.test(raw)) return raw;
+    const escape = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return raw.replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/)
+        .map(par => `<p>${escape(par).replace(/\n/g, "<br>")}</p>`).join("");
+}
+
 /** Removes every image from a story (the card already shows the portrait), and wrappers left empty. */
 export function withoutImages(html) {
     let out = String(html ?? "").replace(/<img\b[^>]*>/gi, "");

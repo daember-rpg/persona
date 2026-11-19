@@ -8,7 +8,7 @@ import {
 } from "./store.js";
 import { canWriteSharedNotes } from "./relay.js";
 import { sealSvg, tornClip, tiltOf, TORN_EDGES, PAPERS } from "./documents.js";
-import { openedIds } from "./store.js";
+import { openedIds, plainToHtml } from "./store.js";
 
 const PLACEHOLDER = {
     npc: `modules/${MODULE_ID}/assets/unknown-person.svg`,
@@ -279,7 +279,8 @@ export async function buildDocumentContext(entry, { tab = "private" } = {}) {
     const enrich = html => foundry.applications.ux.TextEditor.implementation.enrichHTML(html ?? "", { secrets: isGM });
     const showSecret = canSee(entry, "secret", user) && entry.secret.trim();
     const look = documentLook(entry, user);
-    const body = entry.paper === "map" ? withoutImages(entry.summary) : entry.summary;
+    const text = plainToHtml(entry.summary);
+    const body = entry.paper === "map" ? withoutImages(text) : text;
     const notes = sharedNotes(entry.id).map(note => {
         const author = game.users.get(note.userId);
         return {
@@ -299,7 +300,7 @@ export async function buildDocumentContext(entry, { tab = "private" } = {}) {
         signature: entry.title,
         dateline: entry.dateline,
         body: body.trim() ? await enrich(body) : "",
-        secret: showSecret ? await enrich(entry.secret) : null,
+        secret: showSecret ? await enrich(plainToHtml(entry.secret)) : null,
         // Something is still unreadable: smudged lines, if the GM wants players to know there's more.
         hiddenHint: !showSecret && !!entry.secret.trim() && (isGM || entry.hintHidden),
         tab,
@@ -319,7 +320,7 @@ export async function buildCardContext(entry, { tab = "private" } = {}) {
     const groups = new Map(getGroups().map(g => [g.id, g]));
     const enrich = html => foundry.applications.ux.TextEditor.implementation.enrichHTML(html ?? "", { secrets: isGM });
     // The card already shows the portrait; pictures inside the Journal text would repeat it.
-    const story = withoutImages(entry.summary);
+    const story = withoutImages(plainToHtml(entry.summary));
     const showSummary = canSee(entry, "summary", user) && story.trim();
     const showSecret = canSee(entry, "secret", user) && entry.secret.trim();
     const roster = players();
@@ -369,7 +370,7 @@ export async function buildCardContext(entry, { tab = "private" } = {}) {
         statusIcon: entry.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question",
         groups: entry.groups.map(id => groups.get(id)).filter(Boolean),
         summary: showSummary ? await enrich(story) : null,
-        secret: showSecret ? await enrich(entry.secret) : null,
+        secret: showSecret ? await enrich(plainToHtml(entry.secret)) : null,
         hasVideo: !!entry.video && (isGM || canSee(entry, "face", user)),
         people,
         places,
