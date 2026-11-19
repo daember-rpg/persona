@@ -25,7 +25,7 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Framing**: in the editor, drag the picture and use the zoom slider to choose exactly what players see; the same framing is used in the gallery, the rows, the links and the card.
 - **Journal stays the source**: link a page and the card's story follows it (copied into the entry, so players don't need Journal permissions). Journal secret blocks stay GM-only. Turn off *Update the story…* to write your own text.
 - **Show (handout)**: *Show* on a row (or *Show to* on the card) opens that card on the screens of everyone or one player, like a handout. Their face and name are revealed to them first, so the card stays in their gallery.
-- **Video**: give an entry an mp4/webm and press *Video*, or the film button to play any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
+- **Video**: give an entry an mp4/webm (saved as soon as you pick it) and press *Play for everyone* on its card, or the film button on its row; the eye on the card watches it alone first. The film button at the top plays any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
 
 ## Documents: letters, decrees, notes and torn maps
 In-world papers the party can hold, read and keep — drawn on aged paper in the Embermark look, not shown as a plain card.

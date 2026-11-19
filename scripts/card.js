@@ -17,8 +17,9 @@ export class CardOverlay {
     #draft = null;
     #breaking = false;
 
-    constructor({ replayVideo }) {
+    constructor({ replayVideo, playForAll }) {
         this.replayVideo = replayVideo;
+        this.playForAll = playForAll;
     }
 
     get openId() {
@@ -109,6 +110,7 @@ export class CardOverlay {
         if (action === "resealPreview") return unmarkOpened(this.#id).then(() => this.render());
         if (action === "deleteNote") return deleteSharedNote(this.#id, target.dataset.note);
         if (action === "replayVideo") return this.replayVideo(this.#id);
+        if (action === "playForAll") return this.playForAll(this.#id);
         if (action === "openLinked") return this.#openLinked(target.dataset.id);
         if (action === "showHandout") {
             const who = target.dataset.who === "all" ? game.i18n.localize("PERSONA.Reveal.Everyone") : game.users.get(target.dataset.who)?.name;

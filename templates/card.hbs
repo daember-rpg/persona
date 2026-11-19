@@ -3,7 +3,14 @@
     <div class="persona-card__art" style="--art: url('{{img}}')">
         <div class="persona-card__frame"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false"></div>
         {{#if hasVideo}}
-            <button type="button" class="persona-button persona-card__play" data-action="replayVideo"><i class="fa-solid fa-play" inert></i> {{#if isGM}}{{localize "PERSONA.Video.Preview"}}{{else}}{{localize "PERSONA.Video.Replay"}}{{/if}}</button>
+            {{#if isGM}}
+                <div class="persona-card__play persona-card__play--gm">
+                    <button type="button" class="persona-button" data-action="playForAll"><i class="fa-solid fa-play" inert></i> {{localize "PERSONA.Video.PlayAll"}}</button>
+                    <button type="button" class="persona-icon-btn" data-action="replayVideo" data-tooltip="{{localize "PERSONA.Video.PreviewHint"}}" aria-label="{{localize "PERSONA.Video.PreviewHint"}}"><i class="fa-solid fa-eye" inert></i></button>
+                </div>
+            {{else}}
+                <button type="button" class="persona-button persona-card__play" data-action="replayVideo"><i class="fa-solid fa-play" inert></i> {{localize "PERSONA.Video.Replay"}}</button>
+            {{/if}}
         {{/if}}
     </div>
     <div class="persona-card__body">

@@ -67,7 +67,7 @@ Hooks.once("ready", () => {
     }
 
     video = new VideoPlayer();
-    card = new CardOverlay({ replayVideo: id => replayVideo(id) });
+    card = new CardOverlay({ replayVideo: id => replayVideo(id), playForAll: id => playEntryVideo(id) });
     toasts = new Toasts({ openCard: id => card.open(id) });
     view = new PanelView({
         openCard: id => card.open(id),

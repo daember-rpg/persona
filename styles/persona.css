@@ -5289,3 +5289,7 @@
 .application.persona-editor { max-height: calc(100vh - 24px); }
 .persona-editor .window-content { min-height: 0; overflow-y: auto; }
 .persona-editor__footer { position: sticky; bottom: 0; z-index: 2; }
+
+/* GM on a card with a video: play it for the table, or peek at it alone first. */
+.persona .persona-card__play--gm { display: flex; align-items: center; gap: 8px; }
+.persona .persona-card__play--gm .persona-icon-btn { background: rgba(20, 17, 15, 0.75); backdrop-filter: blur(6px); }

@@ -86,7 +86,8 @@
       "Unmute": "Unmute",
       "ForEveryone": "Playing for everyone",
       "JustYou": "Just for you",
-      "ClickToPlay": "Click to play with sound"
+      "ClickToPlay": "Click to play with sound",
+      "PreviewHint": "Watch it yourself first (only you)"
     },
     "Toast": {
       "Face": "Someone new",

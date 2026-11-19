@@ -178,6 +178,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             // Following the Journal locks the story text; unfollowing makes it editable.
             // These change which fields show (or the little preview of the paper).
             if (event.target.name === "newGroupColor") this.#newGroupColor = event.target.value;
+            if (event.target.name === "video") this.#saveVideo();
             if (["syncJournal", "kind", "paper", "sealed", "sealColor", "sealMarkKind", "sealMarkText"].includes(event.target.name)) this.render();
         });
     }
@@ -251,15 +252,23 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const picker = new (FilePickerClass())({
             type: "video",
             current: this.#entry.video,
-            callback: path => { this.#entry.video = path; this.render(); }
+            callback: async path => { this.#entry.video = path; await this.#saveVideo(); this.render(); }
         });
         picker.browse();
     }
 
-    static #onClearVideo() {
+    static async #onClearVideo() {
         this.#readForm();
         this.#entry.video = "";
+        await this.#saveVideo();
         this.render();
+    }
+
+    /** The video is saved as soon as it's picked (no need to press Save), like groups. */
+    async #saveVideo() {
+        if (this.isNew) return;
+        const video = this.#entry.video;
+        await patchEntry(this.#entry.id, entry => ({ ...entry, video }));
     }
 
     static async #onPullJournal() {
