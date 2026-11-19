@@ -19,7 +19,10 @@ const PARTIALS = {
     "persona-director": `${TEMPLATE_ROOT}/partials/director.hbs`,
     "persona-gallery": `${TEMPLATE_ROOT}/partials/gallery.hbs`,
     "persona-tile": `${TEMPLATE_ROOT}/partials/tile.hbs`,
-    "persona-row": `${TEMPLATE_ROOT}/partials/row.hbs`
+    "persona-row": `${TEMPLATE_ROOT}/partials/row.hbs`,
+    "persona-doc-mini": `${TEMPLATE_ROOT}/partials/doc-mini.hbs`,
+    "persona-seal": `${TEMPLATE_ROOT}/partials/seal.hbs`,
+    "persona-notes": `${TEMPLATE_ROOT}/partials/notes.hbs`
 };
 
 let view, windowApp, card, video, toasts, bonds;
@@ -48,6 +51,7 @@ Hooks.once("init", () => {
         ...PARTIALS,
         "persona-panel": `${TEMPLATE_ROOT}/panel.hbs`,
         "persona-card": `${TEMPLATE_ROOT}/card.hbs`,
+        "persona-document": `${TEMPLATE_ROOT}/document.hbs`,
         "persona-editor": `${TEMPLATE_ROOT}/editor.hbs`
     });
 });
@@ -67,7 +71,7 @@ Hooks.once("ready", () => {
     toasts = new Toasts({ openCard: id => card.open(id) });
     view = new PanelView({
         openCard: id => card.open(id),
-        openEditor: id => openEditor(id),
+        openEditor: (id, options) => openEditor(id, options),
         playEntryVideo: id => playEntryVideo(id),
         playFile: () => pickAndPlay(),
         openBonds: () => openBonds()
@@ -154,10 +158,10 @@ function openBonds(key = null) {
     return bonds?.show(key);
 }
 
-function openEditor(id) {
+function openEditor(id, { kind } = {}) {
     const existing = foundry.applications.instances?.get(`persona-editor-${id ?? "new"}`);
     if (existing) return existing.bringToFront?.() ?? existing.render({ force: true });
-    return new EntryEditor(id).render({ force: true });
+    return new EntryEditor(id, { kind }).render({ force: true });
 }
 
 /* -------------------------------------------- */
@@ -214,10 +218,11 @@ function announceReveals() {
         if (!gained.length) continue;
         // Report the deepest layer gained.
         const layer = [...LAYERS].reverse().find(l => gained.includes(l));
+        const isDoc = entry.kind === "document";
         toasts.show({
             id: entry.id,
             img: imageOf(entry),
-            label: game.i18n.localize(TOAST_LABEL[layer]),
+            label: game.i18n.localize(isDoc ? (layer === "secret" ? "PERSONA.Toast.DocSecret" : "PERSONA.Toast.Doc") : TOAST_LABEL[layer]),
             name: canSee(entry, "name") ? entry.name : "???"
         });
     }

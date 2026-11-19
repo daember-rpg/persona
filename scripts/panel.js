@@ -170,7 +170,7 @@ export class PanelView {
         playVideo: (_t, id) => this.playEntryVideo(id),
         playFile: () => this.playFile(),
         openBonds: () => this.openBonds?.(),
-        newEntry: () => this.openEditor(null),
+        newEntry: () => this.openEditor(null, { kind: this.filter === "documents" ? "document" : this.filter === "places" ? "place" : "npc" }),
         edit: (_t, id) => this.openEditor(id),
         openJournal: async (_t, id) => {
             const entry = Store.getEntry(id);
@@ -195,7 +195,7 @@ export class PanelView {
     /** A folder id from the panel ("flat" = the filtered list: the filter's group, if it is one). */
     #folderOf(id) {
         if (id !== "flat") return id;
-        const groupFilter = this.filter && !["all", "places"].includes(this.filter);
+        const groupFilter = this.filter && !["all", "places", "documents"].includes(this.filter);
         return groupFilter ? this.filter : null;
     }
 
@@ -411,7 +411,7 @@ export class PanelView {
         event.preventDefault();
         event.currentTarget.querySelector("[data-drop-zone]")?.classList.remove("is-over");
         const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
-        const entry = await createFromDrop(data);
+        const entry = await createFromDrop(data, { asDocument: this.filter === "documents" });
         if (entry) ui.notifications.info(game.i18n.format("PERSONA.Entry.Added", { name: entry.name }));
     };
 }

@@ -25,13 +25,16 @@
     },
     "Filter": {
       "All": "Everyone",
-      "Places": "Places"
+      "Places": "Places",
+      "Documents": "Documents"
     },
     "Kind": {
       "npc": "Person",
       "place": "Place",
       "people": "People",
-      "places": "Places"
+      "places": "Places",
+      "document": "Document",
+      "documents": "Documents"
     },
     "Layer": {
       "face": "Face",
@@ -89,7 +92,9 @@
       "Face": "Someone new",
       "Name": "Name revealed",
       "Summary": "You learned more",
-      "Secret": "Secret uncovered"
+      "Secret": "Secret uncovered",
+      "Doc": "A document for you",
+      "DocSecret": "Something surfaced on the page"
     },
     "Entry": {
       "New": "New person or place",
@@ -358,6 +363,49 @@
     "Arrange": {
       "Moved": "{name} moved to {group}",
       "Hint": "Drag to reorder or move to another folder"
+    },
+    "Doc": {
+      "Folder": "Party documents",
+      "Open": "Read",
+      "Layer": {
+        "face": "Has it",
+        "secret": "Hidden passage"
+      },
+      "Paper": {
+        "letter": "Letter",
+        "decree": "Decree",
+        "note": "Note",
+        "map": "Torn map"
+      },
+      "PaperLabel": "Paper",
+      "Title": "Title",
+      "Signature": "Signed",
+      "SignaturePlaceholder": "Lord Aldric Venn, Regent of Embermark",
+      "Dateline": "Place and date",
+      "DatelinePlaceholder": "Valtoria, third of Frostfall",
+      "Body": "Text",
+      "BodyHint": "(what's written on it; HTML allowed)",
+      "HiddenHint": "(a passage only shown once you reveal it — after a check, a cipher, a candle held to the paper…)",
+      "HintHidden": "Show smudged lines where the hidden passage is, so players know there's more to read",
+      "Unreadable": "Something here can't be read yet",
+      "PickMap": "Choose the map",
+      "MapHint": "The picture is torn at the edges; the text becomes its caption.",
+      "Sealed": "Sealed with wax (players break the seal the first time they open it)",
+      "SealColor": "Wax",
+      "SealMark": "Pressed into the wax",
+      "SealMarkHint": "(letters or a mark)",
+      "SealMarkPlaceholder": "Initials (empty = the signature's)",
+      "Wax": {
+        "crimson": "Crimson",
+        "black": "Black",
+        "gold": "Gold",
+        "forest": "Forest green",
+        "royal": "Royal blue",
+        "violet": "Violet"
+      },
+      "BreakSeal": "Break the seal",
+      "BreakSealHint": "Click the seal to break it",
+      "Reseal": "Seal it again (on your screen)"
     }
   }
 }

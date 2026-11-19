@@ -23,6 +23,10 @@
                     {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.places"}}</span><span>{{section.places.length}}</span></div>{{/if}}
                     <div class="persona-gallery persona-gallery--places">{{#each section.places as |tile|}}{{> persona-tile tile}}{{/each}}</div>
                 {{/if}}
+                {{#if section.documents.length}}
+                    {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.documents"}}</span><span>{{section.documents.length}}</span></div>{{/if}}
+                    <div class="persona-gallery persona-gallery--documents">{{#each section.documents as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                {{/if}}
             {{/unless}}
         </section>
     {{/each}}

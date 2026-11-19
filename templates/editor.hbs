@@ -1,6 +1,7 @@
 <div class="persona persona-editor__root">
 <div class="persona-editor__body">
     <div class="persona-editor__top">
+        {{#if showFramer}}
         <div class="persona-editor__framing">
             <div class="persona-framer {{#if isPerson}}is-person{{else}}is-place{{/if}}" data-framer data-tooltip="{{localize "PERSONA.Entry.FrameHint"}}">
                 <img class="persona-fit" src="{{preview}}" style="{{frame}}" alt="" draggable="false">
@@ -18,22 +19,37 @@
             <input type="hidden" name="focusX" value="{{entry.focusX}}">
             <input type="hidden" name="focusY" value="{{entry.focusY}}">
         </div>
+        {{else}}
+        <div class="persona-editor__framing persona-editor__docpreview">
+            <span class="persona-tile__doc">{{> persona-doc-mini doc}}</span>
+            <input type="hidden" name="focusX" value="{{entry.focusX}}">
+            <input type="hidden" name="focusY" value="{{entry.focusY}}">
+            <input type="hidden" name="zoom" value="{{entry.zoom}}">
+        </div>
+        {{/if}}
         <div class="persona-editor__identity">
             <div class="persona-field">
                 <span class="persona-label">{{localize "PERSONA.Entry.Kind"}}</span>
                 <div class="persona-radio">
                     <label><input type="radio" name="kind" value="npc" {{#if isPerson}}checked{{/if}}> <i class="fa-solid fa-user" inert></i> {{localize "PERSONA.Kind.npc"}}</label>
-                    <label><input type="radio" name="kind" value="place" {{#unless isPerson}}checked{{/unless}}> <i class="fa-solid fa-map-location-dot" inert></i> {{localize "PERSONA.Kind.place"}}</label>
+                    <label><input type="radio" name="kind" value="place" {{#if isPlace}}checked{{/if}}> <i class="fa-solid fa-map-location-dot" inert></i> {{localize "PERSONA.Kind.place"}}</label>
+                    <label><input type="radio" name="kind" value="document" {{#if isDocument}}checked{{/if}}> <i class="fa-solid fa-scroll" inert></i> {{localize "PERSONA.Kind.document"}}</label>
                 </div>
             </div>
             <label class="persona-field">
-                <span class="persona-label">{{localize "PERSONA.Entry.Name"}}</span>
+                <span class="persona-label">{{#if isDocument}}{{localize "PERSONA.Doc.Title"}}{{else}}{{localize "PERSONA.Entry.Name"}}{{/if}}</span>
                 <input type="text" name="name" value="{{entry.name}}" required autocomplete="off">
             </label>
             <label class="persona-field">
-                <span class="persona-label">{{localize "PERSONA.Entry.TitleField"}}</span>
-                <input type="text" name="title" value="{{entry.title}}" placeholder="{{localize "PERSONA.Entry.TitlePlaceholder"}}" autocomplete="off">
+                <span class="persona-label">{{#if isDocument}}{{localize "PERSONA.Doc.Signature"}}{{else}}{{localize "PERSONA.Entry.TitleField"}}{{/if}}</span>
+                <input type="text" name="title" value="{{entry.title}}" placeholder="{{#if isDocument}}{{localize "PERSONA.Doc.SignaturePlaceholder"}}{{else}}{{localize "PERSONA.Entry.TitlePlaceholder"}}{{/if}}" autocomplete="off">
             </label>
+            {{#if isDocument}}
+                <label class="persona-field">
+                    <span class="persona-label">{{localize "PERSONA.Doc.Dateline"}}</span>
+                    <input type="text" name="dateline" value="{{entry.dateline}}" placeholder="{{localize "PERSONA.Doc.DatelinePlaceholder"}}" autocomplete="off">
+                </label>
+            {{/if}}
             {{#if isPerson}}
                 <div class="persona-field">
                     <span class="persona-label">{{localize "PERSONA.Status.Label"}}</span>
@@ -47,6 +63,41 @@
             <input type="hidden" name="img" value="{{entry.img}}">
         </div>
     </div>
+
+    {{#if isDocument}}
+        <div class="persona-field">
+            <span class="persona-label">{{localize "PERSONA.Doc.PaperLabel"}}</span>
+            <div class="persona-papers" role="radiogroup">
+                {{#each papers as |p|}}
+                    <label class="persona-papers__option"><input type="radio" name="paper" value="{{p.id}}" {{#if p.selected}}checked{{/if}}><i class="{{p.icon}}" inert></i><span>{{p.label}}</span></label>
+                {{/each}}
+            </div>
+            {{#if isMap}}
+                <div class="persona-inline">
+                    <button type="button" class="persona-mini" data-action="pickImage"><i class="fa-solid fa-image" inert></i><span>{{localize "PERSONA.Doc.PickMap"}}</span></button>
+                    <span class="persona-hint">{{localize "PERSONA.Doc.MapHint"}}</span>
+                </div>
+            {{/if}}
+        </div>
+        <div class="persona-field">
+            <label class="persona-check"><input type="checkbox" name="sealed" {{#if entry.sealed}}checked{{/if}}> {{localize "PERSONA.Doc.Sealed"}}</label>
+            {{#if entry.sealed}}
+                <div class="persona-swatches" role="radiogroup" aria-label="{{localize "PERSONA.Doc.SealColor"}}">
+                    {{#each sealColors as |c|}}
+                        <label class="persona-swatches__option" data-tooltip="{{c.label}}"><input type="radio" name="sealColor" value="{{c.id}}" {{#if c.selected}}checked{{/if}}><span style="--wax: {{c.base}}; --wax-light: {{c.light}}"></span></label>
+                    {{/each}}
+                </div>
+                <span class="persona-label">{{localize "PERSONA.Doc.SealMark"}} <small>{{localize "PERSONA.Doc.SealMarkHint"}}</small></span>
+                <div class="persona-icons persona-icons--seal" role="radiogroup">
+                    <label class="persona-icons__option persona-icons__option--text"><input type="radio" name="sealMarkKind" value="text" {{#unless markIsIcon}}checked{{/unless}}><span>Aa</span></label>
+                    {{#each sigils as |sg|}}
+                        <label class="persona-icons__option"><input type="radio" name="sealMarkKind" value="{{sg.icon}}" {{#if sg.selected}}checked{{/if}}><i class="{{sg.icon}}" inert></i></label>
+                    {{/each}}
+                </div>
+                {{#unless markIsIcon}}<input type="text" name="sealMarkText" value="{{markText}}" maxlength="2" placeholder="{{localize "PERSONA.Doc.SealMarkPlaceholder"}}" autocomplete="off">{{/unless}}
+            {{/if}}
+        </div>
+    {{/if}}
 
     <div class="persona-field">
         <span class="persona-label">{{localize "PERSONA.Entry.Journal"}}</span>
@@ -75,15 +126,18 @@
         </div>
     {{else}}
         <label class="persona-field">
-            <span class="persona-label">{{localize "PERSONA.Entry.Summary"}} <small>{{localize "PERSONA.Entry.SummaryHint"}}</small></span>
-            <textarea name="summary" rows="5">{{entry.summary}}</textarea>
+            <span class="persona-label">{{#if isDocument}}{{localize "PERSONA.Doc.Body"}} <small>{{localize "PERSONA.Doc.BodyHint"}}</small>{{else}}{{localize "PERSONA.Entry.Summary"}} <small>{{localize "PERSONA.Entry.SummaryHint"}}</small>{{/if}}</span>
+            <textarea name="summary" rows="{{#if isDocument}}9{{else}}5{{/if}}">{{entry.summary}}</textarea>
         </label>
     {{/if}}
 
     <label class="persona-field">
-        <span class="persona-label">{{localize "PERSONA.Layer.secret"}} <small>{{localize "PERSONA.Entry.SecretHint"}}</small></span>
+        <span class="persona-label">{{#if isDocument}}{{localize "PERSONA.Doc.Layer.secret"}} <small>{{localize "PERSONA.Doc.HiddenHint"}}</small>{{else}}{{localize "PERSONA.Layer.secret"}} <small>{{localize "PERSONA.Entry.SecretHint"}}</small>{{/if}}</span>
         <textarea name="secret" rows="2">{{entry.secret}}</textarea>
     </label>
+    {{#if isDocument}}
+        <label class="persona-check"><input type="checkbox" name="hintHidden" {{#if entry.hintHidden}}checked{{/if}}> {{localize "PERSONA.Doc.HintHidden"}}</label>
+    {{else}}
 
     <div class="persona-field">
         <span class="persona-label">{{localize "PERSONA.Entry.Groups"}}</span>
@@ -142,6 +196,7 @@
             {{#if entry.video}}<button type="button" class="persona-mini persona-mini--icon" data-action="clearVideo" aria-label="{{localize "PERSONA.Entry.ClearVideo"}}"><i class="fa-solid fa-xmark" inert></i></button>{{/if}}
         </div>
     </div>
+    {{/if}}
 </div>
 
 <footer class="persona-editor__footer">

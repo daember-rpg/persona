@@ -1,6 +1,6 @@
 # Persona (Alpha)
 
-The people and places of your story, revealed when you choose. Players keep a gallery of everyone they have met, with cards and notes, and arrange them on their own **Bonds** wheel; the GM shows cards to players like handouts and plays full-screen videos for the whole table. System-agnostic, Foundry VTT V13/V14.
+The people and places of your story, revealed when you choose. Players keep a gallery of everyone they have met, with cards and notes, and arrange them on their own **Bonds** wheel; the GM shows cards to players like handouts and plays full-screen videos for the whole table, and hands out letters, decrees, notes and torn maps sealed with wax that players break open. System-agnostic, Foundry VTT V13/V14.
 
 ## Install
 Manifest URL: `https://raw.githubusercontent.com/daember-rpg/persona/main/module.json`
@@ -26,6 +26,15 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Journal stays the source**: link a page and the card's story follows it (copied into the entry, so players don't need Journal permissions). Journal secret blocks stay GM-only. Turn off *Update the story…* to write your own text.
 - **Show (handout)**: *Show* on a row (or *Show to* on the card) opens that card on the screens of everyone or one player, like a handout. Their face and name are revealed to them first, so the card stays in their gallery.
 - **Video**: give an entry an mp4/webm and press *Video*, or the film button to play any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
+
+## Documents: letters, decrees, notes and torn maps
+In-world papers the party can hold, read and keep — drawn on aged paper in the Embermark look, not shown as a plain card.
+- **Create** one with **+** while the *Documents* filter is on (or pick *Document* in the editor), or drop a **Journal page** on the panel with the *Documents* filter on: its text becomes the document's text.
+- **Paper**: *Letter* (a single sheet in an old printer's hand), *Decree* (ruled double border, a red initial, the title set in small capitals), *Note* (a torn scrap in a hurried hand) or *Torn map* (your picture with torn edges; the text becomes its caption). Each has a place and date line and a signature in script.
+- **Wax seal**: on by default, in crimson, black, gold, green, blue or violet, with initials or a mark (crown, tower, skull, eye, dragon…) pressed in. The first time a player opens it, the letter arrives folded with the seal across the fold; they click the seal, it cracks and falls away in two halves, the folds open and the writing comes up. The broken seal stays by the signature, and the seal is broken for that player from then on. (The GM can *Seal it again* on their own screen to watch it once more.)
+- **Hidden passage**: a part of the text only shown once you reveal it — after a check, a cipher solved, a candle held to the paper. Until then players can see smudged, unreadable lines where it sits (turn that off to keep it a surprise). When revealed, it surfaces in a different ink.
+- **Who has it**: a document has two layers in the Director: *Has it* (the whole document) and *Hidden passage*. *Show* hands it to everyone or one player and opens it on their screens, sealed.
+- **Party documents**: every document a player has lands in one folder at the top of their gallery, apart from the factions' folders, with a small paper showing whether it's still sealed. Notes (private and party) work as on cards.
 
 ## Bonds: each player's relationship wheel
 Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astrolabe: hairline gold structure, faction colour as a lit arc on the rim, links as fine trails of light, portraits as medallions; the dial turns into place when the window opens.
@@ -74,7 +83,7 @@ Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astro
 - A GM online for party notes.
 
 ## Data
-World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`, `characters` (same-person links and retired characters). Per user (flags, written by the player): `seen`, `notes`, `wheels` (one per character key; `bonds` from before 0.12 is read as the assigned character's wheel), `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
+World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`, `characters` (same-person links and retired characters). Per user (flags, written by the player): `seen`, `opened` (documents whose seal they broke), `notes`, `wheels` (one per character key; `bonds` from before 0.12 is read as the assigned character's wheel), `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
 
 ## Structure
 ```
@@ -83,6 +92,7 @@ scripts/
   constants.js   MODULE_ID and defaults
   settings.js    settings registration (changes broadcast as "persona.changed")
   store.js       entries, groups, reveal rules (pure), handouts, per-user state
+  documents.js   papers, wax colours and marks, torn edges and the seal drawing (pure)
   relay.js       socketlib relay for party notes
   view-data.js   template contexts (read-only)
   entries.js     create from drops, Journal sync
@@ -99,7 +109,7 @@ scripts/
 templates/       panel, card, editor + partials
 styles/          persona.css (Embermark)
 lang/            en
-dev/             bonds-preview.html and panel-preview.html (standalone previews, not shipped) and their build scripts
+dev/             bonds-preview.html and panel-preview.html (standalone previews, not shipped; the panel preview has a Documents tab) and their build scripts
 ```
 
 ## Credits

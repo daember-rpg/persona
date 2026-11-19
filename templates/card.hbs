@@ -78,35 +78,6 @@
             </div>
         {{/if}}
 
-        <section class="persona-notes">
-            <div class="persona-tabs" role="tablist">
-                {{#unless isGM}}
-                    <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="{{#if showPrivate}}true{{else}}false{{/if}}">{{localize "PERSONA.Notes.Mine"}}</button>
-                {{/unless}}
-                <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="{{#if showPrivate}}false{{else}}true{{/if}}">{{localize "PERSONA.Notes.Party"}} · {{notes.length}}</button>
-            </div>
-            {{#if showPrivate}}
-                <textarea name="privateNote" rows="4" placeholder="{{localize "PERSONA.Notes.MinePlaceholder"}}">{{privateNote}}</textarea>
-                <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> {{localize "PERSONA.Notes.MineHint"}}</p>
-            {{else}}
-                {{#each notes as |note|}}
-                    <div class="persona-note">
-                        <span class="persona-note__who" style="--who: {{note.color}}">{{note.initial}}</span>
-                        <div class="persona-note__text"><p>{{note.text}}</p><span>{{note.author}}</span></div>
-                        {{#if note.canDelete}}<button type="button" class="persona-note__delete" data-action="deleteNote" data-note="{{note.id}}" aria-label="{{localize "PERSONA.Notes.Delete"}}" data-tooltip="{{localize "PERSONA.Notes.Delete"}}"><i class="fa-solid fa-trash" inert></i></button>{{/if}}
-                    </div>
-                {{else}}
-                    <p class="persona-empty-line">{{localize "PERSONA.Notes.None"}}</p>
-                {{/each}}
-                {{#if canWriteShared}}
-                    <form class="persona-note-form" data-note-form>
-                        <input type="text" name="sharedNote" maxlength="2000" placeholder="{{localize "PERSONA.Notes.PartyPlaceholder"}}" autocomplete="off">
-                        <button type="submit" class="persona-button">{{localize "PERSONA.Notes.Send"}}</button>
-                    </form>
-                {{else}}
-                    <p class="persona-hint"><i class="fa-solid fa-plug-circle-xmark" inert></i> {{localize "PERSONA.Warn.NoRelay"}}</p>
-                {{/if}}
-            {{/if}}
-        </section>
+        {{> persona-notes}}
     </div>
 </article>

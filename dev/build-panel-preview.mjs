@@ -18,11 +18,13 @@ const Handlebars = require("handlebars");
 const lang = JSON.parse(read("lang/en.json"));
 const t = key => key.split(".").reduce((o, k) => o?.[k], lang) ?? key;
 Handlebars.registerHelper("localize", key => t(key));
-for (const [name, file] of Object.entries({ "persona-director": "director", "persona-gallery": "gallery", "persona-row": "row", "persona-tile": "tile" })) {
+for (const [name, file] of Object.entries({ "persona-director": "director", "persona-gallery": "gallery", "persona-row": "row", "persona-tile": "tile", "persona-doc-mini": "doc-mini", "persona-seal": "seal", "persona-notes": "notes" })) {
     Handlebars.registerPartial(name, read(`templates/partials/${file}.hbs`));
 }
 const panel = Handlebars.compile(read("templates/panel.hbs"));
 const card = Handlebars.compile(read("templates/card.hbs"));
+const documentView = Handlebars.compile(read("templates/document.hbs"));
+const { sealSvg, tornClip, tiltOf, TORN_EDGES, PAPERS } = await import(new URL("../scripts/documents.js", import.meta.url));
 
 /* ---------- mock data ---------- */
 const hue = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
@@ -34,6 +36,50 @@ const avatar = (name, { dark = false, wide = false } = {}) => {
         ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${hh}"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h},35%,38%)"/><stop offset="1" stop-color="hsl(${(h + 30) % 360},30%,10%)"/></linearGradient></defs><rect width="${w}" height="${hh}" fill="url(#s)"/><path d="M0 130 L60 90 L110 120 L170 70 L230 110 L320 80 L320 180 L0 180z" fill="hsla(${h},25%,8%,.75)"/><circle cx="250" cy="45" r="16" fill="hsla(45,70%,80%,.5)"/></svg>`
         : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${hh}"><defs><radialGradient id="g" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="hsl(${h},45%,${dark ? 30 : 48}%)"/><stop offset="1" stop-color="hsl(${(h + 40) % 360},40%,12%)"/></radialGradient></defs><rect width="${w}" height="${hh}" fill="url(#g)"/><circle cx="60" cy="58" r="26" fill="hsla(${h},30%,85%,.22)"/><path d="M14 160c4-38 22-58 46-58s42 20 46 58z" fill="hsla(${h},30%,85%,.18)"/><text x="60" y="68" font-family="Cinzel,serif" font-size="26" font-weight="700" text-anchor="middle" fill="hsla(40,60%,92%,.92)">${initials}</text></svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+
+/* ---------- documents ---------- */
+const mapSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#d9c79c"/><path d="M0 70 C60 60 90 110 150 95 S240 40 300 70 S380 120 400 100 L400 0 L0 0Z" fill="#9fb3b0" opacity=".6"/><path d="M0 70 C60 60 90 110 150 95 S240 40 300 70 S380 120 400 100" fill="none" stroke="#5b4a32" stroke-width="2"/><g fill="none" stroke="#5b4a32" stroke-width="1.6"><path d="M60 200 l18-28 18 28M90 210 l22-34 22 34M130 196 l16-24 16 24"/><path d="M250 180 c20-10 40 10 60 0 s30-20 50 -6" stroke-dasharray="5 5"/><path d="M200 120 C210 160 190 200 230 240 S300 260 330 250" stroke-width="2.4" stroke="#6d8a92"/></g><g fill="#5b4a32" font-family="serif" font-size="13" font-style="italic"><text x="40" y="240">Ashen Peaks</text><text x="230" y="150">the old road</text><text x="150" y="40">Sea of Glass</text></g><path d="M318 216 l14 14 M332 216 l-14 14" stroke="#8e1f1b" stroke-width="3.5" stroke-linecap="round"/><circle cx="350" cy="260" r="22" fill="none" stroke="#5b4a32"/><path d="M350 236 v48 M326 260 h48" stroke="#5b4a32"/><text x="346" y="232" font-size="10" fill="#5b4a32">N</text></svg>`)}`;
+const docLook = (id, entry, sealed) => {
+    const torn = TORN_EDGES[entry.paper];
+    const mark = entry.sealMark?.startsWith("fa-") ? { icon: entry.sealMark } : { text: (entry.sealMark || entry.title || entry.name).slice(0, entry.sealMark ? 2 : 1).toUpperCase() };
+    return {
+        paper: entry.paper,
+        paperIcon: PAPERS.find(p => p.id === entry.paper).icon,
+        paperLabel: t(`PERSONA.Doc.Paper.${entry.paper}`),
+        clip: torn ? `clip-path: ${tornClip(id, torn)};` : "",
+        tilt: `--tilt: ${tiltOf(id, entry.paper)}deg;`,
+        hasSeal: entry.sealed !== false,
+        sealed: entry.sealed !== false && sealed,
+        seal: entry.sealed !== false ? sealSvg(id, entry.sealColor ?? "crimson") : "",
+        sealColor: entry.sealColor ?? "crimson",
+        mark,
+        mapImg: entry.paper === "map" ? mapSvg : ""
+    };
+};
+const DOCS = {
+    d1: { paper: "letter", name: "A letter for the Captain", title: "Aldric Venn", sealColor: "crimson", sealMark: "fa-solid fa-chess-rook",
+        dateline: "Valtoria, third of Frostfall",
+        body: "<p>Captain,</p><p>The cart that passes the north gate at the new moon is not to be stopped, searched or spoken of. You will find the ledger short by one line each month; let it stay short.</p><p>Burn this when you have read it. I will know if you have not.</p>",
+        secret: "<p>Postscript, in lemon juice: <em>The Ashen King's envoy rides with it. Count the guards.</em></p>" },
+    d2: { paper: "decree", name: "By Order of the Regent", title: "Aldric Venn, Regent of Embermark", sealColor: "gold", sealMark: "fa-solid fa-crown",
+        dateline: "Given at the Ember Throne, first of Frostfall",
+        body: "<p>Be it known to every soul within the walls of Valtoria that, from this day until the thaw, no blade shall be carried in the streets after the evening bell, save by the Watch.</p><p>Whoever is found in breach of this decree shall answer to the Captain of the Guard.</p>" },
+    d3: { paper: "note", name: "Scrap from the Copper Kettle", title: "— N.", sealed: false,
+        body: "<p>Back room. Midnight. Come alone or don't come.</p><p>Bring the coin you owe.</p>",
+        secret: "<p>(scratched on the back) the bartender listens</p>" },
+    d4: { paper: "map", name: "The old road to the Ashen Peaks", title: "", sealColor: "black", sealMark: "fa-solid fa-skull",
+        dateline: "Copied from the chapel archive", body: "" }
+};
+const docContext = (id, sealed, gm = false) => {
+    const e = DOCS[id];
+    return {
+        id, isGM: gm, isDocument: true, ...docLook(id, e, sealed),
+        name: e.name, signature: e.title, dateline: e.dateline,
+        body: e.body, secret: id === "d1" && !sealed ? null : null, hiddenHint: !!e.secret,
+        tab: "private", showPrivate: !gm, privateNote: "", notes: [], canWriteShared: true,
+        audit: null, shareTargets: null
+    };
 };
 
 const players = [
@@ -71,6 +117,14 @@ const director = {
     ],
     sections: [
         {
+            id: "_docs", label: t("PERSONA.Doc.Folder"), icon: "fa-solid fa-scroll", count: 2, isLoose: true, items: [
+                { id: "d1", kind: "document", name: DOCS.d1.name, title: DOCS.d1.title, isDocument: true, doc: docLook("d1", DOCS.d1, true), hasJournal: false,
+                  layers: [{ key: "face", label: t("PERSONA.Doc.Layer.face"), state: "some", count: "1/4", icon: "fa-solid fa-eye" }, { key: "secret", label: t("PERSONA.Doc.Layer.secret"), state: "none", icon: "fa-solid fa-eye-slash" }] },
+                { id: "d4", kind: "document", name: DOCS.d4.name, title: "", isDocument: true, doc: docLook("d4", DOCS.d4, false), hasJournal: true,
+                  layers: [{ key: "face", label: t("PERSONA.Doc.Layer.face"), state: "all", icon: "fa-solid fa-eye" }, { key: "secret", label: t("PERSONA.Doc.Layer.secret"), state: "none", icon: "fa-solid fa-eye-slash", disabled: true }] }
+            ]
+        },
+        {
             id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", count: 4, items: [
                 row("e1", "Captain Ilsa Marrow", "Captain of the guard", ["all", "all", "some", "none"], { isOpen: true, grid }),
                 row("e2", "Lord Aldric Venn", "Regent of Embermark", ["all", "all", "all", "some"], { hasVideo: true }),
@@ -98,6 +152,15 @@ const gallery = {
         { id: "places", label: t("PERSONA.Filter.Places"), icon: "fa-solid fa-map-location-dot", count: 2 }
     ],
     sections: [
+        {
+            id: "_docs", label: t("PERSONA.Doc.Folder"), icon: "fa-solid fa-scroll", count: 4, people: [], places: [],
+            documents: [
+                { id: "d1", kind: "document", isDocument: true, name: DOCS.d1.name, isNew: true, doc: docLook("d1", DOCS.d1, true) },
+                { id: "d2", kind: "document", isDocument: true, name: DOCS.d2.name, doc: docLook("d2", DOCS.d2, false) },
+                { id: "d3", kind: "document", isDocument: true, name: DOCS.d3.name, isPrivate: true, doc: docLook("d3", DOCS.d3, false) },
+                { id: "d4", kind: "document", isDocument: true, name: DOCS.d4.name, doc: docLook("d4", DOCS.d4, true) }
+            ]
+        },
         {
             id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", count: 4,
             people: [tile("e1", "Captain Ilsa Marrow", "Captain", { isNew: true }), tile("e2", "Lord Aldric Venn", "Regent"), tile("e3", "Sister Hesper", "Healer", { isPrivate: true }), tile("e4", "Old Bram", "Innkeeper", { status: "dead" })],
@@ -166,6 +229,13 @@ body {
 .pv-window > header i { color: rgba(239,227,200,.5); font-size: 12px; }
 .pv-window .window-content { min-height: 0; }
 .pv-view--card .persona-card-layer { position: absolute; }
+.pv-view--docs .persona-card-layer { top: 52px; }
+.pv-view--docs .persona-card-layer > div { display: contents; }
+.pv-view--docs .persona-card-layer > div[hidden] { display: none; }
+.pv-papers { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); z-index: 1500; display: flex; gap: 6px; }
+.pv-papers button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; font: 500 12.5px/1 Spectral, serif; color: rgba(239,227,200,.7); background: rgba(20,17,15,.86); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+.pv-papers button[aria-pressed="true"] { color: #ecd28a; box-shadow: inset 0 0 0 1px rgba(212,178,90,.45); background: rgba(40,33,20,.92); }
+.pv-view--docs .persona-docview { margin-top: 36px; }
 @media (max-width: 700px) {
     .pv-tabs { top: auto; bottom: 12px; }
     .pv-rail { display: none; }
@@ -178,6 +248,7 @@ body {
     <button type="button" data-view="docked" aria-pressed="true">Director · in Triad</button>
     <button type="button" data-view="window" aria-pressed="false">Player · window</button>
     <button type="button" data-view="card" aria-pressed="false">Card</button>
+    <button type="button" data-view="docs" aria-pressed="false">Documents</button>
 </nav>
 
 <section class="pv-view" data-view="docked">
@@ -198,6 +269,18 @@ body {
     <div class="persona persona-card-layer">${card(cardData)}</div>
 </section>
 
+<section class="pv-view pv-view--card pv-view--docs" data-view="docs" hidden>
+    <div class="pv-papers">
+        ${Object.entries(DOCS).map(([id, e], i) => `<button type="button" data-doc="${id}" aria-pressed="${i === 0}">${t(`PERSONA.Doc.Paper.${e.paper}`)}</button>`).join("")}
+        <button type="button" data-reseal>Seal again</button>
+    </div>
+    ${Object.keys(DOCS).map((id, i) => `
+    <div class="persona persona-card-layer is-document" data-docview="${id}" ${i ? "hidden" : ""}>
+        <div data-state="sealed" ${DOCS[id].sealed === false ? "hidden" : ""}>${documentView(docContext(id, true))}</div>
+        <div data-state="open" ${DOCS[id].sealed === false ? "" : "hidden"}>${documentView(docContext(id, false))}</div>
+    </div>`).join("")}
+</section>
+
 <script>
 // The chip row's edge fades (the module does this in panel.js).
 document.querySelectorAll(".persona-head .persona-chips").forEach(row => {
@@ -215,6 +298,27 @@ document.querySelectorAll(".persona-head .persona-chips").forEach(row => {
     new ResizeObserver(edges).observe(row);
     edges();
 });
+// Documents: switch paper, break the seal (the module does this in card.js), seal again.
+const docButtons = document.querySelectorAll(".pv-papers [data-doc]");
+const reset = view => {
+    const sealed = view.querySelector('[data-state="sealed"]');
+    if (!sealed.innerHTML.includes("persona-doc__seal")) return;
+    sealed.hidden = false; view.querySelector('[data-state="open"]').hidden = true;
+    sealed.querySelector(".persona-docview")?.classList.remove("is-breaking");
+};
+docButtons.forEach(b => b.addEventListener("click", () => {
+    docButtons.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    document.querySelectorAll("[data-docview]").forEach(v => { v.hidden = v.dataset.docview !== b.dataset.doc; });
+}));
+document.querySelector("[data-reseal]").addEventListener("click", () => document.querySelectorAll("[data-docview]").forEach(reset));
+document.querySelectorAll("[data-docview]").forEach(view => view.addEventListener("click", e => {
+    if (!e.target.closest('[data-action="breakSeal"]')) return;
+    const doc = view.querySelector('[data-state="sealed"] .persona-docview');
+    if (!doc || doc.classList.contains("is-breaking")) return;
+    doc.classList.add("is-breaking");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => { view.querySelector('[data-state="sealed"]').hidden = true; view.querySelector('[data-state="open"]').hidden = false; }, still ? 120 : 1500);
+}));
 const tabs = document.querySelectorAll(".pv-tabs button");
 const show = view => {
     tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));

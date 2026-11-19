@@ -27,9 +27,9 @@ export async function summaryFromJournal(uuid) {
 
 /**
  * Builds a new entry from dropped data: an Actor (name + portrait), a Journal entry or a
- * Journal page (name + text + first image). Returns the saved entry, or null.
+ * Journal page (name + text + first image; a document with `asDocument`). Returns the saved entry, or null.
  */
-export async function createFromDrop(data) {
+export async function createFromDrop(data, { asDocument = false } = {}) {
     if (!data?.uuid && !data?.type) return null;
     const doc = data.uuid ? await fromUuid(data.uuid) : null;
     if (!doc) return null;
@@ -44,8 +44,9 @@ export async function createFromDrop(data) {
     }
     if (doc.documentName === "JournalEntry" || doc.documentName === "JournalEntryPage") {
         const parts = await journalParts(doc.uuid);
+        // Dropped while the Documents filter is on: the page becomes a letter, not a person.
         return saveEntry(normalizeEntry({
-            kind: "npc",
+            kind: asDocument ? "document" : "npc",
             name: parts.name,
             img: parts.img,
             summary: parts.summary,

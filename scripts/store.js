@@ -41,10 +41,14 @@ export function emptyReveal() {
     return Object.fromEntries(LAYERS.map(layer => [layer, []]));
 }
 
-/** Can this user see this layer of the entry? GMs see everything. */
+/**
+ * Can this user see this layer of the entry? GMs see everything.
+ * A document is read whole: having it (face) means its title and text; only the hidden passage (secret) is separate.
+ */
 export function canSee(entry, layer, user = game.user) {
     if (!entry) return false;
     if (user?.isGM) return true;
+    if (entry.kind === "document" && (layer === "name" || layer === "summary")) layer = "face";
     const list = entry.reveal?.[layer] ?? [];
     return list.includes(ALL) || list.includes(user?.id);
 }
@@ -105,7 +109,7 @@ export function newlyVisible(before, after, userId) {
 export function normalizeEntry(raw = {}) {
     return {
         id: raw.id ?? foundry.utils.randomID(),
-        kind: raw.kind === "place" ? "place" : "npc",
+        kind: ["place", "document"].includes(raw.kind) ? raw.kind : "npc",
         name: String(raw.name ?? ""),
         title: String(raw.title ?? ""),
         img: String(raw.img ?? ""),
@@ -126,7 +130,15 @@ export function normalizeEntry(raw = {}) {
         reveal: Object.fromEntries(LAYERS.map(layer => [layer, Array.isArray(raw.reveal?.[layer]) ? [...raw.reveal[layer]] : []])),
         sort: Number.isFinite(raw.sort) ? raw.sort : Date.now(),
         // Manual position set by the GM's drag and drop; null = not arranged yet (alphabetical, after arranged ones).
-        order: Number.isFinite(raw.order) ? raw.order : null
+        order: Number.isFinite(raw.order) ? raw.order : null,
+        // Documents: the paper, the date line ("Valtoria, third of Frostfall"), and the wax seal.
+        // `title` is the signature; `summary` the text; `secret` a passage the GM reveals later.
+        paper: ["letter", "decree", "note", "map"].includes(raw.paper) ? raw.paper : "letter",
+        dateline: String(raw.dateline ?? ""),
+        sealed: raw.sealed !== false,
+        sealColor: String(raw.sealColor ?? "crimson"),
+        sealMark: String(raw.sealMark ?? ""),
+        hintHidden: raw.hintHidden !== false
     };
 }
 
@@ -219,6 +231,9 @@ export async function createGroup(label, icon = "fa-solid fa-bookmark") {
  * Every entry gets a fresh `order`, so the arrangement is stable from then on.
  */
 export function moveEntry(id, { fromGroup = null, toGroup = null, beforeId = null } = {}) {
+    // The Documents folder isn't a group: moving within it only reorders.
+    if (fromGroup === "_docs") fromGroup = null;
+    if (toGroup === "_docs") toGroup = null;
     return updateSetting("entries", all => {
         if (!all[id]) return all;
         const list = Object.values(all).map(normalizeEntry).sort(compareEntries);
@@ -281,6 +296,25 @@ export async function markSeen(id) {
     if (seen.has(id)) return;
     seen.add(id);
     await game.user.setFlag(MODULE_ID, "seen", [...seen]);
+}
+
+/** Documents whose seal this user has broken. */
+export function openedIds(user = game.user) {
+    return new Set(user.getFlag(MODULE_ID, "opened") ?? []);
+}
+
+export async function markOpened(id) {
+    const opened = openedIds();
+    if (opened.has(id)) return;
+    opened.add(id);
+    await game.user.setFlag(MODULE_ID, "opened", [...opened]);
+}
+
+/** GM: seal a document again on this screen, to watch the seal break once more. */
+export async function unmarkOpened(id) {
+    const opened = openedIds();
+    if (!opened.delete(id)) return;
+    await game.user.setFlag(MODULE_ID, "opened", [...opened]);
 }
 
 export function privateNote(id) {

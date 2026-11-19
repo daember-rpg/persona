@@ -7,7 +7,7 @@ export const LAYERS = ["face", "name", "summary", "secret"];
 /** Audience token meaning "every player". */
 export const ALL = "all";
 
-export const KINDS = ["npc", "place"];
+export const KINDS = ["npc", "place", "document"];
 
 export const GROUP_ICONS = [
     "fa-solid fa-city", "fa-solid fa-landmark", "fa-solid fa-crown", "fa-solid fa-hammer",

@@ -4,7 +4,8 @@
 import { TEMPLATE_ROOT, GROUP_ICONS } from "./constants.js";
 import { getEntry, getEntries, saveEntry, deleteEntry, getGroups, createGroup, normalizeEntry, deleteGroup, linkToPlace, patchEntry } from "./store.js";
 import { summaryFromJournal } from "./entries.js";
-import { imageOf, frameStyle } from "./view-data.js";
+import { imageOf, frameStyle, documentLook } from "./view-data.js";
+import { PAPERS, SEAL_COLORS, SEAL_SIGILS } from "./documents.js";
 import { withoutImages } from "./store.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -42,9 +43,10 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     /** For a place: the people linked to it (stored on each person). */
     #people;
 
-    constructor(entryId = null, options = {}) {
+    constructor(entryId = null, { kind, ...options } = {}) {
         super({ ...options, id: `persona-editor-${entryId ?? "new"}` });
-        this.#entry = entryId ? getEntry(entryId) : normalizeEntry({});
+        // A new entry starts as whatever the panel is filtered to (a document under Documents).
+        this.#entry = entryId ? getEntry(entryId) : normalizeEntry({ kind });
         this.isNew = !entryId;
         this.#people = new Set(getEntries().filter(e => e.kind === "npc" && e.places.includes(this.#entry.id)).map(e => e.id));
     }
@@ -63,11 +65,24 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             journalName = doc ? (doc.parent ? `${doc.parent.name} › ${doc.name}` : doc.name) : game.i18n.localize("PERSONA.Warn.JournalMissing");
         }
         const selected = new Set(entry.groups);
+        const isDocument = entry.kind === "document";
+        const markIsIcon = entry.sealMark.startsWith("fa-");
+        const t = key => game.i18n.localize(key);
         return {
             entry,
             preview: imageOf(entry),
             isNew: this.isNew,
             isPerson: entry.kind === "npc",
+            isPlace: entry.kind === "place",
+            isDocument,
+            isMap: isDocument && entry.paper === "map",
+            showFramer: !isDocument,
+            doc: isDocument ? documentLook({ ...entry, id: entry.id }, { getFlag: () => [] }) : null,
+            papers: PAPERS.map(p => ({ ...p, label: t(`PERSONA.Doc.Paper.${p.id}`), selected: entry.paper === p.id })),
+            sealColors: Object.entries(SEAL_COLORS).map(([id, [base, light]]) => ({ id, base, light, label: t(`PERSONA.Doc.Wax.${id}`), selected: entry.sealColor === id })),
+            sigils: SEAL_SIGILS.map(icon => ({ icon, selected: entry.sealMark === icon })),
+            markIsIcon,
+            markText: markIsIcon ? "" : entry.sealMark,
             summaryLocked: !!entry.journalUuid && entry.syncJournal,
             summaryPreview: withoutImages(entry.summary),
             frame: frameStyle(entry),
@@ -155,7 +170,8 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         this.element.addEventListener("change", event => {
             this.#readForm();
             // Following the Journal locks the story text; unfollowing makes it editable.
-            if (event.target.name === "syncJournal" || event.target.name === "kind") this.render();
+            // These change which fields show (or the little preview of the paper).
+            if (["syncJournal", "kind", "paper", "sealed", "sealColor", "sealMarkKind", "sealMarkText"].includes(event.target.name)) this.render();
         });
     }
 
@@ -176,8 +192,26 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             focusX: Number(value("focusX")),
             focusY: Number(value("focusY")),
             zoom: Number(value("zoom")),
-            syncJournal: !!form.querySelector('[name="syncJournal"]')?.checked
+            syncJournal: !!form.querySelector('[name="syncJournal"]')?.checked,
+            ...(this.#entry.kind === "document" || form.querySelector('[name="kind"]:checked')?.value === "document" ? this.#readDocumentFields(form) : {})
         });
+    }
+
+    /** Paper, date line, seal and its mark, from the document part of the form (when it's shown). */
+    #readDocumentFields(form) {
+        const has = name => !!form.querySelector(`[name="${name}"]`);
+        const out = {};
+        const paper = form.querySelector('[name="paper"]:checked')?.value;
+        if (paper) out.paper = paper;
+        if (has("dateline")) out.dateline = form.querySelector('[name="dateline"]').value;
+        if (has("sealed")) out.sealed = form.querySelector('[name="sealed"]').checked;
+        if (has("hintHidden")) out.hintHidden = form.querySelector('[name="hintHidden"]').checked;
+        const color = form.querySelector('[name="sealColor"]:checked')?.value;
+        if (color) out.sealColor = color;
+        const markKind = form.querySelector('[name="sealMarkKind"]:checked')?.value;
+        if (markKind === "text") out.sealMark = (form.querySelector('[name="sealMarkText"]')?.value ?? "").trim().slice(0, 2);
+        else if (markKind) out.sealMark = markKind;
+        return out;
     }
 
     async #onJournalDrop(event, drop) {

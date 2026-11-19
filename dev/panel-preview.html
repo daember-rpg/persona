@@ -4542,6 +4542,691 @@
 .persona-head { min-width: 0; max-width: 100%; }
 .persona-panel { overflow: hidden; }
 
+/* ==========================================================================
+   Documents (0.17): letters, decrees, notes and torn maps on aged paper,
+   sealed with wax that breaks the first time a player opens them.
+   ========================================================================== */
+
+.persona {
+    --paper: #eadbb8;
+    --paper-light: #f4e9cd;
+    --paper-dark: #c9b083;
+    --ink: #3b2a1a;
+    --ink-faded: #6b5235;
+    --ink-red: #7a2a1d;
+    --hand-letter: "IM Fell English", "Palatino Linotype", Georgia, serif;
+    --hand-formal: "IM Fell English SC", "Cinzel", serif;
+    --hand-script: "Pinyon Script", "Snell Roundhand", cursive;
+    --hand-note: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+    /* Fibres and foxing: a tiled noise texture plus a few stains. */
+    --paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.45'/></svg>");
+}
+
+/* ---------- The paper ---------- */
+
+.persona-doc {
+    position: relative;
+    width: 100%;
+    transform: rotate(var(--tilt, 0deg));
+    perspective: 1400px;
+    filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+}
+
+.persona-doc__sheet {
+    position: relative;
+    min-height: 440px;
+    padding: 56px 60px 64px;
+    background:
+        var(--paper-grain),
+        radial-gradient(circle at 82% 14%, rgba(150, 100, 40, 0.16), transparent 18%),
+        radial-gradient(circle at 12% 78%, rgba(140, 90, 30, 0.14), transparent 22%),
+        radial-gradient(ellipse at 50% 45%, var(--paper-light), var(--paper) 62%, var(--paper-dark));
+    box-shadow:
+        inset 0 0 70px rgba(110, 70, 25, 0.38),
+        inset 0 0 12px rgba(90, 55, 20, 0.35);
+    color: var(--ink);
+    font-family: var(--hand-letter);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.persona-doc__text { position: relative; z-index: 1; }
+
+.persona-doc__dateline {
+    margin: 0 0 1.4em;
+    text-align: right;
+    font-style: italic;
+    color: var(--ink-faded);
+}
+
+.persona-doc__heading {
+    margin: 0 0 0.8em;
+    border: 0;
+    font-family: var(--hand-formal);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: var(--ink);
+}
+
+.persona-doc__body p { margin: 0 0 0.75em; }
+.persona-doc__body p:last-child { margin-bottom: 0; }
+.persona-doc__body :is(h1, h2, h3) { border: 0; font-family: var(--hand-formal); font-weight: 400; color: var(--ink); }
+.persona-doc__body a { color: var(--ink-red); }
+/* Journal secret blocks stay with the GM's copy only. */
+.persona-doc__body section.secret { display: none; }
+
+.persona-doc__signature {
+    margin: 1.2em 0 0;
+    text-align: right;
+    font-family: var(--hand-script);
+    font-size: 32px;
+    line-height: 1.1;
+    color: #2a1d10;
+}
+
+/* A passage revealed later reads in a different ink, as if it surfaced on the page. */
+.persona-doc__revealed {
+    margin: 0.9em 0;
+    color: var(--ink-red);
+    animation: persona-ink-in 1.6s ease-out;
+}
+
+.persona-doc__revealed p { margin: 0 0 0.6em; }
+
+@keyframes persona-ink-in {
+    from { opacity: 0; filter: blur(3px); }
+    to { opacity: 1; filter: none; }
+}
+
+/* What can't be read yet: smudged, water-stained lines. */
+.persona-doc__smudge {
+    display: grid;
+    gap: 9px;
+    margin: 1em 0;
+    padding: 4px 0;
+}
+
+.persona-doc__smudge span {
+    height: 9px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(70, 45, 20, 0.28), rgba(70, 45, 20, 0.12) 40%, rgba(70, 45, 20, 0.3) 70%, rgba(70, 45, 20, 0.1));
+    filter: blur(2.2px);
+}
+
+.persona-doc__smudge span:nth-child(2) { width: 86%; }
+.persona-doc__smudge span:nth-child(3) { width: 58%; }
+
+/* Letter: a single sheet, no heading (the title is on the outside). */
+.persona-doc--letter .persona-doc__heading { display: none; }
+
+/* Decree: formal, framed by ruled borders, a large initial. */
+.persona-doc--decree .persona-doc__sheet { padding: 64px 68px 104px; }
+
+/* Ruled double border, inset from the edge. */
+.persona-doc--decree .persona-doc__sheet::before {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border: 3px double rgba(90, 60, 25, 0.5);
+    pointer-events: none;
+}
+
+.persona-doc--decree .persona-doc__heading {
+    font-size: 26px;
+    letter-spacing: 0.1em;
+}
+
+.persona-doc--decree .persona-doc__heading::after {
+    content: "";
+    display: block;
+    width: 46%;
+    height: 1px;
+    margin: 12px auto 0;
+    background: linear-gradient(90deg, transparent, rgba(59, 42, 26, 0.6), transparent);
+}
+
+.persona-doc--decree .persona-doc__body > p:first-child::first-letter {
+    float: left;
+    margin: 6px 8px 0 0;
+    font-family: var(--hand-formal);
+    font-size: 3.4em;
+    line-height: 0.8;
+    color: var(--ink-red);
+}
+
+/* Note: a torn scrap in a hurried hand. */
+.persona-doc--note {
+    width: min(100%, 400px);
+    margin: 0 auto;
+}
+
+.persona-doc--note .persona-doc__sheet {
+    min-height: 220px;
+    padding: 40px 36px 44px;
+    background:
+        var(--paper-grain),
+        radial-gradient(ellipse at 40% 30%, #f3e6c4, #e2cf9f 75%, #cdb27c);
+    font-family: var(--hand-note);
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+.persona-doc--note .persona-doc__heading { display: none; }
+.persona-doc--note .persona-doc__dateline { font-style: normal; font-size: 19px; }
+.persona-doc--note .persona-doc__signature { font-family: var(--hand-note); font-size: 26px; }
+
+/* Torn map: the picture is the paper. */
+.persona-doc--map .persona-doc__sheet {
+    min-height: 0;
+    padding: 22px 22px 18px;
+}
+
+.persona-doc__map {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 0;
+    filter: sepia(0.45) saturate(0.85) contrast(1.05);
+    mix-blend-mode: multiply;
+}
+
+.persona-doc--map .persona-doc__text { margin-top: 10px; font-size: 15px; }
+.persona-doc--map .persona-doc__dateline { margin: 0 0 4px; text-align: center; }
+.persona-doc__caption {
+    margin: 8px 0 0;
+    text-align: center;
+    font-family: var(--hand-formal);
+    font-size: 17px;
+    letter-spacing: 0.08em;
+}
+
+/* ---------- Wax seal ---------- */
+
+.persona-seal {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+.persona-seal__half {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.persona-seal__half svg { display: block; width: 100%; height: 100%; }
+
+/* The crack the seal breaks along. */
+.persona-seal__half--l { clip-path: polygon(0 0, 53% 0, 47% 22%, 56% 41%, 46% 60%, 54% 79%, 49% 100%, 0 100%); }
+.persona-seal__half--r { clip-path: polygon(53% 0, 100% 0, 100% 100%, 49% 100%, 54% 79%, 46% 60%, 56% 41%, 47% 22%); }
+
+/* The mark, pressed in: darker than the wax, lit from above. */
+.persona-seal__mark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--dp-display);
+    font-size: calc(var(--seal-size, 96px) * 0.3);
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.42);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28), 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.persona-seal__mark i { font-size: calc(var(--seal-size, 96px) * 0.27); }
+
+/* ---------- Document view (the overlay) ---------- */
+
+.persona-card-layer.is-document { padding: var(--dp-2); }
+
+.persona-docview {
+    position: relative;
+    width: min(1040px, 100%);
+    max-height: calc(100vh - 32px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--dp-4);
+    align-items: start;
+    animation: persona-rise 0.28s ease-out;
+}
+
+.persona-docview__stage {
+    min-width: 0;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 28px 24px 36px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 178, 90, 0.3) transparent;
+}
+
+.persona-docview--letter .persona-doc,
+.persona-docview--decree .persona-doc { max-width: 640px; margin: 0 auto; }
+.persona-docview--map .persona-doc { max-width: 720px; margin: 0 auto; }
+
+.persona-docview__hint {
+    margin: 22px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--dp-parchment-dim);
+    animation: persona-hint-pulse 2.4s ease-in-out infinite;
+}
+
+.persona-docview__hint i { margin-right: 6px; color: var(--dp-gold); }
+.persona-docview__hint.is-done { visibility: hidden; animation: none; }
+
+@keyframes persona-hint-pulse { 50% { opacity: 0.55; } }
+
+.persona-docview__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dp-2);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: var(--dp-3) var(--dp-2) var(--dp-2);
+    border-radius: 16px;
+    background: rgba(20, 17, 15, 0.94);
+    box-shadow: 0 0 0 1px var(--dp-hair), 0 30px 80px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px) saturate(120%);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 178, 90, 0.3) transparent;
+}
+
+.persona-docview__side h3 {
+    margin: -6px 0 0;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--dp-parchment);
+}
+
+.persona-docview__side .persona-eyebrow i { margin-right: 6px; }
+.persona-docview__side .persona-audit .persona-mini { margin-top: 10px; }
+
+.persona-docview > .persona-card__close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 5;
+}
+
+.persona-docview__side { padding-top: 52px; }
+
+/* ---------- Sealed: folded shut, the seal across the fold ---------- */
+
+.persona-docview.is-sealed .persona-doc__text {
+    opacity: 0;
+    filter: blur(6px);
+}
+
+.persona-doc__folds {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.persona-doc__flap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    backface-visibility: hidden;
+    background:
+        var(--paper-grain),
+        radial-gradient(ellipse at 50% 100%, var(--paper-light), var(--paper) 70%, var(--paper-dark));
+    box-shadow: inset 0 0 50px rgba(110, 70, 25, 0.32);
+}
+
+.persona-doc--note .persona-doc__flap { background: var(--paper-grain), radial-gradient(ellipse at 50% 100%, #f3e6c4, #e2cf9f 75%, #cdb27c); }
+
+.persona-doc__flap--top {
+    top: 0;
+    transform-origin: 50% 0;
+    /* The crease: shaded where the paper folds under. */
+    box-shadow: inset 0 0 50px rgba(110, 70, 25, 0.32), inset 0 -14px 18px -10px rgba(80, 50, 20, 0.35);
+}
+
+.persona-doc__flap--bottom {
+    bottom: 0;
+    transform-origin: 50% 100%;
+    background:
+        var(--paper-grain),
+        radial-gradient(ellipse at 50% 0, var(--paper-light), var(--paper) 70%, var(--paper-dark));
+    box-shadow: inset 0 0 50px rgba(110, 70, 25, 0.32), inset 0 14px 18px -10px rgba(255, 245, 220, 0.35);
+}
+
+/* A map rolls and folds the same way, but shows nothing until opened. */
+.persona-doc--map .persona-doc__sheet { min-height: 360px; }
+.persona-docview:not(.is-sealed) .persona-doc--map .persona-doc__sheet { min-height: 0; }
+.persona-docview.is-sealed .persona-doc__map { opacity: 0; }
+
+.persona .persona-doc__seal {
+    --seal-size: 104px;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 3;
+    width: var(--seal-size);
+    margin: calc(var(--seal-size) / -2) 0 0 calc(var(--seal-size) / -2);
+    cursor: pointer;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+    transition: transform 0.25s var(--dp-ease), filter 0.25s ease;
+}
+
+.persona .persona-doc__seal:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 14px rgba(236, 210, 138, 0.35));
+}
+
+.persona .persona-doc__seal:focus-visible { outline: 2px solid var(--dp-gold); outline-offset: 6px; border-radius: 50%; }
+
+/* ---------- Breaking the seal ---------- */
+
+.persona-docview.is-breaking .persona-doc__seal { pointer-events: none; transform: none; }
+
+.persona-docview.is-breaking .persona-seal__half--l { animation: persona-seal-l 1s cubic-bezier(0.5, 0, 0.75, 0.2) 0.12s forwards; }
+.persona-docview.is-breaking .persona-seal__half--r { animation: persona-seal-r 1s cubic-bezier(0.5, 0, 0.75, 0.2) 0.12s forwards; }
+.persona-docview.is-breaking .persona-doc__seal { animation: persona-seal-crack 0.14s ease-out; }
+
+@keyframes persona-seal-crack {
+    40% { transform: scale(0.94) rotate(-2deg); }
+    100% { transform: none; }
+}
+
+@keyframes persona-seal-l {
+    0% { transform: none; }
+    18% { transform: translate(-6px, -2px) rotate(-8deg); }
+    100% { transform: translate(-70px, 240px) rotate(-60deg); opacity: 0; }
+}
+
+@keyframes persona-seal-r {
+    0% { transform: none; }
+    18% { transform: translate(6px, -2px) rotate(9deg); }
+    100% { transform: translate(80px, 250px) rotate(70deg); opacity: 0; }
+}
+
+/* Little chips of wax that fly off when it cracks. */
+.persona-doc__chips { position: absolute; inset: 0; pointer-events: none; }
+
+.persona-doc__chips i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 5px;
+    border-radius: 40% 60% 50% 45%;
+    background: var(--wax, #8e1f1b);
+    opacity: 0;
+}
+
+.persona-seal--crimson ~ .persona-doc__chips { --wax: #a3322a; }
+.persona-seal--black ~ .persona-doc__chips { --wax: #3a332e; }
+.persona-seal--gold ~ .persona-doc__chips { --wax: #c49a45; }
+.persona-seal--forest ~ .persona-doc__chips { --wax: #44663d; }
+.persona-seal--royal ~ .persona-doc__chips { --wax: #3a4d8c; }
+.persona-seal--violet ~ .persona-doc__chips { --wax: #74417e; }
+
+.persona-doc__chips i:nth-child(1) { --dx: -64px; --dy: -40px; --r: 120deg; }
+.persona-doc__chips i:nth-child(2) { --dx: 58px; --dy: -52px; --r: -90deg; }
+.persona-doc__chips i:nth-child(3) { --dx: -80px; --dy: 18px; --r: 200deg; }
+.persona-doc__chips i:nth-child(4) { --dx: 76px; --dy: 30px; --r: -160deg; }
+.persona-doc__chips i:nth-child(5) { --dx: -22px; --dy: -70px; --r: 80deg; width: 5px; height: 4px; }
+.persona-doc__chips i:nth-child(6) { --dx: 28px; --dy: 64px; --r: -40deg; width: 5px; height: 4px; }
+
+.persona-docview.is-breaking .persona-doc__chips i { animation: persona-wax-chip 0.7s ease-out 0.1s forwards; }
+
+@keyframes persona-wax-chip {
+    0% { opacity: 1; transform: translate(-50%, -50%); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 30px)) rotate(var(--r)); }
+}
+
+/* Then the folds open, and the writing comes up. */
+.persona-docview.is-breaking .persona-doc__flap--top { animation: persona-unfold-top 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) 0.45s forwards; }
+.persona-docview.is-breaking .persona-doc__flap--bottom { animation: persona-unfold-bottom 0.9s cubic-bezier(0.3, 0.7, 0.2, 1) 0.45s forwards; }
+
+@keyframes persona-unfold-top {
+    to { transform: rotateX(-178deg); }
+}
+
+@keyframes persona-unfold-bottom {
+    to { transform: rotateX(178deg); }
+}
+
+.persona-docview.is-breaking .persona-doc__text,
+.persona-docview.is-breaking .persona-doc__map {
+    transition: opacity 0.6s ease 0.8s, filter 0.6s ease 0.8s;
+    opacity: 1;
+    filter: none;
+}
+
+.persona-docview.is-breaking .persona-doc__map { filter: sepia(0.45) saturate(0.85) contrast(1.05); }
+.persona-docview.is-breaking .persona-docview__hint { opacity: 0; transition: opacity 0.2s ease; animation: none; }
+
+/* Opened: what's left of the seal, cracked in two, by the signature. */
+.persona-doc__remnant {
+    --seal-size: 62px;
+    position: absolute;
+    left: 44px;
+    bottom: 30px;
+    z-index: 1;
+    width: var(--seal-size);
+    opacity: 0.92;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
+}
+
+.persona-doc__remnant .persona-seal__half--l { transform: translate(-5px, 2px) rotate(-9deg); }
+.persona-doc__remnant .persona-seal__half--r { transform: translate(5px, 3px) rotate(7deg); }
+.persona-doc--map .persona-doc__remnant { display: none; }
+.persona-doc--decree .persona-doc__remnant { left: 50%; margin-left: calc(var(--seal-size) / -2); bottom: 30px; }
+
+/* ---------- Small paper: gallery tiles, Director rows, editor preview ---------- */
+
+.persona-tile__doc {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(212, 178, 90, 0.08), transparent 70%),
+        linear-gradient(160deg, #241f1a, #15120f);
+}
+
+.persona-paper-mini {
+    position: relative;
+    display: block;
+    width: 70%;
+    aspect-ratio: 3 / 4;
+    transform: rotate(var(--tilt, 0deg));
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+    transition: transform 0.25s var(--dp-ease);
+}
+
+.persona-tile:hover .persona-paper-mini { transform: rotate(0deg) translateY(-2px) scale(1.03); }
+
+.persona-paper-mini__sheet {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    background:
+        var(--paper-grain),
+        radial-gradient(ellipse at 50% 40%, var(--paper-light), var(--paper) 65%, var(--paper-dark));
+    box-shadow: inset 0 0 18px rgba(110, 70, 25, 0.4);
+}
+
+.persona-paper-mini__lines {
+    position: absolute;
+    inset: 22% 16% 20%;
+    display: block;
+    background: repeating-linear-gradient(180deg, rgba(59, 42, 26, 0.38) 0 1.5px, transparent 1.5px 9%);
+    -webkit-mask-image: linear-gradient(90deg, #000 70%, rgba(0, 0, 0, 0.4));
+    mask-image: linear-gradient(90deg, #000 70%, rgba(0, 0, 0, 0.4));
+}
+
+/* Folded shut: the lines don't show, just the crease. */
+.persona-paper-mini.is-sealed .persona-paper-mini__lines { opacity: 0; }
+.persona-paper-mini.is-sealed .persona-paper-mini__sheet::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(80, 50, 20, 0.35);
+    box-shadow: 0 1px 0 rgba(255, 245, 220, 0.35);
+}
+
+.persona-paper--decree { aspect-ratio: 3 / 4.2; }
+.persona-paper--decree .persona-paper-mini__lines { inset: 26% 18% 24%; }
+.persona-paper--note { width: 66%; aspect-ratio: 1; }
+.persona-paper--note .persona-paper-mini__sheet { background: var(--paper-grain), radial-gradient(ellipse at 40% 30%, #f3e6c4, #e2cf9f 75%, #cdb27c); }
+.persona-paper--note .persona-paper-mini__lines { inset: 26% 16%; }
+.persona-paper--map { width: 84%; aspect-ratio: 4 / 3; }
+.persona-paper-mini__sheet img { width: 100%; height: 100%; object-fit: cover; border: 0; filter: sepia(0.45) saturate(0.85); mix-blend-mode: multiply; }
+.persona-paper-mini.is-sealed .persona-paper-mini__sheet img { opacity: 0; }
+
+.persona-paper-mini__seal {
+    --seal-size: 34px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--seal-size);
+    margin: calc(var(--seal-size) / -2) 0 0 calc(var(--seal-size) / -2);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
+}
+
+.persona-paper-mini__seal.is-broken {
+    --seal-size: 20px;
+    top: auto;
+    left: 14%;
+    bottom: 9%;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.persona-paper-mini__seal.is-broken .persona-seal__half--l { transform: translate(-1.5px, 0.5px) rotate(-9deg); }
+.persona-paper-mini__seal.is-broken .persona-seal__half--r { transform: translate(1.5px, 1px) rotate(7deg); }
+.persona-paper-mini__seal.is-broken .persona-seal__mark { display: none; }
+
+/* A document has two layers to reveal, so each gets half the strip. */
+.persona .persona-row--document .persona-status,
+.persona-docview .persona-status--static { grid-template-columns: repeat(2, minmax(0, 1fr)) 14px; }
+.persona-docview .persona-status--static { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.persona-gallery--documents { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+
+.persona .persona-row__doc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #241f1a, #15120f);
+}
+
+.persona-row__doc .persona-paper-mini { width: 76%; }
+.persona-row__doc .persona-paper-mini__seal { --seal-size: 18px; }
+.persona-row__doc .persona-paper-mini__seal.is-broken { --seal-size: 12px; }
+.persona-row__doc .persona-seal__mark { display: none; }
+
+.persona-editor__docpreview .persona-tile__doc {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2);
+}
+
+.persona-editor__docpreview .persona-paper-mini__seal { --seal-size: 52px; }
+
+/* ---------- Editor: paper and wax pickers ---------- */
+
+.persona-papers {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.persona-papers__option {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 10px 4px 8px;
+    border-radius: 10px;
+    background: var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair-2);
+    font-size: 12px;
+    color: var(--dp-parchment-dim);
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.2s ease, color 0.15s ease;
+}
+
+.persona-papers__option i { font-size: 16px; }
+.persona-papers__option input,
+.persona-swatches__option input { position: absolute; opacity: 0; pointer-events: none; }
+.persona-papers__option:hover { background: var(--dp-fill-2); color: var(--dp-parchment); }
+.persona-papers__option:has(input:checked) { background: var(--dp-gold-soft); box-shadow: inset 0 0 0 1px var(--dp-gold-line); color: var(--dp-gold-light); }
+.persona-papers__option:has(input:focus-visible) { outline: 2px solid var(--dp-gold); outline-offset: 2px; }
+
+.persona-swatches { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+
+.persona-swatches__option { position: relative; cursor: pointer; }
+
+.persona-swatches__option span {
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--wax-light), var(--wax) 60%);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.persona-swatches__option:hover span { transform: scale(1.08); }
+.persona-swatches__option:has(input:checked) span { box-shadow: 0 0 0 2px #15120f, 0 0 0 3.5px var(--dp-gold), 0 0 10px rgba(212, 178, 90, 0.4); }
+.persona-swatches__option:has(input:focus-visible) span { outline: 2px solid var(--dp-gold); outline-offset: 3px; }
+
+.persona-icons--seal { margin-top: 6px; }
+.persona-icons__option--text span { font-family: var(--dp-display); font-size: 12px; font-weight: 700; }
+.persona-icons--seal + input { margin-top: 8px; max-width: 240px; }
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 820px) {
+    .persona-docview {
+        grid-template-columns: minmax(0, 1fr);
+        overflow-y: auto;
+        gap: var(--dp-2);
+    }
+    .persona-docview__stage { max-height: none; overflow: visible; padding: 20px 6px 8px; }
+    .persona-docview__side { max-height: none; overflow: visible; }
+    .persona-doc__sheet { padding: 40px 28px 52px; font-size: 16px; }
+    .persona-doc--decree .persona-doc__sheet { padding: 48px 34px 60px; }
+    .persona-docview > .persona-card__close { position: fixed; top: 12px; right: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .persona-docview.is-breaking .persona-seal__half--l,
+    .persona-docview.is-breaking .persona-seal__half--r,
+    .persona-docview.is-breaking .persona-doc__chips i,
+    .persona-docview.is-breaking .persona-doc__flap--top,
+    .persona-docview.is-breaking .persona-doc__flap--bottom,
+    .persona-docview.is-breaking .persona-doc__seal { animation: none; opacity: 0; }
+    .persona-docview.is-breaking .persona-doc__text,
+    .persona-docview.is-breaking .persona-doc__map { transition: none; }
+    .persona-doc__revealed,
+    .persona-docview__hint { animation: none; }
+    .persona-tile:hover .persona-paper-mini { transform: rotate(var(--tilt, 0deg)); }
+}
+
 /* ---------- Preview chrome (not part of the module) ---------- */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; }
@@ -4576,6 +5261,13 @@ body {
 .pv-window > header i { color: rgba(239,227,200,.5); font-size: 12px; }
 .pv-window .window-content { min-height: 0; }
 .pv-view--card .persona-card-layer { position: absolute; }
+.pv-view--docs .persona-card-layer { top: 52px; }
+.pv-view--docs .persona-card-layer > div { display: contents; }
+.pv-view--docs .persona-card-layer > div[hidden] { display: none; }
+.pv-papers { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); z-index: 1500; display: flex; gap: 6px; }
+.pv-papers button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; font: 500 12.5px/1 Spectral, serif; color: rgba(239,227,200,.7); background: rgba(20,17,15,.86); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+.pv-papers button[aria-pressed="true"] { color: #ecd28a; box-shadow: inset 0 0 0 1px rgba(212,178,90,.45); background: rgba(40,33,20,.92); }
+.pv-view--docs .persona-docview { margin-top: 36px; }
 @media (max-width: 700px) {
     .pv-tabs { top: auto; bottom: 12px; }
     .pv-rail { display: none; }
@@ -4588,6 +5280,7 @@ body {
     <button type="button" data-view="docked" aria-pressed="true">Director · in Triad</button>
     <button type="button" data-view="window" aria-pressed="false">Player · window</button>
     <button type="button" data-view="card" aria-pressed="false">Card</button>
+    <button type="button" data-view="docs" aria-pressed="false">Documents</button>
 </nav>
 
 <section class="pv-view" data-view="docked">
@@ -4629,6 +5322,145 @@ body {
     <div class="persona-body">
             
                 <section class="persona-section">
+                        <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="_docs" data-drop-folder="_docs"  aria-expanded="true">
+                            <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
+                            <i class="fa-solid fa-scroll" inert></i>
+                            <span class="persona-folder__label">Party documents</span>
+                            <span class="persona-folder__count">2</span>
+                        </button>
+                        <div class="persona-rows" data-drop-rows="_docs">
+                            <div class="persona-row persona-row--document  is-draggable" data-id="d1" data-drag-entry="d1" data-folder="_docs">
+                <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
+                    <button type="button" class="persona-row__img persona-row__doc" data-action="openCard" data-id="d1" data-tooltip="Read"><span class="persona-paper-mini persona-paper--letter is-sealed" style="--tilt: -0.53deg;">
+                <span class="persona-paper-mini__sheet" style="">
+                    <span class="persona-paper-mini__lines"></span>
+                </span>
+                <span class="persona-paper-mini__seal "><span class="persona-seal persona-seal--crimson" aria-hidden="true">
+                <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+            <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+            <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+                <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+            <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+            <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+            </span>
+            </span>
+            </span>
+            </button>
+                <div class="persona-row__main">
+                    <div class="persona-row__name"><span>A letter for the Captain</span> <small>Aldric Venn</small></div>
+                    <div class="persona-row__actions">
+                        <button type="button" class="persona-mini " data-action="toggleShare" data-id="d1" data-tooltip="Open this card on players&#x27; screens, like a handout"><i class="fa-solid fa-share-from-square" inert></i><span>Show</span></button>
+                        
+                        <span class="persona-row__spacer"></span>
+                        
+                        <button type="button" class="persona-mini persona-mini--icon" data-action="edit" data-id="d1" data-tooltip="Edit" aria-label="Edit"><i class="fa-solid fa-pen" inert></i></button>
+                    </div>
+                </div>
+            
+                <button type="button" class="persona-status" data-action="toggleReveal" data-id="d1" aria-expanded="false" data-tooltip="Choose who sees what">
+                        <span class="persona-status__layer is-some " data-tooltip="">
+                            <i class="fa-solid fa-eye" inert></i><span>Has it</span><b>1/4</b>
+                        </span>
+                        <span class="persona-status__layer is-none " data-tooltip="">
+                            <i class="fa-solid fa-eye-slash" inert></i><span>Hidden passage</span>
+                        </span>
+                    <i class="fa-solid fa-chevron-down persona-status__chevron" inert></i>
+                </button>
+            
+            
+            </div>
+            <div class="persona-row persona-row--document  is-draggable" data-id="d4" data-drag-entry="d4" data-folder="_docs">
+                <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
+                    <button type="button" class="persona-row__img persona-row__doc" data-action="openCard" data-id="d4" data-tooltip="Read"><span class="persona-paper-mini persona-paper--map " style="--tilt: -0.37deg;">
+                <span class="persona-paper-mini__sheet" style="clip-path: polygon(0.00% 0.78%, 4.55% 0.69%, 9.09% 2.08%, 13.64% 1.98%, 18.18% 0.81%, 22.73% 1.54%, 27.27% 0.80%, 31.82% 1.25%, 36.36% 0.34%, 40.91% 1.79%, 45.45% 0.56%, 50.00% 1.64%, 54.55% 0.44%, 59.09% 0.95%, 63.64% 1.66%, 68.18% 1.74%, 72.73% 1.32%, 77.27% 1.16%, 81.82% 0.20%, 86.36% 0.44%, 90.91% 2.05%, 95.45% 1.19%, 98.43% 0.00%, 99.32% 4.55%, 98.82% 9.09%, 98.86% 13.64%, 98.49% 18.18%, 99.95% 22.73%, 98.36% 27.27%, 98.18% 31.82%, 99.09% 36.36%, 99.3% 40.91%, 99.09% 45.45%, 99.27% 50.00%, 98.03% 54.55%, 99.27% 59.09%, 99.3% 63.64%, 99.49% 68.18%, 98.03% 72.73%, 99.96% 77.27%, 98.08% 81.82%, 98.58% 86.36%, 99.34% 90.91%, 99.64% 95.45%, 100.00% 98.7%, 95.45% 99.78%, 90.91% 98.24%, 86.36% 99.2%, 81.82% 98.38%, 77.27% 99.88%, 72.73% 99.29%, 68.18% 98.09%, 63.64% 98.04%, 59.09% 98.04%, 54.55% 99.76%, 50.00% 97.88%, 45.45% 99.49%, 40.91% 98.11%, 36.36% 98.82%, 31.82% 99.73%, 27.27% 99.61%, 22.73% 99.37%, 18.18% 99.61%, 13.64% 99.25%, 9.09% 99.32%, 4.55% 98.52%, 1.53% 100.00%, 1.10% 95.45%, 0.75% 90.91%, 1.84% 86.36%, 0.44% 81.82%, 1.36% 77.27%, 0.34% 72.73%, 2.01% 68.18%, 1.64% 63.64%, 1.45% 59.09%, 1.05% 54.55%, 0.59% 50.00%, 0.75% 45.45%, 2.04% 40.91%, 1.23% 36.36%, 0.10% 31.82%, 0.91% 27.27%, 0.60% 22.73%, 0.83% 18.18%, 1.36% 13.64%, 1.07% 9.09%, 0.85% 4.55%);">
+                    <img src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23d9c79c%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%20L400%200%20L0%200Z%22%20fill%3D%22%239fb3b0%22%20opacity%3D%22.6%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%222%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M60%20200%20l18-28%2018%2028M90%20210%20l22-34%2022%2034M130%20196%20l16-24%2016%2024%22%2F%3E%3Cpath%20d%3D%22M250%20180%20c20-10%2040%2010%2060%200%20s30-20%2050%20-6%22%20stroke-dasharray%3D%225%205%22%2F%3E%3Cpath%20d%3D%22M200%20120%20C210%20160%20190%20200%20230%20240%20S300%20260%20330%20250%22%20stroke-width%3D%222.4%22%20stroke%3D%22%236d8a92%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%235b4a32%22%20font-family%3D%22serif%22%20font-size%3D%2213%22%20font-style%3D%22italic%22%3E%3Ctext%20x%3D%2240%22%20y%3D%22240%22%3EAshen%20Peaks%3C%2Ftext%3E%3Ctext%20x%3D%22230%22%20y%3D%22150%22%3Ethe%20old%20road%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%2240%22%3ESea%20of%20Glass%3C%2Ftext%3E%3C%2Fg%3E%3Cpath%20d%3D%22M318%20216%20l14%2014%20M332%20216%20l-14%2014%22%20stroke%3D%22%238e1f1b%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22350%22%20cy%3D%22260%22%20r%3D%2222%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%2F%3E%3Cpath%20d%3D%22M350%20236%20v48%20M326%20260%20h48%22%20stroke%3D%22%235b4a32%22%2F%3E%3Ctext%20x%3D%22346%22%20y%3D%22232%22%20font-size%3D%2210%22%20fill%3D%22%235b4a32%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" draggable="false" loading="lazy">
+                </span>
+                <span class="persona-paper-mini__seal is-broken"><span class="persona-seal persona-seal--black" aria-hidden="true">
+                <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+            <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+            <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+                <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+            <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+            <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+            </span>
+            </span>
+            </span>
+            </button>
+                <div class="persona-row__main">
+                    <div class="persona-row__name"><span>The old road to the Ashen Peaks</span></div>
+                    <div class="persona-row__actions">
+                        <button type="button" class="persona-mini " data-action="toggleShare" data-id="d4" data-tooltip="Open this card on players&#x27; screens, like a handout"><i class="fa-solid fa-share-from-square" inert></i><span>Show</span></button>
+                        
+                        <span class="persona-row__spacer"></span>
+                        <button type="button" class="persona-mini persona-mini--icon" data-action="openJournal" data-id="d4" data-tooltip="Open in Journal" aria-label="Open in Journal"><i class="fa-solid fa-book" inert></i></button>
+                        <button type="button" class="persona-mini persona-mini--icon" data-action="edit" data-id="d4" data-tooltip="Edit" aria-label="Edit"><i class="fa-solid fa-pen" inert></i></button>
+                    </div>
+                </div>
+            
+                <button type="button" class="persona-status" data-action="toggleReveal" data-id="d4" aria-expanded="false" data-tooltip="Choose who sees what">
+                        <span class="persona-status__layer is-all " data-tooltip="">
+                            <i class="fa-solid fa-eye" inert></i><span>Has it</span>
+                        </span>
+                        <span class="persona-status__layer is-none is-disabled" data-tooltip="">
+                            <i class="fa-solid fa-eye-slash" inert></i><span>Hidden passage</span>
+                        </span>
+                    <i class="fa-solid fa-chevron-down persona-status__chevron" inert></i>
+                </button>
+            
+            
+            </div>
+            
+                        </div>
+                </section>
+                <section class="persona-section">
                         <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g1" data-drop-folder="g1" data-drag-group="g1" aria-expanded="true">
                             <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
                             <i class="fa-solid fa-chess-rook" inert></i>
@@ -4636,9 +5468,9 @@ body {
                             <span class="persona-folder__count">4</span>
                         </button>
                         <div class="persona-rows" data-drop-rows="g1">
-                            <div class="persona-row is-open is-draggable" data-id="e1" data-drag-entry="e1" data-folder="g1">
+                            <div class="persona-row persona-row-- is-open is-draggable" data-id="e1" data-drag-entry="e1" data-folder="g1">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e1" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(120%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(160%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ECI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e1" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(120%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(160%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ECI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>Captain Ilsa Marrow</span> <small>Captain of the guard</small></div>
                     <div class="persona-row__actions">
@@ -4823,9 +5655,9 @@ body {
                         </div>
                     </div>
             </div>
-            <div class="persona-row  is-draggable" data-id="e2" data-drag-entry="e2" data-folder="g1">
+            <div class="persona-row persona-row--  is-draggable" data-id="e2" data-drag-entry="e2" data-folder="g1">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e2" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(0%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(40%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ELA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e2" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(0%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(40%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ELA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>Lord Aldric Venn</span> <small>Regent of Embermark</small></div>
                     <div class="persona-row__actions">
@@ -4855,9 +5687,9 @@ body {
             
             
             </div>
-            <div class="persona-row  is-draggable" data-id="e3" data-drag-entry="e3" data-folder="g1">
+            <div class="persona-row persona-row--  is-draggable" data-id="e3" data-drag-entry="e3" data-folder="g1">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e3" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(28%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(68%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ESH%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e3" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(28%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(68%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ESH%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>Sister Hesper</span> <small>Healer at the Ash Chapel</small></div>
                     <div class="persona-row__actions">
@@ -4887,9 +5719,9 @@ body {
             
             
             </div>
-            <div class="persona-row  is-draggable" data-id="e4" data-drag-entry="e4" data-folder="g1">
+            <div class="persona-row persona-row--  is-draggable" data-id="e4" data-drag-entry="e4" data-folder="g1">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e4" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(52%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(92%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EOB%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e4" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(52%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(92%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EOB%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>Old Bram</span> <em class="persona-status-tag is-dead">Dead</em> <small>Innkeeper</small></div>
                     <div class="persona-row__actions">
@@ -4938,9 +5770,9 @@ body {
                             <span class="persona-folder__count">2</span>
                         </button>
                         <div class="persona-rows" data-drop-rows="g3">
-                            <div class="persona-row  is-draggable" data-id="e8" data-drag-entry="e8" data-folder="g3">
+                            <div class="persona-row persona-row--  is-draggable" data-id="e8" data-drag-entry="e8" data-folder="g3">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e8" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(318%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(358%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ETA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e8" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(318%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(358%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ETA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>The Ashen King</span> <small>Lord of Kurdrax</small></div>
                     <div class="persona-row__actions">
@@ -4970,9 +5802,9 @@ body {
             
             
             </div>
-            <div class="persona-row  is-draggable" data-id="e9" data-drag-entry="e9" data-folder="g3">
+            <div class="persona-row persona-row--  is-draggable" data-id="e9" data-drag-entry="e9" data-folder="g3">
                 <span class="persona-row__grip" aria-hidden="true"><i class="fa-solid fa-grip-vertical" inert></i></span>
-                <button type="button" class="persona-row__img" data-action="openCard" data-id="e9" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(161%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(201%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(161%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(161%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EGI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
+                    <button type="button" class="persona-row__img" data-action="openCard" data-id="e9" data-tooltip="Open card"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(161%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(201%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(161%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(161%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EGI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></button>
                 <div class="persona-row__main">
                     <div class="persona-row__name"><span>Gorrik Ironjaw</span> <em class="persona-status-tag is-missing">Missing</em> <small>Champion of Kurdrax</small></div>
                     <div class="persona-row__actions">
@@ -5067,6 +5899,164 @@ body {
 
     <div class="persona-body">
                     <section class="persona-section">
+                            <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="_docs" aria-expanded="true">
+                                <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
+                                <i class="fa-solid fa-scroll" inert></i>
+                                <span class="persona-folder__label">Party documents</span>
+                                <span class="persona-folder__count">4</span>
+                            </button>
+                                
+                                <div class="persona-gallery persona-gallery--documents"><button type="button" class="persona-tile persona-tile--document " data-action="openCard" data-id="d1">
+                    <span class="persona-tile__img persona-tile__doc"><span class="persona-paper-mini persona-paper--letter is-sealed" style="--tilt: -0.53deg;">
+                <span class="persona-paper-mini__sheet" style="">
+                    <span class="persona-paper-mini__lines"></span>
+                </span>
+                <span class="persona-paper-mini__seal "><span class="persona-seal persona-seal--crimson" aria-hidden="true">
+                <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+            <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+            <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+                <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+            <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+            <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+            <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+            </span>
+            </span>
+            </span>
+            </span>
+                
+                <span class="persona-tile__new">New</span>
+                
+                    <span class="persona-tile__name" data-tooltip="A letter for the Captain">A letter for the Captain</span>
+            </button>
+            <button type="button" class="persona-tile persona-tile--document " data-action="openCard" data-id="d2">
+                    <span class="persona-tile__img persona-tile__doc"><span class="persona-paper-mini persona-paper--decree " style="--tilt: 0.55deg;">
+                <span class="persona-paper-mini__sheet" style="">
+                    <span class="persona-paper-mini__lines"></span>
+                </span>
+                <span class="persona-paper-mini__seal is-broken"><span class="persona-seal persona-seal--gold" aria-hidden="true">
+                <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+            <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#a67c22"/>
+            <circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+            <circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+                <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+            <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#a67c22"/>
+            <circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+            <circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+            </span>
+            </span>
+            </span>
+            </span>
+                
+                
+                
+                    <span class="persona-tile__name" data-tooltip="By Order of the Regent">By Order of the Regent</span>
+            </button>
+            <button type="button" class="persona-tile persona-tile--document " data-action="openCard" data-id="d3">
+                    <span class="persona-tile__img persona-tile__doc"><span class="persona-paper-mini persona-paper--note " style="--tilt: -2.01deg;">
+                <span class="persona-paper-mini__sheet" style="clip-path: polygon(0.00% 1.48%, 4.55% 1.96%, 9.09% 0.46%, 13.64% 0.39%, 18.18% 2.09%, 22.73% 1.49%, 27.27% 2.08%, 31.82% 0.21%, 36.36% 1.34%, 40.91% 0.82%, 45.45% 0.75%, 50.00% 0.32%, 54.55% 1.85%, 59.09% 1.83%, 63.64% 1.18%, 68.18% 1.00%, 72.73% 0.22%, 77.27% 2.10%, 81.82% 1.28%, 86.36% 0.91%, 90.91% 1.36%, 95.45% 1.84%, 100% 0.00%, 100% 4.55%, 100% 9.09%, 100% 13.64%, 100% 18.18%, 100% 22.73%, 100% 27.27%, 100% 31.82%, 100% 36.36%, 100% 40.91%, 100% 45.45%, 100% 50.00%, 100% 54.55%, 100% 59.09%, 100% 63.64%, 100% 68.18%, 100% 72.73%, 100% 77.27%, 100% 81.82%, 100% 86.36%, 100% 90.91%, 100% 95.45%, 100.00% 99.8%, 95.45% 98.37%, 90.91% 99.99%, 86.36% 99.28%, 81.82% 98.44%, 77.27% 98.57%, 72.73% 98.17%, 68.18% 98.27%, 63.64% 98.59%, 59.09% 98.2%, 54.55% 99.79%, 50.00% 99.59%, 45.45% 98.08%, 40.91% 99.78%, 36.36% 98.9%, 31.82% 99.75%, 27.27% 99.38%, 22.73% 98.17%, 18.18% 98.25%, 13.64% 98.94%, 9.09% 98.34%, 4.55% 99.95%, 0% 100.00%, 0% 95.45%, 0% 90.91%, 0% 86.36%, 0% 81.82%, 0% 77.27%, 0% 72.73%, 0% 68.18%, 0% 63.64%, 0% 59.09%, 0% 54.55%, 0% 50.00%, 0% 45.45%, 0% 40.91%, 0% 36.36%, 0% 31.82%, 0% 27.27%, 0% 22.73%, 0% 18.18%, 0% 13.64%, 0% 9.09%, 0% 4.55%);">
+                    <span class="persona-paper-mini__lines"></span>
+                </span>
+                
+            </span>
+            </span>
+                
+                
+                <span class="persona-tile__private" data-tooltip="Only you know this one"><i class="fa-solid fa-eye" inert></i></span>
+                    <span class="persona-tile__name" data-tooltip="Scrap from the Copper Kettle">Scrap from the Copper Kettle</span>
+            </button>
+            <button type="button" class="persona-tile persona-tile--document " data-action="openCard" data-id="d4">
+                    <span class="persona-tile__img persona-tile__doc"><span class="persona-paper-mini persona-paper--map is-sealed" style="--tilt: -0.37deg;">
+                <span class="persona-paper-mini__sheet" style="clip-path: polygon(0.00% 0.78%, 4.55% 0.69%, 9.09% 2.08%, 13.64% 1.98%, 18.18% 0.81%, 22.73% 1.54%, 27.27% 0.80%, 31.82% 1.25%, 36.36% 0.34%, 40.91% 1.79%, 45.45% 0.56%, 50.00% 1.64%, 54.55% 0.44%, 59.09% 0.95%, 63.64% 1.66%, 68.18% 1.74%, 72.73% 1.32%, 77.27% 1.16%, 81.82% 0.20%, 86.36% 0.44%, 90.91% 2.05%, 95.45% 1.19%, 98.43% 0.00%, 99.32% 4.55%, 98.82% 9.09%, 98.86% 13.64%, 98.49% 18.18%, 99.95% 22.73%, 98.36% 27.27%, 98.18% 31.82%, 99.09% 36.36%, 99.3% 40.91%, 99.09% 45.45%, 99.27% 50.00%, 98.03% 54.55%, 99.27% 59.09%, 99.3% 63.64%, 99.49% 68.18%, 98.03% 72.73%, 99.96% 77.27%, 98.08% 81.82%, 98.58% 86.36%, 99.34% 90.91%, 99.64% 95.45%, 100.00% 98.7%, 95.45% 99.78%, 90.91% 98.24%, 86.36% 99.2%, 81.82% 98.38%, 77.27% 99.88%, 72.73% 99.29%, 68.18% 98.09%, 63.64% 98.04%, 59.09% 98.04%, 54.55% 99.76%, 50.00% 97.88%, 45.45% 99.49%, 40.91% 98.11%, 36.36% 98.82%, 31.82% 99.73%, 27.27% 99.61%, 22.73% 99.37%, 18.18% 99.61%, 13.64% 99.25%, 9.09% 99.32%, 4.55% 98.52%, 1.53% 100.00%, 1.10% 95.45%, 0.75% 90.91%, 1.84% 86.36%, 0.44% 81.82%, 1.36% 77.27%, 0.34% 72.73%, 2.01% 68.18%, 1.64% 63.64%, 1.45% 59.09%, 1.05% 54.55%, 0.59% 50.00%, 0.75% 45.45%, 2.04% 40.91%, 1.23% 36.36%, 0.10% 31.82%, 0.91% 27.27%, 0.60% 22.73%, 0.83% 18.18%, 1.36% 13.64%, 1.07% 9.09%, 0.85% 4.55%);">
+                    <img src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23d9c79c%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%20L400%200%20L0%200Z%22%20fill%3D%22%239fb3b0%22%20opacity%3D%22.6%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%222%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M60%20200%20l18-28%2018%2028M90%20210%20l22-34%2022%2034M130%20196%20l16-24%2016%2024%22%2F%3E%3Cpath%20d%3D%22M250%20180%20c20-10%2040%2010%2060%200%20s30-20%2050%20-6%22%20stroke-dasharray%3D%225%205%22%2F%3E%3Cpath%20d%3D%22M200%20120%20C210%20160%20190%20200%20230%20240%20S300%20260%20330%20250%22%20stroke-width%3D%222.4%22%20stroke%3D%22%236d8a92%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%235b4a32%22%20font-family%3D%22serif%22%20font-size%3D%2213%22%20font-style%3D%22italic%22%3E%3Ctext%20x%3D%2240%22%20y%3D%22240%22%3EAshen%20Peaks%3C%2Ftext%3E%3Ctext%20x%3D%22230%22%20y%3D%22150%22%3Ethe%20old%20road%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%2240%22%3ESea%20of%20Glass%3C%2Ftext%3E%3C%2Fg%3E%3Cpath%20d%3D%22M318%20216%20l14%2014%20M332%20216%20l-14%2014%22%20stroke%3D%22%238e1f1b%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22350%22%20cy%3D%22260%22%20r%3D%2222%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%2F%3E%3Cpath%20d%3D%22M350%20236%20v48%20M326%20260%20h48%22%20stroke%3D%22%235b4a32%22%2F%3E%3Ctext%20x%3D%22346%22%20y%3D%22232%22%20font-size%3D%2210%22%20fill%3D%22%235b4a32%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" draggable="false" loading="lazy">
+                </span>
+                <span class="persona-paper-mini__seal "><span class="persona-seal persona-seal--black" aria-hidden="true">
+                <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+            <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+            <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+                <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+            <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+            <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+            <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+            <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+            <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+            <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+            <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+            <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+            <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+            <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+            <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+            </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+            </span>
+            </span>
+            </span>
+            </span>
+                
+                
+                
+                    <span class="persona-tile__name" data-tooltip="The old road to the Ashen Peaks">The old road to the Ashen Peaks</span>
+            </button>
+            </div>
+                    </section>
+                    <section class="persona-section">
                             <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g1" aria-expanded="true">
                                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
                                 <i class="fa-solid fa-chess-rook" inert></i>
@@ -5075,28 +6065,28 @@ body {
                             </button>
                                 
                                 <div class="persona-gallery"><button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e1">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(120%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(160%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ECI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(120%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(160%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(120%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ECI%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 <span class="persona-tile__new">New</span>
                 
                     <span class="persona-tile__name" data-tooltip="Captain Ilsa Marrow — Captain">Captain Ilsa Marrow</span>
             </button>
             <button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e2">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(0%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(40%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ELA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(0%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(40%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(0%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ELA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
                     <span class="persona-tile__name" data-tooltip="Lord Aldric Venn — Regent">Lord Aldric Venn</span>
             </button>
             <button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e3">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(28%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(68%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ESH%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(28%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(68%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(28%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ESH%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 <span class="persona-tile__private" data-tooltip="Only you know this one"><i class="fa-solid fa-eye" inert></i></span>
                     <span class="persona-tile__name" data-tooltip="Sister Hesper — Healer">Sister Hesper</span>
             </button>
             <button type="button" class="persona-tile persona-tile--npc is-dead" data-action="openCard" data-id="e4">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(52%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(92%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EOB%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(52%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(92%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(52%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EOB%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 <span class="persona-tile__status" data-tooltip="Dead"><i class="fa-solid fa-skull" inert></i></span>
                 
                 
@@ -5105,14 +6095,14 @@ body {
             </div>
                                 
                                 <div class="persona-gallery persona-gallery--places"><button type="button" class="persona-tile persona-tile--place " data-action="openCard" data-id="p1">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20180%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22s%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(4%2C35%25%2C38%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(34%2C30%25%2C10%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22url(%23s)%22%2F%3E%3Cpath%20d%3D%22M0%20130%20L60%2090%20L110%20120%20L170%2070%20L230%20110%20L320%2080%20L320%20180%20L0%20180z%22%20fill%3D%22hsla(4%2C25%25%2C8%25%2C.75)%22%2F%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2245%22%20r%3D%2216%22%20fill%3D%22hsla(45%2C70%25%2C80%25%2C.5)%22%2F%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20180%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22s%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(4%2C35%25%2C38%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(34%2C30%25%2C10%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22url(%23s)%22%2F%3E%3Cpath%20d%3D%22M0%20130%20L60%2090%20L110%20120%20L170%2070%20L230%20110%20L320%2080%20L320%20180%20L0%20180z%22%20fill%3D%22hsla(4%2C25%25%2C8%25%2C.75)%22%2F%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2245%22%20r%3D%2216%22%20fill%3D%22hsla(45%2C70%25%2C80%25%2C.5)%22%2F%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
                     <span class="persona-tile__name" data-tooltip="The Copper Kettle — Inn">The Copper Kettle</span>
             </button>
             <button type="button" class="persona-tile persona-tile--place " data-action="openCard" data-id="p2">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20180%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22s%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(132%2C35%25%2C38%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(162%2C30%25%2C10%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22url(%23s)%22%2F%3E%3Cpath%20d%3D%22M0%20130%20L60%2090%20L110%20120%20L170%2070%20L230%20110%20L320%2080%20L320%20180%20L0%20180z%22%20fill%3D%22hsla(132%2C25%25%2C8%25%2C.75)%22%2F%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2245%22%20r%3D%2216%22%20fill%3D%22hsla(45%2C70%25%2C80%25%2C.5)%22%2F%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20180%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22s%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(132%2C35%25%2C38%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(162%2C30%25%2C10%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22180%22%20fill%3D%22url(%23s)%22%2F%3E%3Cpath%20d%3D%22M0%20130%20L60%2090%20L110%20120%20L170%2070%20L230%20110%20L320%2080%20L320%20180%20L0%20180z%22%20fill%3D%22hsla(132%2C25%25%2C8%25%2C.75)%22%2F%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2245%22%20r%3D%2216%22%20fill%3D%22hsla(45%2C70%25%2C80%25%2C.5)%22%2F%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
@@ -5129,21 +6119,21 @@ body {
                             </button>
                                 
                                 <div class="persona-gallery"><button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e8">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(318%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(358%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ETA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(318%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(358%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(318%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3ETA%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
                     <span class="persona-tile__name" data-tooltip="The Ashen King — Lord of Kurdrax">The Ashen King</span>
             </button>
             <button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e10">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(86%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(126%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(86%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(86%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(86%2C45%25%2C48%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(126%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(86%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(86%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
                     <span class="persona-tile__name" data-tooltip="Nyx — Knife-for-hire">Nyx</span>
             </button>
             <button type="button" class="persona-tile persona-tile--npc " data-action="openCard" data-id="e13">
-                <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(88%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(128%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(88%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(88%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EE%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
+                    <span class="persona-tile__img"><img class="persona-fit" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%20160%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%20cx%3D%2250%25%22%20cy%3D%2235%25%22%20r%3D%2275%25%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22hsl(88%2C45%25%2C30%25)%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22hsl(128%2C40%25%2C12%25)%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22120%22%20height%3D%22160%22%20fill%3D%22url(%23g)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2258%22%20r%3D%2226%22%20fill%3D%22hsla(88%2C30%25%2C85%25%2C.22)%22%2F%3E%3Cpath%20d%3D%22M14%20160c4-38%2022-58%2046-58s42%2020%2046%2058z%22%20fill%3D%22hsla(88%2C30%25%2C85%25%2C.18)%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2268%22%20font-family%3D%22Cinzel%2Cserif%22%20font-size%3D%2226%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22hsla(40%2C60%25%2C92%25%2C.92)%22%3EE%3C%2Ftext%3E%3C%2Fsvg%3E" style="" alt="" draggable="false" loading="lazy"></span>
                 
                 
                 
@@ -5196,29 +6186,542 @@ body {
             </section>
 
 
-        <section class="persona-notes">
-            <div class="persona-tabs" role="tablist">
-                    <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="false">My notes</button>
-                <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="true">Party notes · 2</button>
-            </div>
-                    <div class="persona-note">
-                        <span class="persona-note__who" style="--who: #d4b25a">A</span>
-                        <div class="persona-note__text"><p>She recognised Kaelen&#x27;s crest. Ask about the old war.</p><span>Ana</span></div>
-                        <button type="button" class="persona-note__delete" data-action="deleteNote" data-note="n1" aria-label="Delete note" data-tooltip="Delete note"><i class="fa-solid fa-trash" inert></i></button>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="false">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="true">Party notes · 2</button>
                     </div>
-                    <div class="persona-note">
-                        <span class="persona-note__who" style="--who: #8fb0c9">B</span>
-                        <div class="persona-note__text"><p>Don&#x27;t mention the cart. She noticed us watching.</p><span>Bruno</span></div>
-                        
-                    </div>
-                    <form class="persona-note-form" data-note-form>
-                        <input type="text" name="sharedNote" maxlength="2000" placeholder="Write to the party" autocomplete="off">
-                        <button type="submit" class="persona-button">Send</button>
-                    </form>
-        </section>
+                            <div class="persona-note">
+                                <span class="persona-note__who" style="--who: #d4b25a">A</span>
+                                <div class="persona-note__text"><p>She recognised Kaelen&#x27;s crest. Ask about the old war.</p><span>Ana</span></div>
+                                <button type="button" class="persona-note__delete" data-action="deleteNote" data-note="n1" aria-label="Delete note" data-tooltip="Delete note"><i class="fa-solid fa-trash" inert></i></button>
+                            </div>
+                            <div class="persona-note">
+                                <span class="persona-note__who" style="--who: #8fb0c9">B</span>
+                                <div class="persona-note__text"><p>Don&#x27;t mention the cart. She noticed us watching.</p><span>Bruno</span></div>
+                                
+                            </div>
+                            <form class="persona-note-form" data-note-form>
+                                <input type="text" name="sharedNote" maxlength="2000" placeholder="Write to the party" autocomplete="off">
+                                <button type="submit" class="persona-button">Send</button>
+                            </form>
+                </section>
     </div>
 </article>
 </div>
+</section>
+
+<section class="pv-view pv-view--card pv-view--docs" data-view="docs" hidden>
+    <div class="pv-papers">
+        <button type="button" data-doc="d1" aria-pressed="true">Letter</button><button type="button" data-doc="d2" aria-pressed="false">Decree</button><button type="button" data-doc="d3" aria-pressed="false">Note</button><button type="button" data-doc="d4" aria-pressed="false">Torn map</button>
+        <button type="button" data-reseal>Seal again</button>
+    </div>
+    
+    <div class="persona persona-card-layer is-document" data-docview="d1" >
+        <div data-state="sealed" ><article class="persona-docview persona-docview--letter is-sealed" role="dialog" aria-label="A letter for the Captain">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--letter" style="--tilt: -0.53deg;">
+            <div class="persona-doc__sheet" style="">
+                
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Valtoria, third of Frostfall</p>
+                    <h2 class="persona-doc__heading">A letter for the Captain</h2>
+                    <div class="persona-doc__body"><p>Captain,</p><p>The cart that passes the north gate at the new moon is not to be stopped, searched or spoken of. You will find the ledger short by one line each month; let it stay short.</p><p>Burn this when you have read it. I will know if you have not.</p></div>
+                        <div class="persona-doc__smudge" data-tooltip="Something here can&#x27;t be read yet" aria-label="Something here can&#x27;t be read yet"><span></span><span></span><span></span></div>
+                                        <p class="persona-doc__signature">Aldric Venn</p>
+                    
+                </div>
+                
+            </div>
+
+                <div class="persona-doc__folds" aria-hidden="true" style="">
+                    <span class="persona-doc__flap persona-doc__flap--top"></span>
+                    <span class="persona-doc__flap persona-doc__flap--bottom"></span>
+                </div>
+                <button type="button" class="persona-doc__seal" data-action="breakSeal" aria-label="Break the seal">
+                    <span class="persona-seal persona-seal--crimson" aria-hidden="true">
+                        <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+                    <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+                    <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+                        <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+                    <path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#8a1712"/>
+                    <circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+                    </span>
+                    <span class="persona-doc__chips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </button>
+        </div>
+        <p class="persona-docview__hint "><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-envelope" inert></i> Letter</span>
+        <h3>A letter for the Captain</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+        <div data-state="open" hidden><article class="persona-docview persona-docview--letter " role="dialog" aria-label="A letter for the Captain">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--letter" style="--tilt: -0.53deg;">
+            <div class="persona-doc__sheet" style="">
+                
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Valtoria, third of Frostfall</p>
+                    <h2 class="persona-doc__heading">A letter for the Captain</h2>
+                    <div class="persona-doc__body"><p>Captain,</p><p>The cart that passes the north gate at the new moon is not to be stopped, searched or spoken of. You will find the ledger short by one line each month; let it stay short.</p><p>Burn this when you have read it. I will know if you have not.</p></div>
+                        <div class="persona-doc__smudge" data-tooltip="Something here can&#x27;t be read yet" aria-label="Something here can&#x27;t be read yet"><span></span><span></span><span></span></div>
+                                        <p class="persona-doc__signature">Aldric Venn</p>
+                    
+                </div>
+                <span class="persona-doc__remnant"><span class="persona-seal persona-seal--crimson" aria-hidden="true">
+    <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+<path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#8a1712"/>
+<circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+<circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+    <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#8a1712"/>
+<path d="M98.1,50.0 C98.4,55.2 96.1,61.0 94.2,66.1 C92.2,71.2 89.7,76.3 86.3,80.5 C83.0,84.7 78.6,88.9 73.8,91.3 C69.1,93.7 63.3,94.1 57.9,95.0 C52.6,95.8 46.9,97.5 41.8,96.6 C36.7,95.7 31.7,92.3 27.2,89.5 C22.7,86.6 18.3,83.5 14.7,79.6 C11.2,75.7 7.9,71.0 5.8,66.1 C3.7,61.1 2.4,55.5 2.1,50.0 C1.8,44.5 2.0,38.2 4.2,33.3 C6.4,28.5 11.6,24.8 15.4,20.9 C19.1,17.1 22.6,13.0 27.0,10.1 C31.4,7.3 36.7,5.0 41.9,3.9 C47.1,2.9 52.8,2.9 58.2,3.7 C63.5,4.5 69.2,6.1 73.8,8.8 C78.4,11.5 82.8,15.6 85.9,19.9 C89.0,24.2 90.2,29.6 92.2,34.6 C94.3,39.6 97.8,44.8 98.1,50.0" fill="#3d0806" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#8a1712"/>
+<circle cx="44" cy="42" r="34" fill="#c8392c" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#c8392c" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#3d0806" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#8a1712"/>
+<circle cx="47.5" cy="47" r="24" fill="#c8392c" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#3d0806" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#c8392c" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#3d0806" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-chess-rook" inert></i></span></span>
+</span>
+</span>
+            </div>
+
+        </div>
+        <p class="persona-docview__hint is-done"><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-envelope" inert></i> Letter</span>
+        <h3>A letter for the Captain</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+    </div>
+    <div class="persona persona-card-layer is-document" data-docview="d2" hidden>
+        <div data-state="sealed" ><article class="persona-docview persona-docview--decree is-sealed" role="dialog" aria-label="By Order of the Regent">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--decree" style="--tilt: 0.55deg;">
+            <div class="persona-doc__sheet" style="">
+                
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Given at the Ember Throne, first of Frostfall</p>
+                    <h2 class="persona-doc__heading">By Order of the Regent</h2>
+                    <div class="persona-doc__body"><p>Be it known to every soul within the walls of Valtoria that, from this day until the thaw, no blade shall be carried in the streets after the evening bell, save by the Watch.</p><p>Whoever is found in breach of this decree shall answer to the Captain of the Guard.</p></div>
+                    <p class="persona-doc__signature">Aldric Venn, Regent of Embermark</p>
+                    
+                </div>
+                
+            </div>
+
+                <div class="persona-doc__folds" aria-hidden="true" style="">
+                    <span class="persona-doc__flap persona-doc__flap--top"></span>
+                    <span class="persona-doc__flap persona-doc__flap--bottom"></span>
+                </div>
+                <button type="button" class="persona-doc__seal" data-action="breakSeal" aria-label="Break the seal">
+                    <span class="persona-seal persona-seal--gold" aria-hidden="true">
+                        <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+                    <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#a67c22"/>
+                    <circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+                        <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+                    <path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#a67c22"/>
+                    <circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+                    </span>
+                    <span class="persona-doc__chips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </button>
+        </div>
+        <p class="persona-docview__hint "><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-scroll" inert></i> Decree</span>
+        <h3>By Order of the Regent</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+        <div data-state="open" hidden><article class="persona-docview persona-docview--decree " role="dialog" aria-label="By Order of the Regent">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--decree" style="--tilt: 0.55deg;">
+            <div class="persona-doc__sheet" style="">
+                
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Given at the Ember Throne, first of Frostfall</p>
+                    <h2 class="persona-doc__heading">By Order of the Regent</h2>
+                    <div class="persona-doc__body"><p>Be it known to every soul within the walls of Valtoria that, from this day until the thaw, no blade shall be carried in the streets after the evening bell, save by the Watch.</p><p>Whoever is found in breach of this decree shall answer to the Captain of the Guard.</p></div>
+                    <p class="persona-doc__signature">Aldric Venn, Regent of Embermark</p>
+                    
+                </div>
+                <span class="persona-doc__remnant"><span class="persona-seal persona-seal--gold" aria-hidden="true">
+    <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+<path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#a67c22"/>
+<circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+<circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+    <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#a67c22"/>
+<path d="M98.2,50.0 C98.5,55.5 98.2,61.8 96.1,66.8 C94.0,71.7 89.3,75.7 85.6,79.9 C81.9,84.0 78.7,89.3 74.1,91.7 C69.4,94.1 63.2,93.0 57.8,94.2 C52.3,95.3 46.7,99.2 41.4,98.8 C36.1,98.4 30.6,94.7 26.0,91.6 C21.4,88.6 16.8,84.8 13.8,80.4 C10.7,76.0 9.8,70.5 7.7,65.4 C5.6,60.3 1.5,55.2 1.2,50.0 C1.0,44.8 3.9,39.0 5.9,34.0 C8.0,28.9 10.2,23.5 13.7,19.5 C17.1,15.5 22.0,12.2 26.8,9.8 C31.5,7.3 36.8,6.2 42.1,5.0 C47.3,3.8 52.9,2.3 58.3,2.7 C63.8,3.1 69.9,4.5 74.7,7.2 C79.4,10.0 83.5,14.7 86.8,19.1 C90.1,23.5 92.7,28.6 94.6,33.8 C96.5,38.9 98.0,44.5 98.2,50.0" fill="#4d360c" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#a67c22"/>
+<circle cx="44" cy="42" r="34" fill="#e8c262" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#e8c262" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#4d360c" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#a67c22"/>
+<circle cx="47.5" cy="47" r="24" fill="#e8c262" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#4d360c" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#e8c262" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#4d360c" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-crown" inert></i></span></span>
+</span>
+</span>
+            </div>
+
+        </div>
+        <p class="persona-docview__hint is-done"><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-scroll" inert></i> Decree</span>
+        <h3>By Order of the Regent</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+    </div>
+    <div class="persona persona-card-layer is-document" data-docview="d3" hidden>
+        <div data-state="sealed" hidden><article class="persona-docview persona-docview--note " role="dialog" aria-label="Scrap from the Copper Kettle">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--note" style="--tilt: -2.01deg;">
+            <div class="persona-doc__sheet" style="clip-path: polygon(0.00% 1.48%, 4.55% 1.96%, 9.09% 0.46%, 13.64% 0.39%, 18.18% 2.09%, 22.73% 1.49%, 27.27% 2.08%, 31.82% 0.21%, 36.36% 1.34%, 40.91% 0.82%, 45.45% 0.75%, 50.00% 0.32%, 54.55% 1.85%, 59.09% 1.83%, 63.64% 1.18%, 68.18% 1.00%, 72.73% 0.22%, 77.27% 2.10%, 81.82% 1.28%, 86.36% 0.91%, 90.91% 1.36%, 95.45% 1.84%, 100% 0.00%, 100% 4.55%, 100% 9.09%, 100% 13.64%, 100% 18.18%, 100% 22.73%, 100% 27.27%, 100% 31.82%, 100% 36.36%, 100% 40.91%, 100% 45.45%, 100% 50.00%, 100% 54.55%, 100% 59.09%, 100% 63.64%, 100% 68.18%, 100% 72.73%, 100% 77.27%, 100% 81.82%, 100% 86.36%, 100% 90.91%, 100% 95.45%, 100.00% 99.8%, 95.45% 98.37%, 90.91% 99.99%, 86.36% 99.28%, 81.82% 98.44%, 77.27% 98.57%, 72.73% 98.17%, 68.18% 98.27%, 63.64% 98.59%, 59.09% 98.2%, 54.55% 99.79%, 50.00% 99.59%, 45.45% 98.08%, 40.91% 99.78%, 36.36% 98.9%, 31.82% 99.75%, 27.27% 99.38%, 22.73% 98.17%, 18.18% 98.25%, 13.64% 98.94%, 9.09% 98.34%, 4.55% 99.95%, 0% 100.00%, 0% 95.45%, 0% 90.91%, 0% 86.36%, 0% 81.82%, 0% 77.27%, 0% 72.73%, 0% 68.18%, 0% 63.64%, 0% 59.09%, 0% 54.55%, 0% 50.00%, 0% 45.45%, 0% 40.91%, 0% 36.36%, 0% 31.82%, 0% 27.27%, 0% 22.73%, 0% 18.18%, 0% 13.64%, 0% 9.09%, 0% 4.55%);">
+                
+                <div class="persona-doc__text">
+                    
+                    <h2 class="persona-doc__heading">Scrap from the Copper Kettle</h2>
+                    <div class="persona-doc__body"><p>Back room. Midnight. Come alone or don't come.</p><p>Bring the coin you owe.</p></div>
+                        <div class="persona-doc__smudge" data-tooltip="Something here can&#x27;t be read yet" aria-label="Something here can&#x27;t be read yet"><span></span><span></span><span></span></div>
+                                        <p class="persona-doc__signature">— N.</p>
+                    
+                </div>
+                
+            </div>
+
+        </div>
+        
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-note-sticky" inert></i> Note</span>
+        <h3>Scrap from the Copper Kettle</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+        <div data-state="open" ><article class="persona-docview persona-docview--note " role="dialog" aria-label="Scrap from the Copper Kettle">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--note" style="--tilt: -2.01deg;">
+            <div class="persona-doc__sheet" style="clip-path: polygon(0.00% 1.48%, 4.55% 1.96%, 9.09% 0.46%, 13.64% 0.39%, 18.18% 2.09%, 22.73% 1.49%, 27.27% 2.08%, 31.82% 0.21%, 36.36% 1.34%, 40.91% 0.82%, 45.45% 0.75%, 50.00% 0.32%, 54.55% 1.85%, 59.09% 1.83%, 63.64% 1.18%, 68.18% 1.00%, 72.73% 0.22%, 77.27% 2.10%, 81.82% 1.28%, 86.36% 0.91%, 90.91% 1.36%, 95.45% 1.84%, 100% 0.00%, 100% 4.55%, 100% 9.09%, 100% 13.64%, 100% 18.18%, 100% 22.73%, 100% 27.27%, 100% 31.82%, 100% 36.36%, 100% 40.91%, 100% 45.45%, 100% 50.00%, 100% 54.55%, 100% 59.09%, 100% 63.64%, 100% 68.18%, 100% 72.73%, 100% 77.27%, 100% 81.82%, 100% 86.36%, 100% 90.91%, 100% 95.45%, 100.00% 99.8%, 95.45% 98.37%, 90.91% 99.99%, 86.36% 99.28%, 81.82% 98.44%, 77.27% 98.57%, 72.73% 98.17%, 68.18% 98.27%, 63.64% 98.59%, 59.09% 98.2%, 54.55% 99.79%, 50.00% 99.59%, 45.45% 98.08%, 40.91% 99.78%, 36.36% 98.9%, 31.82% 99.75%, 27.27% 99.38%, 22.73% 98.17%, 18.18% 98.25%, 13.64% 98.94%, 9.09% 98.34%, 4.55% 99.95%, 0% 100.00%, 0% 95.45%, 0% 90.91%, 0% 86.36%, 0% 81.82%, 0% 77.27%, 0% 72.73%, 0% 68.18%, 0% 63.64%, 0% 59.09%, 0% 54.55%, 0% 50.00%, 0% 45.45%, 0% 40.91%, 0% 36.36%, 0% 31.82%, 0% 27.27%, 0% 22.73%, 0% 18.18%, 0% 13.64%, 0% 9.09%, 0% 4.55%);">
+                
+                <div class="persona-doc__text">
+                    
+                    <h2 class="persona-doc__heading">Scrap from the Copper Kettle</h2>
+                    <div class="persona-doc__body"><p>Back room. Midnight. Come alone or don't come.</p><p>Bring the coin you owe.</p></div>
+                        <div class="persona-doc__smudge" data-tooltip="Something here can&#x27;t be read yet" aria-label="Something here can&#x27;t be read yet"><span></span><span></span><span></span></div>
+                                        <p class="persona-doc__signature">— N.</p>
+                    
+                </div>
+                
+            </div>
+
+        </div>
+        
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-note-sticky" inert></i> Note</span>
+        <h3>Scrap from the Copper Kettle</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+    </div>
+    <div class="persona persona-card-layer is-document" data-docview="d4" hidden>
+        <div data-state="sealed" ><article class="persona-docview persona-docview--map is-sealed" role="dialog" aria-label="The old road to the Ashen Peaks">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--map" style="--tilt: -0.37deg;">
+            <div class="persona-doc__sheet" style="clip-path: polygon(0.00% 0.78%, 4.55% 0.69%, 9.09% 2.08%, 13.64% 1.98%, 18.18% 0.81%, 22.73% 1.54%, 27.27% 0.80%, 31.82% 1.25%, 36.36% 0.34%, 40.91% 1.79%, 45.45% 0.56%, 50.00% 1.64%, 54.55% 0.44%, 59.09% 0.95%, 63.64% 1.66%, 68.18% 1.74%, 72.73% 1.32%, 77.27% 1.16%, 81.82% 0.20%, 86.36% 0.44%, 90.91% 2.05%, 95.45% 1.19%, 98.43% 0.00%, 99.32% 4.55%, 98.82% 9.09%, 98.86% 13.64%, 98.49% 18.18%, 99.95% 22.73%, 98.36% 27.27%, 98.18% 31.82%, 99.09% 36.36%, 99.3% 40.91%, 99.09% 45.45%, 99.27% 50.00%, 98.03% 54.55%, 99.27% 59.09%, 99.3% 63.64%, 99.49% 68.18%, 98.03% 72.73%, 99.96% 77.27%, 98.08% 81.82%, 98.58% 86.36%, 99.34% 90.91%, 99.64% 95.45%, 100.00% 98.7%, 95.45% 99.78%, 90.91% 98.24%, 86.36% 99.2%, 81.82% 98.38%, 77.27% 99.88%, 72.73% 99.29%, 68.18% 98.09%, 63.64% 98.04%, 59.09% 98.04%, 54.55% 99.76%, 50.00% 97.88%, 45.45% 99.49%, 40.91% 98.11%, 36.36% 98.82%, 31.82% 99.73%, 27.27% 99.61%, 22.73% 99.37%, 18.18% 99.61%, 13.64% 99.25%, 9.09% 99.32%, 4.55% 98.52%, 1.53% 100.00%, 1.10% 95.45%, 0.75% 90.91%, 1.84% 86.36%, 0.44% 81.82%, 1.36% 77.27%, 0.34% 72.73%, 2.01% 68.18%, 1.64% 63.64%, 1.45% 59.09%, 1.05% 54.55%, 0.59% 50.00%, 0.75% 45.45%, 2.04% 40.91%, 1.23% 36.36%, 0.10% 31.82%, 0.91% 27.27%, 0.60% 22.73%, 0.83% 18.18%, 1.36% 13.64%, 1.07% 9.09%, 0.85% 4.55%);">
+                <img class="persona-doc__map" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23d9c79c%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%20L400%200%20L0%200Z%22%20fill%3D%22%239fb3b0%22%20opacity%3D%22.6%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%222%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M60%20200%20l18-28%2018%2028M90%20210%20l22-34%2022%2034M130%20196%20l16-24%2016%2024%22%2F%3E%3Cpath%20d%3D%22M250%20180%20c20-10%2040%2010%2060%200%20s30-20%2050%20-6%22%20stroke-dasharray%3D%225%205%22%2F%3E%3Cpath%20d%3D%22M200%20120%20C210%20160%20190%20200%20230%20240%20S300%20260%20330%20250%22%20stroke-width%3D%222.4%22%20stroke%3D%22%236d8a92%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%235b4a32%22%20font-family%3D%22serif%22%20font-size%3D%2213%22%20font-style%3D%22italic%22%3E%3Ctext%20x%3D%2240%22%20y%3D%22240%22%3EAshen%20Peaks%3C%2Ftext%3E%3Ctext%20x%3D%22230%22%20y%3D%22150%22%3Ethe%20old%20road%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%2240%22%3ESea%20of%20Glass%3C%2Ftext%3E%3C%2Fg%3E%3Cpath%20d%3D%22M318%20216%20l14%2014%20M332%20216%20l-14%2014%22%20stroke%3D%22%238e1f1b%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22350%22%20cy%3D%22260%22%20r%3D%2222%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%2F%3E%3Cpath%20d%3D%22M350%20236%20v48%20M326%20260%20h48%22%20stroke%3D%22%235b4a32%22%2F%3E%3Ctext%20x%3D%22346%22%20y%3D%22232%22%20font-size%3D%2210%22%20fill%3D%22%235b4a32%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" draggable="false">
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Copied from the chapel archive</p>
+                    
+                    
+                    
+                    <p class="persona-doc__caption">The old road to the Ashen Peaks</p>
+                </div>
+                
+            </div>
+
+                <div class="persona-doc__folds" aria-hidden="true" style="clip-path: polygon(0.00% 0.78%, 4.55% 0.69%, 9.09% 2.08%, 13.64% 1.98%, 18.18% 0.81%, 22.73% 1.54%, 27.27% 0.80%, 31.82% 1.25%, 36.36% 0.34%, 40.91% 1.79%, 45.45% 0.56%, 50.00% 1.64%, 54.55% 0.44%, 59.09% 0.95%, 63.64% 1.66%, 68.18% 1.74%, 72.73% 1.32%, 77.27% 1.16%, 81.82% 0.20%, 86.36% 0.44%, 90.91% 2.05%, 95.45% 1.19%, 98.43% 0.00%, 99.32% 4.55%, 98.82% 9.09%, 98.86% 13.64%, 98.49% 18.18%, 99.95% 22.73%, 98.36% 27.27%, 98.18% 31.82%, 99.09% 36.36%, 99.3% 40.91%, 99.09% 45.45%, 99.27% 50.00%, 98.03% 54.55%, 99.27% 59.09%, 99.3% 63.64%, 99.49% 68.18%, 98.03% 72.73%, 99.96% 77.27%, 98.08% 81.82%, 98.58% 86.36%, 99.34% 90.91%, 99.64% 95.45%, 100.00% 98.7%, 95.45% 99.78%, 90.91% 98.24%, 86.36% 99.2%, 81.82% 98.38%, 77.27% 99.88%, 72.73% 99.29%, 68.18% 98.09%, 63.64% 98.04%, 59.09% 98.04%, 54.55% 99.76%, 50.00% 97.88%, 45.45% 99.49%, 40.91% 98.11%, 36.36% 98.82%, 31.82% 99.73%, 27.27% 99.61%, 22.73% 99.37%, 18.18% 99.61%, 13.64% 99.25%, 9.09% 99.32%, 4.55% 98.52%, 1.53% 100.00%, 1.10% 95.45%, 0.75% 90.91%, 1.84% 86.36%, 0.44% 81.82%, 1.36% 77.27%, 0.34% 72.73%, 2.01% 68.18%, 1.64% 63.64%, 1.45% 59.09%, 1.05% 54.55%, 0.59% 50.00%, 0.75% 45.45%, 2.04% 40.91%, 1.23% 36.36%, 0.10% 31.82%, 0.91% 27.27%, 0.60% 22.73%, 0.83% 18.18%, 1.36% 13.64%, 1.07% 9.09%, 0.85% 4.55%);">
+                    <span class="persona-doc__flap persona-doc__flap--top"></span>
+                    <span class="persona-doc__flap persona-doc__flap--bottom"></span>
+                </div>
+                <button type="button" class="persona-doc__seal" data-action="breakSeal" aria-label="Break the seal">
+                    <span class="persona-seal persona-seal--black" aria-hidden="true">
+                        <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+                    <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+                    <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+                        <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+                    <path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+                    <circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+                    <circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+                    <circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+                    <circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+                    <circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+                    <circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+                    <circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+                    <circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+                    <circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+                    <ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+                    <ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+                    </svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+                    </span>
+                    <span class="persona-doc__chips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </button>
+        </div>
+        <p class="persona-docview__hint "><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-map" inert></i> Torn map</span>
+        <h3>The old road to the Ashen Peaks</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+        <div data-state="open" hidden><article class="persona-docview persona-docview--map " role="dialog" aria-label="The old road to the Ashen Peaks">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="Close"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--map" style="--tilt: -0.37deg;">
+            <div class="persona-doc__sheet" style="clip-path: polygon(0.00% 0.78%, 4.55% 0.69%, 9.09% 2.08%, 13.64% 1.98%, 18.18% 0.81%, 22.73% 1.54%, 27.27% 0.80%, 31.82% 1.25%, 36.36% 0.34%, 40.91% 1.79%, 45.45% 0.56%, 50.00% 1.64%, 54.55% 0.44%, 59.09% 0.95%, 63.64% 1.66%, 68.18% 1.74%, 72.73% 1.32%, 77.27% 1.16%, 81.82% 0.20%, 86.36% 0.44%, 90.91% 2.05%, 95.45% 1.19%, 98.43% 0.00%, 99.32% 4.55%, 98.82% 9.09%, 98.86% 13.64%, 98.49% 18.18%, 99.95% 22.73%, 98.36% 27.27%, 98.18% 31.82%, 99.09% 36.36%, 99.3% 40.91%, 99.09% 45.45%, 99.27% 50.00%, 98.03% 54.55%, 99.27% 59.09%, 99.3% 63.64%, 99.49% 68.18%, 98.03% 72.73%, 99.96% 77.27%, 98.08% 81.82%, 98.58% 86.36%, 99.34% 90.91%, 99.64% 95.45%, 100.00% 98.7%, 95.45% 99.78%, 90.91% 98.24%, 86.36% 99.2%, 81.82% 98.38%, 77.27% 99.88%, 72.73% 99.29%, 68.18% 98.09%, 63.64% 98.04%, 59.09% 98.04%, 54.55% 99.76%, 50.00% 97.88%, 45.45% 99.49%, 40.91% 98.11%, 36.36% 98.82%, 31.82% 99.73%, 27.27% 99.61%, 22.73% 99.37%, 18.18% 99.61%, 13.64% 99.25%, 9.09% 99.32%, 4.55% 98.52%, 1.53% 100.00%, 1.10% 95.45%, 0.75% 90.91%, 1.84% 86.36%, 0.44% 81.82%, 1.36% 77.27%, 0.34% 72.73%, 2.01% 68.18%, 1.64% 63.64%, 1.45% 59.09%, 1.05% 54.55%, 0.59% 50.00%, 0.75% 45.45%, 2.04% 40.91%, 1.23% 36.36%, 0.10% 31.82%, 0.91% 27.27%, 0.60% 22.73%, 0.83% 18.18%, 1.36% 13.64%, 1.07% 9.09%, 0.85% 4.55%);">
+                <img class="persona-doc__map" src="data:image/svg+xml;charset&#x3D;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23d9c79c%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%20L400%200%20L0%200Z%22%20fill%3D%22%239fb3b0%22%20opacity%3D%22.6%22%2F%3E%3Cpath%20d%3D%22M0%2070%20C60%2060%2090%20110%20150%2095%20S240%2040%20300%2070%20S380%20120%20400%20100%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%222%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M60%20200%20l18-28%2018%2028M90%20210%20l22-34%2022%2034M130%20196%20l16-24%2016%2024%22%2F%3E%3Cpath%20d%3D%22M250%20180%20c20-10%2040%2010%2060%200%20s30-20%2050%20-6%22%20stroke-dasharray%3D%225%205%22%2F%3E%3Cpath%20d%3D%22M200%20120%20C210%20160%20190%20200%20230%20240%20S300%20260%20330%20250%22%20stroke-width%3D%222.4%22%20stroke%3D%22%236d8a92%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%235b4a32%22%20font-family%3D%22serif%22%20font-size%3D%2213%22%20font-style%3D%22italic%22%3E%3Ctext%20x%3D%2240%22%20y%3D%22240%22%3EAshen%20Peaks%3C%2Ftext%3E%3Ctext%20x%3D%22230%22%20y%3D%22150%22%3Ethe%20old%20road%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%2240%22%3ESea%20of%20Glass%3C%2Ftext%3E%3C%2Fg%3E%3Cpath%20d%3D%22M318%20216%20l14%2014%20M332%20216%20l-14%2014%22%20stroke%3D%22%238e1f1b%22%20stroke-width%3D%223.5%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22350%22%20cy%3D%22260%22%20r%3D%2222%22%20fill%3D%22none%22%20stroke%3D%22%235b4a32%22%2F%3E%3Cpath%20d%3D%22M350%20236%20v48%20M326%20260%20h48%22%20stroke%3D%22%235b4a32%22%2F%3E%3Ctext%20x%3D%22346%22%20y%3D%22232%22%20font-size%3D%2210%22%20fill%3D%22%235b4a32%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E" alt="" draggable="false">
+                <div class="persona-doc__text">
+                    <p class="persona-doc__dateline">Copied from the chapel archive</p>
+                    
+                    
+                    
+                    <p class="persona-doc__caption">The old road to the Ashen Peaks</p>
+                </div>
+                <span class="persona-doc__remnant"><span class="persona-seal persona-seal--black" aria-hidden="true">
+    <span class="persona-seal__half persona-seal__half--l"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+<path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+<circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+<circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+    <span class="persona-seal__half persona-seal__half--r"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+<path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#1f1b19"/>
+<path d="M98.1,50.0 C98.0,55.4 96.6,61.3 94.4,66.2 C92.3,71.1 88.5,75.2 85.1,79.4 C81.6,83.6 78.5,89.0 74.0,91.5 C69.4,94.0 63.3,93.4 57.9,94.6 C52.4,95.8 46.7,99.4 41.4,98.9 C36.1,98.3 30.9,94.2 26.2,91.2 C21.5,88.2 16.6,85.2 13.0,81.1 C9.4,76.9 6.4,71.7 4.7,66.5 C2.9,61.3 2.3,55.5 2.4,50.0 C2.4,44.5 2.9,38.6 4.9,33.6 C6.8,28.5 10.4,23.9 14.0,19.8 C17.5,15.6 21.5,11.2 26.2,8.7 C30.9,6.2 36.7,5.3 42.0,4.8 C47.3,4.2 52.5,4.9 57.8,5.5 C63.2,6.2 69.3,6.2 73.9,8.5 C78.6,10.9 82.4,15.7 85.9,19.9 C89.4,24.0 92.9,28.6 94.9,33.7 C96.9,38.7 98.2,44.6 98.1,50.0" fill="#080706" opacity=".35" transform="translate(2.5 3) scale(.95)"/>
+<circle cx="47" cy="46" r="40" fill="#1f1b19"/>
+<circle cx="44" cy="42" r="34" fill="#4f4741" opacity=".28"/>
+<circle cx="41" cy="38" r="22" fill="#4f4741" opacity=".22"/>
+<circle cx="51" cy="51" r="31" fill="#080706" opacity=".55"/>
+<circle cx="50" cy="50" r="29.5" fill="#1f1b19"/>
+<circle cx="47.5" cy="47" r="24" fill="#4f4741" opacity=".22"/>
+<circle cx="54" cy="55" r="20" fill="#080706" opacity=".22"/>
+<circle cx="50" cy="50" r="29.5" fill="none" stroke="#4f4741" stroke-opacity=".45" stroke-width=".9"/>
+<circle cx="50" cy="50" r="24.5" fill="none" stroke="#080706" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="1.2 1.6"/>
+<ellipse cx="34" cy="27" rx="9" ry="3.6" fill="#fff" opacity=".28" transform="rotate(-34 34 27)"/>
+<ellipse cx="68" cy="80" rx="7" ry="2.4" fill="#fff" opacity=".08" transform="rotate(-34 68 80)"/>
+</svg><span class="persona-seal__mark"><i class="fa-solid fa-skull" inert></i></span></span>
+</span>
+</span>
+            </div>
+
+        </div>
+        <p class="persona-docview__hint is-done"><i class="fa-solid fa-hand-pointer" inert></i> Click the seal to break it</p>
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="fa-solid fa-map" inert></i> Torn map</span>
+        <h3>The old road to the Ashen Peaks</h3>
+                <section class="persona-notes">
+                    <div class="persona-tabs" role="tablist">
+                            <button type="button" role="tab" data-action="noteTab" data-tab="private" aria-selected="true">My notes</button>
+                        <button type="button" role="tab" data-action="noteTab" data-tab="shared" aria-selected="false">Party notes · 0</button>
+                    </div>
+                        <textarea name="privateNote" rows="4" placeholder="Only you can see this."></textarea>
+                        <p class="persona-hint"><i class="fa-solid fa-lock" inert></i> Private to you. Saved as you type.</p>
+                </section>
+    </aside>
+</article>
+</div>
+    </div>
 </section>
 
 <script>
@@ -5238,6 +6741,27 @@ document.querySelectorAll(".persona-head .persona-chips").forEach(row => {
     new ResizeObserver(edges).observe(row);
     edges();
 });
+// Documents: switch paper, break the seal (the module does this in card.js), seal again.
+const docButtons = document.querySelectorAll(".pv-papers [data-doc]");
+const reset = view => {
+    const sealed = view.querySelector('[data-state="sealed"]');
+    if (!sealed.innerHTML.includes("persona-doc__seal")) return;
+    sealed.hidden = false; view.querySelector('[data-state="open"]').hidden = true;
+    sealed.querySelector(".persona-docview")?.classList.remove("is-breaking");
+};
+docButtons.forEach(b => b.addEventListener("click", () => {
+    docButtons.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    document.querySelectorAll("[data-docview]").forEach(v => { v.hidden = v.dataset.docview !== b.dataset.doc; });
+}));
+document.querySelector("[data-reseal]").addEventListener("click", () => document.querySelectorAll("[data-docview]").forEach(reset));
+document.querySelectorAll("[data-docview]").forEach(view => view.addEventListener("click", e => {
+    if (!e.target.closest('[data-action="breakSeal"]')) return;
+    const doc = view.querySelector('[data-state="sealed"] .persona-docview');
+    if (!doc || doc.classList.contains("is-breaking")) return;
+    doc.classList.add("is-breaking");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => { view.querySelector('[data-state="sealed"]').hidden = true; view.querySelector('[data-state="open"]').hidden = false; }, still ? 120 : 1500);
+}));
 const tabs = document.querySelectorAll(".pv-tabs button");
 const show = view => {
     tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));

@@ -1,0 +1,63 @@
+<article class="persona-docview persona-docview--{{paper}} {{#if sealed}}is-sealed{{/if}}" role="dialog" aria-label="{{name}}">
+    <button type="button" class="persona-card__close" data-action="closeCard" aria-label="{{localize "PERSONA.Close"}}"><i class="fa-solid fa-xmark" inert></i></button>
+
+    <div class="persona-docview__stage">
+        <div class="persona-doc persona-doc--{{paper}}" style="{{tilt}}">
+            <div class="persona-doc__sheet" style="{{clip}}">
+                {{#if mapImg}}<img class="persona-doc__map" src="{{mapImg}}" alt="" draggable="false">{{/if}}
+                <div class="persona-doc__text">
+                    {{#if dateline}}<p class="persona-doc__dateline">{{dateline}}</p>{{/if}}
+                    {{#unless mapImg}}<h2 class="persona-doc__heading">{{name}}</h2>{{/unless}}
+                    {{#if body}}<div class="persona-doc__body">{{{body}}}</div>{{/if}}
+                    {{#if secret}}
+                        <div class="persona-doc__revealed">{{{secret}}}</div>
+                    {{else if hiddenHint}}
+                        <div class="persona-doc__smudge" data-tooltip="{{localize "PERSONA.Doc.Unreadable"}}" aria-label="{{localize "PERSONA.Doc.Unreadable"}}"><span></span><span></span><span></span></div>
+                    {{/if}}
+                    {{#if signature}}<p class="persona-doc__signature">{{signature}}</p>{{/if}}
+                    {{#if mapImg}}<p class="persona-doc__caption">{{name}}</p>{{/if}}
+                </div>
+                {{#if hasSeal}}{{#unless sealed}}<span class="persona-doc__remnant">{{> persona-seal}}</span>{{/unless}}{{/if}}
+            </div>
+
+            {{#if sealed}}
+                <div class="persona-doc__folds" aria-hidden="true" style="{{clip}}">
+                    <span class="persona-doc__flap persona-doc__flap--top"></span>
+                    <span class="persona-doc__flap persona-doc__flap--bottom"></span>
+                </div>
+                <button type="button" class="persona-doc__seal" data-action="breakSeal" aria-label="{{localize "PERSONA.Doc.BreakSeal"}}">
+                    {{> persona-seal}}
+                    <span class="persona-doc__chips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </button>
+            {{/if}}
+        </div>
+        {{#if hasSeal}}<p class="persona-docview__hint {{#unless sealed}}is-done{{/unless}}"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "PERSONA.Doc.BreakSealHint"}}</p>{{/if}}
+    </div>
+
+    <aside class="persona-docview__side">
+        <span class="persona-eyebrow"><i class="{{paperIcon}}" inert></i> {{paperLabel}}</span>
+        <h3>{{name}}</h3>
+        {{#if shareTargets}}
+            <div class="persona-share persona-share--card">
+                <span class="persona-eyebrow">{{localize "PERSONA.Handout.ShowTo"}}</span>
+                <div class="persona-chips">
+                    {{#each shareTargets as |target|}}
+                        <button type="button" class="persona-chip" data-action="showHandout" data-who="{{target.id}}"><i class="{{target.icon}}" inert></i><span>{{target.label}}</span></button>
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+        {{#if isGM}}
+            <div class="persona-audit">
+                <span class="persona-eyebrow">{{localize "PERSONA.Card.WhoKnows"}}</span>
+                <div class="persona-status persona-status--static">
+                    {{#each audit as |layer|}}
+                        <span class="persona-status__layer is-{{layer.state}} {{#if layer.disabled}}is-disabled{{/if}}" data-tooltip="{{layer.tooltip}}"><i class="{{layer.icon}}" inert></i><span>{{layer.label}}</span>{{#if layer.count}}<b>{{layer.count}}</b>{{/if}}</span>
+                    {{/each}}
+                </div>
+                {{#if hasSeal}}<button type="button" class="persona-mini" data-action="resealPreview"><i class="fa-solid fa-stamp" inert></i><span>{{localize "PERSONA.Doc.Reseal"}}</span></button>{{/if}}
+            </div>
+        {{/if}}
+        {{> persona-notes}}
+    </aside>
+</article>

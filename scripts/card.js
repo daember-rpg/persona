@@ -3,8 +3,8 @@
  * and their notes. Closes with the X, Escape or a click outside.
  */
 import { MODULE_ID, TEMPLATE_ROOT } from "./constants.js";
-import { buildCardContext } from "./view-data.js";
-import { getEntry, canSee, markSeen, savePrivateNote, showHandout } from "./store.js";
+import { buildCardContext, buildDocumentContext } from "./view-data.js";
+import { getEntry, canSee, markSeen, savePrivateNote, showHandout, markOpened, unmarkOpened } from "./store.js";
 import { addSharedNote, deleteSharedNote } from "./relay.js";
 
 const renderTemplate = (...args) => foundry.applications.handlebars.renderTemplate(...args);
@@ -15,6 +15,7 @@ export class CardOverlay {
     #tab = "private";
     #saveTimer = null;
     #draft = null;
+    #breaking = false;
 
     constructor({ replayVideo }) {
         this.replayVideo = replayVideo;
@@ -74,10 +75,16 @@ export class CardOverlay {
         const entry = getEntry(this.#id);
         if (!entry) return this.close();
         const layer = this.#ensure();
-        const context = await buildCardContext(entry, { tab: this.#tab });
+        // While a seal is breaking, let the animation finish; the render after it shows the open letter.
+        if (this.#breaking) return;
+        const isDocument = entry.kind === "document";
+        const context = isDocument
+            ? await buildDocumentContext(entry, { tab: this.#tab })
+            : await buildCardContext(entry, { tab: this.#tab });
         // Keep what the player is typing if a refresh lands mid-sentence.
         const typingShared = layer.querySelector('input[name="sharedNote"]')?.value ?? "";
-        layer.innerHTML = await renderTemplate(`${TEMPLATE_ROOT}/card.hbs`, context);
+        layer.innerHTML = await renderTemplate(`${TEMPLATE_ROOT}/${isDocument ? "document" : "card"}.hbs`, context);
+        layer.classList.toggle("is-document", isDocument);
         if (this.#draft !== null) {
             const area = layer.querySelector('textarea[name="privateNote"]');
             if (area) area.value = this.#draft;
@@ -98,6 +105,8 @@ export class CardOverlay {
             this.#tab = target.dataset.tab;
             return this.render();
         }
+        if (action === "breakSeal") return this.#breakSeal();
+        if (action === "resealPreview") return unmarkOpened(this.#id).then(() => this.render());
         if (action === "deleteNote") return deleteSharedNote(this.#id, target.dataset.note);
         if (action === "replayVideo") return this.replayVideo(this.#id);
         if (action === "openLinked") return this.#openLinked(target.dataset.id);
@@ -107,6 +116,20 @@ export class CardOverlay {
                 ui.notifications.info(game.i18n.format("PERSONA.Handout.Shown", { name: getEntry(this.#id)?.name ?? "", who })));
         }
     };
+
+    /** The wax cracks, the halves fall, the folds open; then the letter is open for good (for this user). */
+    async #breakSeal() {
+        const view = this.#layer?.querySelector(".persona-docview.is-sealed");
+        if (!view || this.#breaking) return;
+        const id = this.#id;
+        const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        this.#breaking = true;
+        view.classList.add("is-breaking");
+        await new Promise(resolve => setTimeout(resolve, still ? 120 : 1500));
+        this.#breaking = false;
+        await markOpened(id);
+        if (this.#id === id) await this.render();
+    }
 
     async #openLinked(id) {
         await this.#flushNote();

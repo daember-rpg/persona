@@ -1,0 +1,6 @@
+<span class="persona-paper-mini persona-paper--{{paper}} {{#if sealed}}is-sealed{{/if}}" style="{{tilt}}">
+    <span class="persona-paper-mini__sheet" style="{{clip}}">
+        {{#if mapImg}}<img src="{{mapImg}}" alt="" draggable="false" loading="lazy">{{else}}<span class="persona-paper-mini__lines"></span>{{/if}}
+    </span>
+    {{#if hasSeal}}<span class="persona-paper-mini__seal {{#unless sealed}}is-broken{{/unless}}">{{> persona-seal}}</span>{{/if}}
+</span>
