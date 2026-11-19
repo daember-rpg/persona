@@ -17,7 +17,7 @@
         {{/if}}
         {{#if groups.length}}
             <div class="persona-chips">
-                {{#each groups as |group|}}<span class="persona-chip is-static"><i class="{{group.icon}}" inert></i><span>{{group.label}}</span></span>{{/each}}
+                {{#each groups as |group|}}<span class="persona-chip is-static"><span class="persona-dot" style="--dot: {{group.color}}"></span><span>{{group.label}}</span></span>{{/each}}
             </div>
         {{/if}}
 

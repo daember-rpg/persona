@@ -5227,6 +5227,70 @@
     .persona-tile:hover .persona-paper-mini { transform: rotate(var(--tilt, 0deg)); }
 }
 
+/* Editor group chips: the delete × sits inside the pill, at its right end. */
+.persona-chip-wrap { position: relative; }
+.persona .persona-chip-wrap .persona-chip { padding-right: 30px; }
+.persona .persona-chip-wrap .persona-chip-remove {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0;
+    border-radius: 50%;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.persona .persona-chip-wrap .persona-chip-remove:hover { background: var(--dp-ember-soft); color: var(--dp-ember-light); }
+
+/* A small caption above an icon picker. */
+.persona-label--sub { display: block; margin: 10px 0 6px; font-size: 11px; }
+
+/* ---------- Group colours (0.18): a dot on folders, filters and cards; the same colour as its Bonds slice ---------- */
+
+.persona-dot {
+    display: inline-block;
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--dot, var(--dp-gold));
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 8px color-mix(in srgb, var(--dot, #d4b25a) 55%, transparent);
+}
+
+/* A coloured folder: its rule starts in the group's colour. */
+.persona .persona-folder.has-color::after {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 70%, transparent), transparent);
+}
+
+.persona .persona-folder.has-color.is-collapsed .persona-dot { opacity: 0.6; }
+
+/* Editor: the dot sits inside the group's pill and changes its colour on click. */
+.persona .persona-chip-wrap .persona-chip { padding-left: 28px; }
+.persona .persona-dot--button {
+    position: absolute;
+    top: 50%;
+    left: 9px;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.persona .persona-dot--button:hover { transform: scale(1.25); box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 0 4px color-mix(in srgb, var(--dot) 40%, transparent); }
+.persona .persona-dot--button:focus-visible { outline: 2px solid var(--dp-gold); outline-offset: 2px; }
+
+.persona-swatches--flat { margin: 0; }
+.persona-swatches--flat .persona-swatches__option span {
+    width: 24px;
+    height: 24px;
+    background: var(--wax);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
 /* ---------- Preview chrome (not part of the module) ---------- */
 :root { color-scheme: dark; }
 html, body { margin: 0; height: 100%; }
@@ -5308,10 +5372,10 @@ body {
                     <i class="fa-solid fa-users" inert></i><span>Everyone</span><span class="persona-chip__count">14</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="g1" aria-pressed="false">
-                    <i class="fa-solid fa-fort-awesome" inert></i><span>Embermark</span><span class="persona-chip__count">4</span>
+                    <span class="persona-dot" style="--dot: #b4643e"></span><span>Embermark</span><span class="persona-chip__count">4</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="g2" aria-pressed="false">
-                    <i class="fa-solid fa-eye" inert></i><span>Veiled Order</span><span class="persona-chip__count">3</span>
+                    <span class="persona-dot" style="--dot: #8a5a8f"></span><span>Veiled Order</span><span class="persona-chip__count">3</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="places" aria-pressed="false">
                     <i class="fa-solid fa-map-location-dot" inert></i><span>Places</span><span class="persona-chip__count">3</span>
@@ -5322,7 +5386,7 @@ body {
     <div class="persona-body">
             
                 <section class="persona-section">
-                        <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="_docs" data-drop-folder="_docs"  aria-expanded="true">
+                        <button type="button" class="persona-folder  "  data-action="toggleFolder" data-folder="_docs" data-drop-folder="_docs"  aria-expanded="true">
                             <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
                             <i class="fa-solid fa-scroll" inert></i>
                             <span class="persona-folder__label">Party documents</span>
@@ -5461,9 +5525,9 @@ body {
                         </div>
                 </section>
                 <section class="persona-section">
-                        <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g1" data-drop-folder="g1" data-drag-group="g1" aria-expanded="true">
+                        <button type="button" class="persona-folder  has-color" style="--dot: #b4643e" data-action="toggleFolder" data-folder="g1" data-drop-folder="g1" data-drag-group="g1" aria-expanded="true">
                             <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                            <i class="fa-solid fa-chess-rook" inert></i>
+                            <span class="persona-dot" style="--dot: #b4643e"></span>
                             <span class="persona-folder__label">Embermark</span>
                             <span class="persona-folder__count">4</span>
                         </button>
@@ -5755,17 +5819,17 @@ body {
                         </div>
                 </section>
                 <section class="persona-section">
-                        <button type="button" class="persona-folder is-collapsed" data-action="toggleFolder" data-folder="g2" data-drop-folder="g2" data-drag-group="g2" aria-expanded="false">
+                        <button type="button" class="persona-folder is-collapsed has-color" style="--dot: #8a5a8f" data-action="toggleFolder" data-folder="g2" data-drop-folder="g2" data-drag-group="g2" aria-expanded="false">
                             <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                            <i class="fa-solid fa-eye" inert></i>
+                            <span class="persona-dot" style="--dot: #8a5a8f"></span>
                             <span class="persona-folder__label">Veiled Order</span>
                             <span class="persona-folder__count">3</span>
                         </button>
                 </section>
                 <section class="persona-section">
-                        <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g3" data-drop-folder="g3" data-drag-group="g3" aria-expanded="true">
+                        <button type="button" class="persona-folder  has-color" style="--dot: #c8452f" data-action="toggleFolder" data-folder="g3" data-drop-folder="g3" data-drag-group="g3" aria-expanded="true">
                             <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                            <i class="fa-solid fa-skull" inert></i>
+                            <span class="persona-dot" style="--dot: #c8452f"></span>
                             <span class="persona-folder__label">Kurdrax</span>
                             <span class="persona-folder__count">2</span>
                         </button>
@@ -5871,25 +5935,25 @@ body {
                     <i class="fa-solid fa-users" inert></i><span>Everyone</span><span class="persona-chip__count">11</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x0" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Resistência de Valtoria</span><span class="persona-chip__count">2</span>
+                    <span class="persona-dot" style="--dot: #b4643e"></span><span>Resistência de Valtoria</span><span class="persona-chip__count">2</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x1" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Elfos de Khaledin</span><span class="persona-chip__count">2</span>
+                    <span class="persona-dot" style="--dot: #74864a"></span><span>Elfos de Khaledin</span><span class="persona-chip__count">2</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x2" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Heróis de Tarlan</span><span class="persona-chip__count">2</span>
+                    <span class="persona-dot" style="--dot: #4f7a8a"></span><span>Heróis de Tarlan</span><span class="persona-chip__count">2</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x3" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Figuras Históricas</span><span class="persona-chip__count">3</span>
+                    <span class="persona-dot" style="--dot: #8a5a8f"></span><span>Figuras Históricas</span><span class="persona-chip__count">3</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x4" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Os senhores dos Dragões</span><span class="persona-chip__count">3</span>
+                    <span class="persona-dot" style="--dot: #c9a35a"></span><span>Os senhores dos Dragões</span><span class="persona-chip__count">3</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x5" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Aliados</span><span class="persona-chip__count">2</span>
+                    <span class="persona-dot" style="--dot: #c8452f"></span><span>Aliados</span><span class="persona-chip__count">2</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="x6" aria-pressed="false">
-                    <i class="fa-solid fa-city" inert></i><span>Campeões de Kurdrax</span><span class="persona-chip__count">4</span>
+                    <span class="persona-dot" style="--dot: #5d6b9a"></span><span>Campeões de Kurdrax</span><span class="persona-chip__count">4</span>
                 </button>
                 <button type="button" class="persona-chip " data-action="filter" data-filter="places" aria-pressed="false">
                     <i class="fa-solid fa-map-location-dot" inert></i><span>Places</span><span class="persona-chip__count">2</span>
@@ -5899,7 +5963,7 @@ body {
 
     <div class="persona-body">
                     <section class="persona-section">
-                            <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="_docs" aria-expanded="true">
+                            <button type="button" class="persona-folder  "  data-action="toggleFolder" data-folder="_docs" aria-expanded="true">
                                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
                                 <i class="fa-solid fa-scroll" inert></i>
                                 <span class="persona-folder__label">Party documents</span>
@@ -6057,9 +6121,9 @@ body {
             </div>
                     </section>
                     <section class="persona-section">
-                            <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g1" aria-expanded="true">
+                            <button type="button" class="persona-folder  has-color" style="--dot: #b4643e" data-action="toggleFolder" data-folder="g1" aria-expanded="true">
                                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                                <i class="fa-solid fa-chess-rook" inert></i>
+                                <span class="persona-dot" style="--dot: #b4643e"></span>
                                 <span class="persona-folder__label">Embermark</span>
                                 <span class="persona-folder__count">4</span>
                             </button>
@@ -6111,9 +6175,9 @@ body {
             </div>
                     </section>
                     <section class="persona-section">
-                            <button type="button" class="persona-folder " data-action="toggleFolder" data-folder="g3" aria-expanded="true">
+                            <button type="button" class="persona-folder  has-color" style="--dot: #c8452f" data-action="toggleFolder" data-folder="g3" aria-expanded="true">
                                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                                <i class="fa-solid fa-skull" inert></i>
+                                <span class="persona-dot" style="--dot: #c8452f"></span>
                                 <span class="persona-folder__label">Kurdrax</span>
                                 <span class="persona-folder__count">3</span>
                             </button>
@@ -6142,9 +6206,9 @@ body {
             </div>
                     </section>
                     <section class="persona-section">
-                            <button type="button" class="persona-folder is-collapsed" data-action="toggleFolder" data-folder="g2" aria-expanded="false">
+                            <button type="button" class="persona-folder is-collapsed has-color" style="--dot: #8a5a8f" data-action="toggleFolder" data-folder="g2" aria-expanded="false">
                                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                                <i class="fa-solid fa-eye" inert></i>
+                                <span class="persona-dot" style="--dot: #8a5a8f"></span>
                                 <span class="persona-folder__label">Veiled Order</span>
                                 <span class="persona-folder__count">3</span>
                             </button>
@@ -6167,7 +6231,7 @@ body {
             <p class="persona-card__title">Captain of the Embermark guard</p>
             
             <div class="persona-chips">
-                <span class="persona-chip is-static"><i class="fa-solid fa-chess-rook" inert></i><span>Embermark</span></span><span class="persona-chip is-static"><i class="fa-solid fa-shield-halved" inert></i><span>City Watch</span></span>
+                <span class="persona-chip is-static"><span class="persona-dot" style="--dot: #b4643e"></span><span>Embermark</span></span><span class="persona-chip is-static"><span class="persona-dot" style="--dot: #4f7a8a"></span><span>City Watch</span></span>
             </div>
 
             <div class="persona-card__summary"><p>Twenty years on the walls and never once late to a watch. Ilsa keeps the gate ledger herself and trusts no clerk with it.</p><p>She owes Lord Venn her post, and everyone at the Copper Kettle knows she hates it.</p></div>

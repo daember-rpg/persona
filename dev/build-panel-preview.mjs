@@ -111,8 +111,8 @@ const director = {
     isGM: true, search: "", hasPlayers: true, canArrange: true,
     chips: [
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: 14, active: true },
-        { id: "g1", label: "Embermark", icon: "fa-solid fa-fort-awesome", count: 4 },
-        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", count: 3 },
+        { id: "g1", label: "Embermark", icon: "fa-solid fa-fort-awesome", color: "#b4643e", color: "#b4643e", count: 4 },
+        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", color: "#8a5a8f", count: 3 },
         { id: "places", label: t("PERSONA.Filter.Places"), icon: "fa-solid fa-map-location-dot", count: 3 }
     ],
     sections: [
@@ -125,16 +125,16 @@ const director = {
             ]
         },
         {
-            id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", count: 4, items: [
+            id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", color: "#b4643e", count: 4, items: [
                 row("e1", "Captain Ilsa Marrow", "Captain of the guard", ["all", "all", "some", "none"], { isOpen: true, grid }),
                 row("e2", "Lord Aldric Venn", "Regent of Embermark", ["all", "all", "all", "some"], { hasVideo: true }),
                 row("e3", "Sister Hesper", "Healer at the Ash Chapel", ["all", "some", "none", "none"], { isSharing: true }),
                 row("e4", "Old Bram", "Innkeeper", ["all", "all", "all", "none"], { status: "dead" })
             ]
         },
-        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", count: 3, collapsed: true, items: [] },
+        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", color: "#8a5a8f", count: 3, collapsed: true, items: [] },
         {
-            id: "g3", label: "Kurdrax", icon: "fa-solid fa-skull", count: 2, items: [
+            id: "g3", label: "Kurdrax", icon: "fa-solid fa-skull", color: "#c8452f", count: 2, items: [
                 row("e8", "The Ashen King", "Lord of Kurdrax", ["some", "none", "none", "none"], { dark: true }),
                 row("e9", "Gorrik Ironjaw", "Champion of Kurdrax", ["all", "all", "some", "none"], { status: "missing" })
             ]
@@ -148,7 +148,7 @@ const gallery = {
     chips: [
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: 11, active: true },
         ...[["Resistência de Valtoria", 2], ["Elfos de Khaledin", 2], ["Heróis de Tarlan", 2], ["Figuras Históricas", 3], ["Os senhores dos Dragões", 3], ["Aliados", 2], ["Campeões de Kurdrax", 4]]
-            .map(([label, count], i) => ({ id: `x${i}`, label, icon: "fa-solid fa-city", count })),
+            .map(([label, count], i) => ({ id: `x${i}`, label, color: ["#b4643e", "#74864a", "#4f7a8a", "#8a5a8f", "#c9a35a", "#c8452f", "#5d6b9a"][i], count })),
         { id: "places", label: t("PERSONA.Filter.Places"), icon: "fa-solid fa-map-location-dot", count: 2 }
     ],
     sections: [
@@ -162,22 +162,22 @@ const gallery = {
             ]
         },
         {
-            id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", count: 4,
+            id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", color: "#b4643e", count: 4,
             people: [tile("e1", "Captain Ilsa Marrow", "Captain", { isNew: true }), tile("e2", "Lord Aldric Venn", "Regent"), tile("e3", "Sister Hesper", "Healer", { isPrivate: true }), tile("e4", "Old Bram", "Innkeeper", { status: "dead" })],
             places: [tile("p1", "The Copper Kettle", "Inn", { kind: "place", wide: true }), tile("p2", "Ash Chapel", "Temple", { kind: "place", wide: true })]
         },
         {
-            id: "g3", label: "Kurdrax", icon: "fa-solid fa-skull", count: 3,
+            id: "g3", label: "Kurdrax", icon: "fa-solid fa-skull", color: "#c8452f", count: 3,
             people: [tile("e8", "The Ashen King", "Lord of Kurdrax", { dark: true }), tile("e10", "Nyx", "Knife-for-hire"), tile("e13", null, "", { dark: true })], places: []
         },
-        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", count: 3, collapsed: true, people: [], places: [] }
+        { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", color: "#8a5a8f", count: 3, collapsed: true, people: [], places: [] }
     ]
 };
 
 const cardData = {
     kind: "npc", kindLabel: t("PERSONA.Kind.npc"), named: true, name: "Captain Ilsa Marrow", title: "Captain of the Embermark guard",
     img: avatar("Captain Ilsa Marrow"), frame: "", isGM: false, showPrivate: false, canWriteShared: true,
-    groups: [{ icon: "fa-solid fa-chess-rook", label: "Embermark" }, { icon: "fa-solid fa-shield-halved", label: "City Watch" }],
+    groups: [{ color: "#b4643e", label: "Embermark" }, { color: "#4f7a8a", label: "City Watch" }],
     summary: "<p>Twenty years on the walls and never once late to a watch. Ilsa keeps the gate ledger herself and trusts no clerk with it.</p><p>She owes Lord Venn her post, and everyone at the Copper Kettle knows she hates it.</p>",
     secret: "<p>She lets one cart through the north gate every new moon, unchecked.</p>",
     people: [], places: [{ id: "p1", name: "The Copper Kettle" }, { id: "p2", name: "North Gate" }],

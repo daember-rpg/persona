@@ -54,7 +54,7 @@ function matchesSearch(entry, search, user) {
 function buildChips(pool, filter, isGM) {
     const count = predicate => pool.filter(predicate).length;
     const groups = getGroups()
-        .map(group => ({ id: group.id, label: group.label, icon: group.icon, count: count(e => e.groups.includes(group.id)) }))
+        .map(group => ({ id: group.id, label: group.label, color: group.color, count: count(e => e.groups.includes(group.id)) }))
         .filter(group => isGM || group.count > 0);
     return [
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: pool.length },
@@ -77,7 +77,7 @@ function buildSections(list, { filter, search, collapsed, item }) {
     const docs = list.filter(e => e.kind === "document");
     const rest = list.filter(e => e.kind !== "document");
     const sections = getGroups()
-        .map(group => ({ id: group.id, label: group.label, icon: group.icon, entries: rest.filter(e => e.groups.includes(group.id)) }))
+        .map(group => ({ id: group.id, label: group.label, color: group.color, entries: rest.filter(e => e.groups.includes(group.id)) }))
         .filter(section => section.entries.length);
     if (docs.length) sections.unshift({ id: DOCS, label: t("PERSONA.Doc.Folder"), icon: "fa-solid fa-scroll", entries: docs });
     const loose = rest.filter(e => !e.groups.length);
@@ -89,6 +89,7 @@ function buildSections(list, { filter, search, collapsed, item }) {
         id: section.id,
         label: section.label,
         icon: section.icon,
+        color: section.color,
         count: section.entries.length,
         collapsed: !!collapsed?.[section.id],
         items: section.entries.map(item)

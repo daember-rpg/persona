@@ -2,7 +2,7 @@
  * Data access for entries (people and places), groups, reveals and notes.
  * Reveal rules are pure functions so they can be tested without Foundry.
  */
-import { MODULE_ID, LAYERS, ALL } from "./constants.js";
+import { MODULE_ID, LAYERS, ALL, GROUP_COLORS } from "./constants.js";
 import { getSetting, setSetting } from "./settings.js";
 
 /* -------------------------------------------- */
@@ -206,22 +206,41 @@ export function linkToPlace(personId, placeId, on) {
 /*  Groups                                      */
 /* -------------------------------------------- */
 
+const isColor = c => /^#[0-9a-f]{6}$/i.test(String(c ?? ""));
+
+/** Groups in folder order. A group without a colour of its own takes the palette's, by position. */
 export function getGroups() {
     return Object.values(getSetting("groups") ?? {})
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.label.localeCompare(b.label));
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.label.localeCompare(b.label))
+        .map((g, i) => ({ ...g, color: isColor(g.color) ? g.color : GROUP_COLORS[i % GROUP_COLORS.length] }));
 }
 
-export async function createGroup(label, icon = "fa-solid fa-bookmark") {
+/** The first palette colour no group uses yet (else the next in turn). */
+export function nextGroupColor() {
+    const used = new Set(getGroups().map(g => g.color.toLowerCase()));
+    return GROUP_COLORS.find(c => !used.has(c.toLowerCase())) ?? GROUP_COLORS[getGroups().length % GROUP_COLORS.length];
+}
+
+export async function createGroup(label, color = null) {
     const text = String(label ?? "").trim();
     if (!text) return null;
     const existing = getGroups().find(g => g.label.toLowerCase() === text.toLowerCase());
     if (existing) return existing.id;
     const id = foundry.utils.randomID();
+    const chosen = isColor(color) ? color : nextGroupColor();
     await updateSetting("groups", groups => {
-        groups[id] = { id, label: text, icon, order: Object.keys(groups).length };
+        groups[id] = { id, label: text, color: chosen, order: Object.keys(groups).length };
         return groups;
     });
     return id;
+}
+
+export function setGroupColor(id, color) {
+    if (!isColor(color)) return Promise.resolve();
+    return updateSetting("groups", groups => {
+        if (groups[id]) groups[id] = { ...groups[id], color };
+        return groups;
+    });
 }
 
 /**

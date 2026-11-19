@@ -20,7 +20,7 @@
         <div class="persona-chips">
             {{#each chips as |chip|}}
                 <button type="button" class="persona-chip {{#if chip.active}}is-active{{/if}}" data-action="filter" data-filter="{{chip.id}}" aria-pressed="{{#if chip.active}}true{{else}}false{{/if}}">
-                    <i class="{{chip.icon}}" inert></i><span>{{chip.label}}</span><span class="persona-chip__count">{{chip.count}}</span>
+                    {{#if chip.color}}<span class="persona-dot" style="--dot: {{chip.color}}"></span>{{else}}<i class="{{chip.icon}}" inert></i>{{/if}}<span>{{chip.label}}</span><span class="persona-chip__count">{{chip.count}}</span>
                 </button>
             {{/each}}
         </div>

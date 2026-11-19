@@ -143,10 +143,11 @@
         <span class="persona-label">{{localize "PERSONA.Entry.Groups"}}</span>
         <div class="persona-chips">
             {{#each groups as |group|}}
-                <span class="persona-chip-wrap">
+                <span class="persona-chip-wrap" style="--dot: {{group.color}}">
                     <button type="button" class="persona-chip {{#if group.selected}}is-active{{/if}}" data-action="toggleGroup" data-group="{{group.id}}" aria-pressed="{{#if group.selected}}true{{else}}false{{/if}}">
-                        <i class="{{group.icon}}" inert></i><span>{{group.label}}</span>
+                        <span>{{group.label}}</span>
                     </button>
+                    <button type="button" class="persona-dot persona-dot--button" data-action="cycleGroupColor" data-group="{{group.id}}" data-tooltip="{{localize "PERSONA.Group.ChangeColor"}}" aria-label="{{localize "PERSONA.Group.ChangeColor"}}"></button>
                     <button type="button" class="persona-chip-remove" data-action="removeGroup" data-group="{{group.id}}" aria-label="{{localize "PERSONA.Group.Delete"}}" data-tooltip="{{localize "PERSONA.Group.Delete"}}"><i class="fa-solid fa-xmark" inert></i></button>
                 </span>
             {{else}}
@@ -157,10 +158,10 @@
             <input type="text" name="newGroup" placeholder="{{localize "PERSONA.Group.NewPlaceholder"}}" autocomplete="off">
             <button type="button" class="persona-mini" data-action="addGroup"><i class="fa-solid fa-plus" inert></i> {{localize "PERSONA.Group.Add"}}</button>
         </div>
-        <span class="persona-label persona-label--sub">{{localize "PERSONA.Group.Icon"}}</span>
-        <div class="persona-icons" role="radiogroup" aria-label="{{localize "PERSONA.Group.Icon"}}">
-            {{#each icons as |opt index|}}
-                <label class="persona-icons__option" data-tooltip="{{opt.label}}"><input type="radio" name="newGroupIcon" value="{{opt.icon}}" aria-label="{{opt.label}}" {{#unless index}}checked{{/unless}}><i class="{{opt.icon}}" inert></i></label>
+        <span class="persona-label persona-label--sub">{{localize "PERSONA.Group.Color"}}</span>
+        <div class="persona-swatches persona-swatches--flat" role="radiogroup" aria-label="{{localize "PERSONA.Group.Color"}}">
+            {{#each newGroupColors as |c|}}
+                <label class="persona-swatches__option"><input type="radio" name="newGroupColor" value="{{c.color}}" aria-label="{{c.color}}" {{#if c.selected}}checked{{/if}}><span style="--wax: {{c.color}}; --wax-light: {{c.color}}"></span></label>
             {{/each}}
         </div>
     </div>

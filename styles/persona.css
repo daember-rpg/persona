@@ -5238,3 +5238,49 @@
 
 /* A small caption above an icon picker. */
 .persona-label--sub { display: block; margin: 10px 0 6px; font-size: 11px; }
+
+/* ---------- Group colours (0.18): a dot on folders, filters and cards; the same colour as its Bonds slice ---------- */
+
+.persona-dot {
+    display: inline-block;
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--dot, var(--dp-gold));
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 8px color-mix(in srgb, var(--dot, #d4b25a) 55%, transparent);
+}
+
+/* A coloured folder: its rule starts in the group's colour. */
+.persona .persona-folder.has-color::after {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 70%, transparent), transparent);
+}
+
+.persona .persona-folder.has-color.is-collapsed .persona-dot { opacity: 0.6; }
+
+/* Editor: the dot sits inside the group's pill and changes its colour on click. */
+.persona .persona-chip-wrap .persona-chip { padding-left: 28px; }
+.persona .persona-dot--button {
+    position: absolute;
+    top: 50%;
+    left: 9px;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.persona .persona-dot--button:hover { transform: scale(1.25); box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 0 4px color-mix(in srgb, var(--dot) 40%, transparent); }
+.persona .persona-dot--button:focus-visible { outline: 2px solid var(--dp-gold); outline-offset: 2px; }
+
+.persona-swatches--flat { margin: 0; }
+.persona-swatches--flat .persona-swatches__option span {
+    width: 24px;
+    height: 24px;
+    background: var(--wax);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}

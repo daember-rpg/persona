@@ -7,9 +7,9 @@
         {{#if section.flat}}
             <div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Panel.Cast"}}</span><span>{{section.items.length}}</span></div>
         {{else}}
-            <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}}" data-action="toggleFolder" data-folder="{{section.id}}" data-drop-folder="{{section.id}}" {{#if ../canArrange}}{{#unless section.isLoose}}data-drag-group="{{section.id}}"{{/unless}}{{/if}} aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
+            <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}} {{#if section.color}}has-color{{/if}}" {{#if section.color}}style="--dot: {{section.color}}"{{/if}} data-action="toggleFolder" data-folder="{{section.id}}" data-drop-folder="{{section.id}}" {{#if ../canArrange}}{{#unless section.isLoose}}data-drag-group="{{section.id}}"{{/unless}}{{/if}} aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
                 <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                <i class="{{section.icon}}" inert></i>
+                {{#if section.color}}<span class="persona-dot" style="--dot: {{section.color}}"></span>{{else}}<i class="{{section.icon}}" inert></i>{{/if}}
                 <span class="persona-folder__label">{{section.label}}</span>
                 <span class="persona-folder__count">{{section.count}}</span>
             </button>

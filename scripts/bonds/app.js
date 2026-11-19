@@ -37,7 +37,7 @@ function activeSheets() {
 
 /** The GM's Persona folders as the wheel's default slices, in folder order. */
 function folderTags() {
-    return getGroups().map((g, i) => ({ key: g.id, label: g.label, color: SECTOR_COLORS[i % SECTOR_COLORS.length] }));
+    return getGroups().map(g => ({ key: g.id, label: g.label, color: g.color }));
 }
 
 /**

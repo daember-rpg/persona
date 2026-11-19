@@ -7,9 +7,9 @@
     {{#each sections as |section|}}
         <section class="persona-section">
             {{#unless section.flat}}
-                <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}}" data-action="toggleFolder" data-folder="{{section.id}}" aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
+                <button type="button" class="persona-folder {{#if section.collapsed}}is-collapsed{{/if}} {{#if section.color}}has-color{{/if}}" {{#if section.color}}style="--dot: {{section.color}}"{{/if}} data-action="toggleFolder" data-folder="{{section.id}}" aria-expanded="{{#if section.collapsed}}false{{else}}true{{/if}}">
                     <i class="fa-solid fa-chevron-down persona-folder__chevron" inert></i>
-                    <i class="{{section.icon}}" inert></i>
+                    {{#if section.color}}<span class="persona-dot" style="--dot: {{section.color}}"></span>{{else}}<i class="{{section.icon}}" inert></i>{{/if}}
                     <span class="persona-folder__label">{{section.label}}</span>
                     <span class="persona-folder__count">{{section.count}}</span>
                 </button>

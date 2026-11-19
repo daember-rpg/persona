@@ -1,8 +1,8 @@
 /**
  * GM editor for one entry: identity, art, Journal link, summary, secret, groups, video.
  */
-import { TEMPLATE_ROOT, GROUP_ICONS, GROUP_ICON_NAMES } from "./constants.js";
-import { getEntry, getEntries, saveEntry, deleteEntry, getGroups, createGroup, normalizeEntry, deleteGroup, linkToPlace, patchEntry } from "./store.js";
+import { TEMPLATE_ROOT, GROUP_COLORS } from "./constants.js";
+import { getEntry, getEntries, saveEntry, deleteEntry, getGroups, createGroup, normalizeEntry, deleteGroup, linkToPlace, patchEntry, nextGroupColor, setGroupColor } from "./store.js";
 import { summaryFromJournal } from "./entries.js";
 import { imageOf, frameStyle, documentLook } from "./view-data.js";
 import { PAPERS, SEAL_COLORS, SEAL_SIGILS } from "./documents.js";
@@ -29,6 +29,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             togglePerson: EntryEditor.#onTogglePerson,
             addGroup: EntryEditor.#onAddGroup,
             removeGroup: EntryEditor.#onRemoveGroup,
+            cycleGroupColor: EntryEditor.#onCycleGroupColor,
             deleteEntry: EntryEditor.#onDelete,
             resetFrame: EntryEditor.#onResetFrame
         }
@@ -42,6 +43,8 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     #entry;
     /** For a place: the people linked to it (stored on each person). */
     #people;
+    /** Colour picked for the next group, kept across re-renders. */
+    #newGroupColor = null;
 
     constructor(entryId = null, { kind, ...options } = {}) {
         super({ ...options, id: `persona-editor-${entryId ?? "new"}` });
@@ -92,7 +95,10 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
                 .map(e => ({ id: e.id, name: e.name, selected: entry.places.includes(e.id) })),
             peopleOptions: getEntries().filter(e => e.kind === "npc" && e.id !== entry.id)
                 .map(e => ({ id: e.id, name: e.name, selected: this.#people.has(e.id) })),
-            icons: GROUP_ICONS.map(icon => ({ icon, label: game.i18n.localize(`PERSONA.Group.Icons.${GROUP_ICON_NAMES[icon]}`) })),
+            newGroupColors: (() => {
+                const pick = this.#newGroupColor ?? nextGroupColor();
+                return GROUP_COLORS.map(color => ({ color, selected: color === pick }));
+            })(),
             statuses: [
                 { id: "alive", icon: "fa-solid fa-heart-pulse" },
                 { id: "dead", icon: "fa-solid fa-skull" },
@@ -171,6 +177,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             this.#readForm();
             // Following the Journal locks the story text; unfollowing makes it editable.
             // These change which fields show (or the little preview of the paper).
+            if (event.target.name === "newGroupColor") this.#newGroupColor = event.target.value;
             if (["syncJournal", "kind", "paper", "sealed", "sealColor", "sealMarkKind", "sealMarkText"].includes(event.target.name)) this.render();
         });
     }
@@ -304,13 +311,24 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     static async #onAddGroup() {
         this.#readForm();
         const input = this.element.querySelector('[name="newGroup"]');
-        const icon = this.element.querySelector('[name="newGroupIcon"]:checked')?.value;
+        const color = this.element.querySelector('[name="newGroupColor"]:checked')?.value;
         const label = input?.value?.trim();
-        const id = await createGroup(label, icon);
+        const id = await createGroup(label, color);
         if (!id) return input?.focus();
+        this.#newGroupColor = null;
         this.#entry.groups = [...new Set([...this.#entry.groups, id])];
         await this.#saveGroups();
         ui.notifications.info(game.i18n.format("PERSONA.Group.AddedTo", { name: this.#entry.name || "?", group: label }));
+        this.render();
+    }
+
+    /** The dot on a group: next colour of the palette. Saved right away, for every entry in the group. */
+    static async #onCycleGroupColor(_event, target) {
+        this.#readForm();
+        const group = getGroups().find(g => g.id === target.dataset.group);
+        if (!group) return;
+        const at = GROUP_COLORS.findIndex(c => c.toLowerCase() === group.color.toLowerCase());
+        await setGroupColor(group.id, GROUP_COLORS[(at + 1) % GROUP_COLORS.length]);
         this.render();
     }
 

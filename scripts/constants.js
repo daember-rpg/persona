@@ -9,7 +9,13 @@ export const ALL = "all";
 
 export const KINDS = ["npc", "place", "document"];
 
-/** Icons for a new group, with the name shown on hover (PERSONA.Group.Icons.<name>). */
+/**
+ * A group's colour: shown on its folder, its filter, cards, and as its slice on every Bonds wheel.
+ * Same palette (and order) as the Bonds slices, so worlds from before 0.18 keep their wheel colours.
+ */
+export const GROUP_COLORS = ["#b4643e", "#74864a", "#4f7a8a", "#8a5a8f", "#c9a35a", "#c8452f", "#5d6b9a", "#857a65"];
+
+/** Icons groups were given before 0.18 (kept in the data, no longer chosen). */
 export const GROUP_ICON_NAMES = {
     "fa-solid fa-city": "city", "fa-solid fa-landmark": "temple", "fa-solid fa-crown": "nobility", "fa-solid fa-hammer": "guild",
     "fa-solid fa-mask": "secret", "fa-solid fa-route": "journey", "fa-solid fa-bookmark": "chapter", "fa-solid fa-tree": "wilds",
