@@ -21,7 +21,7 @@ export const SEAL_COLORS = {
     violet: ["#552260", "#8f52a0", "#24092b"]
 };
 
-/** What's pressed into the wax: an initial (letters) or one of these marks. */
+/** What's pressed into the wax: an initial (letters) or one of these marks (names: PERSONA.Doc.Marks.<last word>). */
 export const SEAL_SIGILS = [
     "fa-solid fa-crown", "fa-solid fa-chess-rook", "fa-solid fa-skull", "fa-solid fa-eye",
     "fa-solid fa-dragon", "fa-solid fa-feather-pointed", "fa-solid fa-sun", "fa-solid fa-moon",

@@ -9,11 +9,13 @@ export const ALL = "all";
 
 export const KINDS = ["npc", "place", "document"];
 
-export const GROUP_ICONS = [
-    "fa-solid fa-city", "fa-solid fa-landmark", "fa-solid fa-crown", "fa-solid fa-hammer",
-    "fa-solid fa-mask", "fa-solid fa-route", "fa-solid fa-bookmark", "fa-solid fa-tree",
-    "fa-solid fa-dungeon", "fa-solid fa-ship", "fa-solid fa-scroll", "fa-solid fa-skull"
-];
+/** Icons for a new group, with the name shown on hover (PERSONA.Group.Icons.<name>). */
+export const GROUP_ICON_NAMES = {
+    "fa-solid fa-city": "city", "fa-solid fa-landmark": "temple", "fa-solid fa-crown": "nobility", "fa-solid fa-hammer": "guild",
+    "fa-solid fa-mask": "secret", "fa-solid fa-route": "journey", "fa-solid fa-bookmark": "chapter", "fa-solid fa-tree": "wilds",
+    "fa-solid fa-dungeon": "dungeon", "fa-solid fa-ship": "sea", "fa-solid fa-scroll": "lore", "fa-solid fa-skull": "enemies"
+};
+export const GROUP_ICONS = Object.keys(GROUP_ICON_NAMES);
 
 export const DEFAULT_VIDEO = {
     nonce: null,       // changes on every play, so a client can dismiss one showing locally

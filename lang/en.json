@@ -140,10 +140,24 @@
       "Delete": "Delete group",
       "DeleteConfirm": "Delete the group \"{name}\"? People and places stay; they just leave this group.",
       "NewPlaceholder": "New group: Ashford, Smiths' Guild, Chapter 2…",
-      "Icon": "Group icon",
+      "Icon": "Icon for the new group (shown on its folder and filter)",
       "None": "No groups yet.",
       "Ungrouped": "No group",
-      "AddedTo": "{name} added to {group}."
+      "AddedTo": "{name} added to {group}.",
+      "Icons": {
+        "city": "City or town",
+        "temple": "Temple, faith or institution",
+        "nobility": "Nobility or royalty",
+        "guild": "Guild or craft",
+        "secret": "Secret society or spies",
+        "journey": "Journey or road",
+        "chapter": "Chapter or arc",
+        "wilds": "Wilds or forest folk",
+        "dungeon": "Dungeon or ruins",
+        "sea": "Sea, ship or port",
+        "lore": "History or legends",
+        "enemies": "Enemies or the dead"
+      }
     },
     "Settings": {
       "dockInTriad": {
@@ -405,7 +419,22 @@
       },
       "BreakSeal": "Break the seal",
       "BreakSealHint": "Click the seal to break it",
-      "Reseal": "Seal it again (on your screen)"
+      "Reseal": "Seal it again (on your screen)",
+      "Marks": {
+        "letters": "Initials",
+        "crown": "Crown",
+        "skull": "Skull",
+        "eye": "Eye",
+        "dragon": "Dragon",
+        "sun": "Sun",
+        "moon": "Moon",
+        "khanda": "Crossed blades",
+        "fire": "Flame",
+        "leaf": "Leaf",
+        "chess-rook": "Tower",
+        "feather-pointed": "Quill",
+        "shield-halved": "Shield"
+      }
     }
   }
 }

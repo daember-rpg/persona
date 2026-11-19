@@ -89,9 +89,9 @@
                 </div>
                 <span class="persona-label">{{localize "PERSONA.Doc.SealMark"}} <small>{{localize "PERSONA.Doc.SealMarkHint"}}</small></span>
                 <div class="persona-icons persona-icons--seal" role="radiogroup">
-                    <label class="persona-icons__option persona-icons__option--text"><input type="radio" name="sealMarkKind" value="text" {{#unless markIsIcon}}checked{{/unless}}><span>Aa</span></label>
+                    <label class="persona-icons__option persona-icons__option--text" data-tooltip="{{localize "PERSONA.Doc.Marks.letters"}}"><input type="radio" name="sealMarkKind" value="text" aria-label="{{localize "PERSONA.Doc.Marks.letters"}}" {{#unless markIsIcon}}checked{{/unless}}><span>Aa</span></label>
                     {{#each sigils as |sg|}}
-                        <label class="persona-icons__option"><input type="radio" name="sealMarkKind" value="{{sg.icon}}" {{#if sg.selected}}checked{{/if}}><i class="{{sg.icon}}" inert></i></label>
+                        <label class="persona-icons__option" data-tooltip="{{sg.label}}"><input type="radio" name="sealMarkKind" value="{{sg.icon}}" aria-label="{{sg.label}}" {{#if sg.selected}}checked{{/if}}><i class="{{sg.icon}}" inert></i></label>
                     {{/each}}
                 </div>
                 {{#unless markIsIcon}}<input type="text" name="sealMarkText" value="{{markText}}" maxlength="2" placeholder="{{localize "PERSONA.Doc.SealMarkPlaceholder"}}" autocomplete="off">{{/unless}}
@@ -157,9 +157,10 @@
             <input type="text" name="newGroup" placeholder="{{localize "PERSONA.Group.NewPlaceholder"}}" autocomplete="off">
             <button type="button" class="persona-mini" data-action="addGroup"><i class="fa-solid fa-plus" inert></i> {{localize "PERSONA.Group.Add"}}</button>
         </div>
+        <span class="persona-label persona-label--sub">{{localize "PERSONA.Group.Icon"}}</span>
         <div class="persona-icons" role="radiogroup" aria-label="{{localize "PERSONA.Group.Icon"}}">
-            {{#each icons as |icon index|}}
-                <label class="persona-icons__option"><input type="radio" name="newGroupIcon" value="{{icon}}" {{#unless index}}checked{{/unless}}><i class="{{icon}}" inert></i></label>
+            {{#each icons as |opt index|}}
+                <label class="persona-icons__option" data-tooltip="{{opt.label}}"><input type="radio" name="newGroupIcon" value="{{opt.icon}}" aria-label="{{opt.label}}" {{#unless index}}checked{{/unless}}><i class="{{opt.icon}}" inert></i></label>
             {{/each}}
         </div>
     </div>

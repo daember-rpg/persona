@@ -5235,3 +5235,6 @@
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 .persona .persona-chip-wrap .persona-chip-remove:hover { background: var(--dp-ember-soft); color: var(--dp-ember-light); }
+
+/* A small caption above an icon picker. */
+.persona-label--sub { display: block; margin: 10px 0 6px; font-size: 11px; }

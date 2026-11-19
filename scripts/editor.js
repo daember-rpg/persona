@@ -1,7 +1,7 @@
 /**
  * GM editor for one entry: identity, art, Journal link, summary, secret, groups, video.
  */
-import { TEMPLATE_ROOT, GROUP_ICONS } from "./constants.js";
+import { TEMPLATE_ROOT, GROUP_ICONS, GROUP_ICON_NAMES } from "./constants.js";
 import { getEntry, getEntries, saveEntry, deleteEntry, getGroups, createGroup, normalizeEntry, deleteGroup, linkToPlace, patchEntry } from "./store.js";
 import { summaryFromJournal } from "./entries.js";
 import { imageOf, frameStyle, documentLook } from "./view-data.js";
@@ -80,7 +80,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             doc: isDocument ? documentLook({ ...entry, id: entry.id }, { getFlag: () => [] }) : null,
             papers: PAPERS.map(p => ({ ...p, label: t(`PERSONA.Doc.Paper.${p.id}`), selected: entry.paper === p.id })),
             sealColors: Object.entries(SEAL_COLORS).map(([id, [base, light]]) => ({ id, base, light, label: t(`PERSONA.Doc.Wax.${id}`), selected: entry.sealColor === id })),
-            sigils: SEAL_SIGILS.map(icon => ({ icon, selected: entry.sealMark === icon })),
+            sigils: SEAL_SIGILS.map(icon => ({ icon, label: game.i18n.localize(`PERSONA.Doc.Marks.${icon.split("fa-").pop()}`), selected: entry.sealMark === icon })),
             markIsIcon,
             markText: markIsIcon ? "" : entry.sealMark,
             summaryLocked: !!entry.journalUuid && entry.syncJournal,
@@ -92,7 +92,7 @@ export class EntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
                 .map(e => ({ id: e.id, name: e.name, selected: entry.places.includes(e.id) })),
             peopleOptions: getEntries().filter(e => e.kind === "npc" && e.id !== entry.id)
                 .map(e => ({ id: e.id, name: e.name, selected: this.#people.has(e.id) })),
-            icons: GROUP_ICONS,
+            icons: GROUP_ICONS.map(icon => ({ icon, label: game.i18n.localize(`PERSONA.Group.Icons.${GROUP_ICON_NAMES[icon]}`) })),
             statuses: [
                 { id: "alive", icon: "fa-solid fa-heart-pulse" },
                 { id: "dead", icon: "fa-solid fa-skull" },
