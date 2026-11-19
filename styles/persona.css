@@ -5220,3 +5220,18 @@
     .persona-docview__hint { animation: none; }
     .persona-tile:hover .persona-paper-mini { transform: rotate(var(--tilt, 0deg)); }
 }
+
+/* Editor group chips: the delete × sits inside the pill, at its right end. */
+.persona-chip-wrap { position: relative; }
+.persona .persona-chip-wrap .persona-chip { padding-right: 30px; }
+.persona .persona-chip-wrap .persona-chip-remove {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0;
+    border-radius: 50%;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.persona .persona-chip-wrap .persona-chip-remove:hover { background: var(--dp-ember-soft); color: var(--dp-ember-light); }
