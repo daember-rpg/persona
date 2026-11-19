@@ -57,21 +57,24 @@ export function registerSettings() {
         type: Object,
         default: { shape: "curve", bend: 0.5, show: "always" }
     });
-    // Bonds: record a moment on the timeline without thinking about it.
-    game.settings.register(MODULE_ID, "autoMoment", {
-        name: "PERSONA.Settings.autoMoment.Name",
-        hint: "PERSONA.Settings.autoMoment.Hint",
+    // Bonds: offer to record a moment (the GM always decides; nothing is recorded on its own).
+    // A new key, so worlds that had 0.13–0.16's automatic recording stop it after updating.
+    game.settings.register(MODULE_ID, "momentPrompt", {
+        name: "PERSONA.Settings.momentPrompt.Name",
+        hint: "PERSONA.Settings.momentPrompt.Hint",
         scope: "world",
         config: true,
         type: String,
         choices: {
-            off: "PERSONA.Settings.autoMoment.off",
-            session: "PERSONA.Settings.autoMoment.session",
-            combat: "PERSONA.Settings.autoMoment.combat",
-            both: "PERSONA.Settings.autoMoment.both"
+            off: "PERSONA.Settings.momentPrompt.off",
+            session: "PERSONA.Settings.momentPrompt.session",
+            combat: "PERSONA.Settings.momentPrompt.combat",
+            both: "PERSONA.Settings.momentPrompt.both"
         },
-        default: "session"
+        default: "off"
     });
+    // Last time the GM was asked at login, so leaving and coming back doesn't ask again.
+    game.settings.register(MODULE_ID, "momentPromptSeen", { scope: "world", config: false, type: Number, default: 0 });
     game.settings.register(MODULE_ID, "revealToasts", {
         name: "PERSONA.Settings.revealToasts.Name",
         hint: "PERSONA.Settings.revealToasts.Hint",

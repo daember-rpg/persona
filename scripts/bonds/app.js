@@ -117,34 +117,62 @@ export async function recordMoment(label, auto = null) {
 }
 
 /* -------------------------------------------- */
-/*  Automatic moments                           */
+/*  Moment prompts                              */
 /* -------------------------------------------- */
 
-const SESSION_GAP = 6 * 60 * 60 * 1000; // a GM login this long after the last moment = a new session
+const SESSION_GAP = 6 * 60 * 60 * 1000; // a GM login this long after the last moment or prompt = a new session
 
-/** Only one client records: the active GM. */
+/** Only one client asks: the active GM. */
 function isRecorder() {
     return game.user.isGM && (game.users.activeGM?.id ?? game.user.id) === game.user.id;
 }
 
 const dateLabel = () => new Date().toLocaleDateString(game.i18n.lang, { day: "numeric", month: "short" });
 
-/** At the start of a session: how every wheel looked when the table sat down. */
-export async function autoMomentOnLogin() {
-    if (!isRecorder() || !["session", "both"].includes(getSetting("autoMoment"))) return;
-    if (!characters().some(c => !c.retired)) return;
-    const last = getMoments().at(-1);
-    if (last && Date.now() - last.ts < SESSION_GAP) return;
-    const n = getMoments().filter(m => m.auto === "session").length + 1;
-    await recordMoment(game.i18n.format("PERSONA.Bonds.AutoSession", { n, date: dateLabel() }), "session");
+/**
+ * Asks the GM whether to record a moment, with the label ready to edit.
+ * Nothing is recorded unless the GM says so. Returns the new moment's id, or null.
+ */
+async function offerMoment(label, auto, question) {
+    const DialogV2 = foundry.applications.api.DialogV2;
+    const escape = foundry.utils.escapeHTML ?? (s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`));
+    const chosen = await DialogV2.prompt({
+        window: { title: game.i18n.localize("PERSONA.Bonds.PromptTitle"), icon: "fa-solid fa-hourglass-half" },
+        classes: ["persona-moment-prompt"],
+        content: `<p>${question}</p>
+            <div class="form-group"><label>${game.i18n.localize("PERSONA.Bonds.PromptLabel")}</label>
+            <input type="text" name="label" value="${escape(label)}" maxlength="60" autofocus></div>`,
+        ok: {
+            label: game.i18n.localize("PERSONA.Bonds.PromptRecord"),
+            icon: "fa-solid fa-bookmark",
+            callback: (event, button) => button.form.elements.label.value.trim() || label
+        },
+        rejectClose: false
+    }).catch(() => null);
+    return chosen ? recordMoment(chosen, auto) : null;
 }
 
-/** After a fight: what changed in the heat of it. */
+/** At login, after a long gap: "New session? Record how the wheels look now?" */
+export async function autoMomentOnLogin() {
+    if (!isRecorder() || !["session", "both"].includes(getSetting("momentPrompt"))) return;
+    if (!characters().some(c => !c.retired)) return;
+    const last = Math.max(getMoments().at(-1)?.ts ?? 0, getSetting("momentPromptSeen") ?? 0);
+    if (Date.now() - last < SESSION_GAP) return;
+    // Remember the question was asked, whatever the answer, so a reload doesn't ask again.
+    await game.settings.set(MODULE_ID, "momentPromptSeen", Date.now());
+    const n = getMoments().filter(m => m.auto === "session").length + 1;
+    await offerMoment(game.i18n.format("PERSONA.Bonds.AutoSession", { n, date: dateLabel() }), "session",
+        game.i18n.localize("PERSONA.Bonds.PromptSession"));
+}
+
+/** After a fight: "Record what changed in the heat of it?" */
 export async function autoMomentAfterCombat(combat) {
-    if (!isRecorder() || !["combat", "both"].includes(getSetting("autoMoment"))) return;
+    if (!isRecorder() || !["combat", "both"].includes(getSetting("momentPrompt"))) return;
     if (!combat?.started && !combat?.round) return;
+    if (!characters().some(c => !c.retired)) return;
     const scene = combat.scene?.name ?? game.scenes.get(combat.scene)?.name ?? "";
-    await recordMoment(game.i18n.format("PERSONA.Bonds.AutoCombat", { scene: scene || dateLabel() }), "combat");
+    await offerMoment(game.i18n.format("PERSONA.Bonds.AutoCombat", { scene: scene || dateLabel() }), "combat",
+        game.i18n.localize("PERSONA.Bonds.PromptCombat"));
 }
 
 export function deleteMoment(id) {

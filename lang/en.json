@@ -153,13 +153,13 @@
         "Name": "Reveal notices",
         "Hint": "Show a notice when the GM reveals someone or something new to you."
       },
-      "autoMoment": {
-        "Name": "Bonds: record moments automatically",
-        "Hint": "Adds a moment to every player's timeline on its own: when the GM logs in for a new session (6 hours after the last moment), after each combat, or both.",
-        "off": "Never",
-        "session": "At the start of each session",
-        "combat": "After each combat",
-        "both": "Both"
+      "momentPrompt": {
+        "Name": "Bonds: offer to record moments",
+        "Hint": "Persona never records a moment on its own. With this on, it asks you (the GM) whether to record one: when you log in for a new session (6 hours after the last moment or question), after each combat, or both. You can rename it or say no.",
+        "off": "Never ask — I record moments myself",
+        "session": "Ask me at the start of a session",
+        "combat": "Ask me after each combat",
+        "both": "Ask me at both"
       }
     },
     "Warn": {
@@ -348,7 +348,12 @@
       "SheetsHint": "Sheets of this character (same person, one wheel)",
       "EditSlice": "Name this slice your way",
       "UseFolderName": "Use the folder's name",
-      "SliceHint": "Only on this wheel: everyone else keeps their own names. The GM's folder '{folder}' isn't changed."
+      "SliceHint": "Only on this wheel: everyone else keeps their own names. The GM's folder '{folder}' isn't changed.",
+      "PromptTitle": "Record a moment?",
+      "PromptLabel": "Name",
+      "PromptRecord": "Record moment",
+      "PromptSession": "A new session? Record how every wheel looks right now, so players can look back at it on their timeline.",
+      "PromptCombat": "The fight is over. Record what changed on the wheels during it?"
     },
     "Arrange": {
       "Moved": "{name} moved to {group}",

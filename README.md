@@ -51,7 +51,7 @@ Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astro
 - **What the party thinks**: the inspector shows where the other players keep the same person (distance only; never their notes or categories).
 - **GM overview**: *Overview* shows every person the players know against every player — not revealed, not placed, or how close — with pins and link counts. Click a cell to open that player's wheel on that person.
 - **Timeline that tells the story**: each moment lists what changed on that wheel since the one before (who joined, who died or went missing, who moved closer or farther), and those portraits are highlighted while looking back.
-- **Automatic moments**: a world setting records a moment at the start of each session (the GM's first login 6 hours after the last moment), after each combat, both, or never.
+- **Moment prompts**: Persona never records a moment on its own. A world setting (off by default) can have it ask the GM — at the start of a session (the first login 6 hours after the last moment or question), after each combat, or both — with the name ready to edit or decline.
 - **Save as image**: the image button saves the wheel as a PNG with every portrait and name, to share at the end of an arc.
 - **Live moments**: with the wheel open, someone the GM just revealed flies into the list with an ember glow; someone who just died drains to grey with a pale flash before the skull sets in; someone who went missing blurs out. (Respects reduced motion.)
 - **The party** sits on a gold thread inside an engraved band; names show on hover, like everyone else's.
