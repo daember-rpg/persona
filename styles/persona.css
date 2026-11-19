@@ -5284,3 +5284,8 @@
     background: var(--wax);
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
+
+/* Editor: never taller than the screen; the form scrolls and Save stays in reach. */
+.application.persona-editor { max-height: calc(100vh - 24px); }
+.persona-editor .window-content { min-height: 0; overflow-y: auto; }
+.persona-editor__footer { position: sticky; bottom: 0; z-index: 2; }
