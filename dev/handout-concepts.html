@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persona Handout Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+/* Concept sketches for Persona's list, card and handout moment, in the Triad/Kronos dialect.
+   Not module code: a page to pick a direction from. */
+:root {
+    color-scheme: dark;
+    --glass: rgba(20, 17, 15, 0.86); --glass-deep: rgba(12, 10, 9, 0.72);
+    --fill: rgba(255,255,255,.035); --fill-2: rgba(255,255,255,.065); --fill-3: rgba(255,255,255,.11);
+    --hair: rgba(255,255,255,.08); --hair-2: rgba(255,255,255,.14);
+    --ink: #efe3c8; --ink-dim: rgba(239,227,200,.62); --ink-faint: rgba(239,227,200,.38);
+    --gold: #d4b25a; --gold-light: #ecd28a; --gold-soft: rgba(212,178,90,.15); --gold-line: rgba(212,178,90,.45);
+    --ember: #c8553d; --ember-light: #e07a5f; --moss: #8a9a5b;
+    --display: "Cinzel", serif; --body: "Spectral", Georgia, serif;
+    --ease: cubic-bezier(.2,.8,.2,1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+    font-family: var(--body); color: var(--ink); overflow: hidden;
+    background:
+        radial-gradient(60% 50% at 70% 40%, rgba(120,140,90,.16), transparent 70%),
+        radial-gradient(40% 40% at 25% 75%, rgba(150,110,70,.14), transparent 70%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 100px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 100px),
+        #23261f;
+}
+button { all: unset; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ---------- Preview chrome ---------- */
+.tabs { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--hair-2), 0 8px 24px rgba(0,0,0,.4); backdrop-filter: blur(10px); max-width: calc(100vw - 24px); overflow-x: auto; scrollbar-width: none; }
+.tabs button { padding: 7px 14px; border-radius: 999px; font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); white-space: nowrap; }
+.tabs button[aria-pressed="true"] { background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold-line); color: var(--gold-light); }
+.view { position: fixed; inset: 0; padding: 64px 348px 24px 24px; display: flex; gap: 28px; justify-content: center; align-items: flex-start; overflow: auto; }
+.view[hidden] { display: none; }
+.note { position: fixed; right: 24px; top: 64px; max-width: 300px; padding: 12px 14px; border-radius: 12px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--hair); font-size: 13.5px; line-height: 1.45; color: var(--ink-dim); backdrop-filter: blur(10px); z-index: 5; }
+.note b { color: var(--gold-light); font-weight: 600; }
+.note .refs { display: block; margin-top: 6px; font-size: 12px; color: var(--ink-faint); }
+
+/* ---------- Shared: window, portraits, chips ---------- */
+.win { width: 380px; height: min(760px, calc(100vh - 88px)); flex: none; display: grid; grid-template-rows: auto auto minmax(0,1fr); border-radius: 12px; overflow: hidden; background: radial-gradient(120% 220px at 0 0, rgba(212,178,90,.07), transparent 70%), var(--glass); box-shadow: 0 0 0 1px var(--hair-2), 0 24px 60px rgba(0,0,0,.55); backdrop-filter: blur(12px); }
+.win__head { padding: 16px 16px 12px; position: relative; }
+.win__head::after { content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 1px; background: linear-gradient(90deg, rgba(212,178,90,.4), rgba(212,178,90,.08) 70%, transparent); }
+.eyebrow { font: 600 10.5px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.win__head h2 { margin: 6px 0 12px; font: 600 18px var(--display); letter-spacing: .05em; }
+.search { height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-radius: 999px; background: var(--fill); box-shadow: inset 0 0 0 1px var(--hair-2); color: var(--ink-faint); font-size: 14px; }
+.chips { display: flex; gap: 6px; padding: 12px 16px 0; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+.chip { flex: none; height: 26px; display: inline-flex; align-items: center; gap: 7px; padding: 0 11px; border-radius: 999px; background: var(--fill-2); box-shadow: inset 0 0 0 1px var(--hair); font-size: 12.5px; color: var(--ink-dim); }
+.chip.on { background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold-line); color: var(--gold-light); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 8px color-mix(in srgb, var(--c) 55%, transparent); flex: none; }
+.scroll { overflow-y: auto; padding: 14px 16px 24px; scrollbar-width: thin; scrollbar-color: rgba(212,178,90,.3) transparent; }
+.folder { display: flex; align-items: center; gap: 10px; margin: 16px 0 10px; font: 600 11px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.folder:first-child { margin-top: 0; }
+.folder::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--c, #d4b25a) 70%, transparent), transparent); }
+.folder small { font: 500 11px var(--body); letter-spacing: 0; color: var(--ink-faint); }
+.portrait { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Concept 1: Codex ---------- */
+.codex-row { width: 100%; display: grid; grid-template-columns: 48px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; transition: background-color .15s; }
+.codex-row:hover { background: var(--fill); }
+.codex-row.on { background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold-line); }
+.medal { position: relative; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px #15120f, 0 0 0 3.5px var(--c), 0 4px 10px rgba(0,0,0,.4); }
+.medal.unknown img { filter: brightness(.25) blur(1px); }
+.medal.unknown::after { content: "?"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 18px var(--display); color: var(--ink-faint); }
+.medal.dead img { filter: grayscale(1) brightness(.7); }
+.codex-row__text { min-width: 0; text-align: left; }
+.codex-row__name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.codex-row__name .new { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 8px rgba(200,85,61,.8); flex: none; }
+.codex-row__title { font-size: 13px; font-style: italic; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pips { display: flex; gap: 3px; }
+.pips i { width: 6px; height: 14px; border-radius: 3px; background: var(--fill-3); }
+.pips i.k { background: var(--gold); box-shadow: 0 0 6px rgba(212,178,90,.5); }
+.pips i.s { background: var(--ember); box-shadow: 0 0 6px rgba(200,85,61,.5); }
+
+/* Codex page (the card) */
+.page { width: 440px; flex: none; max-height: calc(100vh - 88px); overflow-y: auto; border-radius: 16px; background: rgba(20,17,15,.94); box-shadow: 0 0 0 1px var(--hair), 0 30px 80px rgba(0,0,0,.6); scrollbar-width: thin; scrollbar-color: rgba(212,178,90,.3) transparent; }
+.page__hero { position: relative; height: 300px; overflow: hidden; }
+.page__hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
+.page__hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(20,17,15,.6) 70%, rgba(20,17,15,.98)), linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, transparent), transparent 50%); }
+.page__id { position: absolute; left: 24px; right: 24px; bottom: 18px; z-index: 1; }
+.page__id h3 { margin: 6px 0 2px; font: 600 26px/1.1 var(--display); letter-spacing: .04em; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+.page__id p { margin: 0; font-style: italic; color: var(--ink-dim); }
+.page__body { padding: 8px 24px 24px; display: grid; gap: 18px; }
+.known { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--glass-deep); box-shadow: inset 0 0 0 1px var(--hair); font-size: 13px; color: var(--ink-dim); }
+.known .bar { flex: 1; height: 4px; border-radius: 4px; background: var(--fill-3); overflow: hidden; }
+.known .bar span { display: block; height: 100%; width: var(--p); background: linear-gradient(90deg, var(--gold), var(--gold-light)); box-shadow: 0 0 8px rgba(212,178,90,.6); }
+.entry h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font: 600 11px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.entry h4::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(212,178,90,.35), transparent); }
+.entry p { margin: 0 0 .6em; font-size: 15.5px; line-height: 1.55; }
+.entry.locked { padding: 12px 14px; border-radius: 12px; background: repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 8px, transparent 8px 16px), var(--fill); box-shadow: inset 0 0 0 1px var(--hair); color: var(--ink-faint); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.entry.locked i { color: var(--ink-faint); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- Concept 2: Gallery ---------- */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.tile { position: relative; aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px var(--hair-2), 0 8px 18px rgba(0,0,0,.35); transition: transform .25s var(--ease), box-shadow .2s; }
+.tile:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--gold-line), 0 0 18px rgba(212,178,90,.22), 0 12px 24px rgba(0,0,0,.45); }
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .4s var(--ease); }
+.tile:hover img { transform: scale(1.05); }
+.tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,9,8,.92)); }
+.tile__band { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--c); box-shadow: 0 0 12px var(--c); z-index: 2; }
+.tile__text { position: absolute; left: 10px; right: 10px; bottom: 12px; z-index: 2; text-align: left; }
+.tile__text b { display: block; font: 600 13px/1.2 var(--display); letter-spacing: .04em; }
+.tile__text span { font-size: 12px; font-style: italic; color: var(--ink-dim); }
+.tile__new { position: absolute; top: 8px; left: 8px; z-index: 2; padding: 2px 8px; border-radius: 999px; background: var(--ember); box-shadow: 0 0 10px rgba(200,85,61,.6); font: 700 9.5px/1.6 var(--display); letter-spacing: .14em; color: #fff3e6; }
+.tile.unknown img { filter: brightness(.18) blur(2px); }
+.tile.unknown .tile__text b { color: var(--ink-faint); }
+.tile.dead img { filter: grayscale(1) brightness(.6); }
+.tile--wide { grid-column: 1 / -1; aspect-ratio: 16/7; }
+
+/* Cinematic card */
+.cine { width: 680px; flex: none; height: min(520px, calc(100vh - 88px)); display: grid; grid-template-columns: 300px minmax(0,1fr); border-radius: 16px; overflow: hidden; background: rgba(20,17,15,.94); box-shadow: 0 0 0 1px var(--hair), 0 30px 80px rgba(0,0,0,.6); }
+.cine__art { position: relative; }
+.cine__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cine__art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, rgba(20,17,15,.95)), linear-gradient(0deg, color-mix(in srgb, var(--c) 35%, transparent), transparent 40%); }
+.cine__body { padding: 28px 28px 24px 8px; overflow-y: auto; display: grid; align-content: start; gap: 16px; }
+.cine__body h3 { margin: 4px 0 0; font: 600 28px/1.1 var(--display); letter-spacing: .04em; }
+.cine__body .epi { margin: 0; font-style: italic; color: var(--ink-dim); }
+.cine__body p { margin: 0; font-size: 15.5px; line-height: 1.55; }
+
+/* ---------- Handout moment: the introduction ---------- */
+.stage { position: fixed; inset: 0; display: grid; place-items: center; }
+.stage__scene { position: absolute; inset: 0; background: radial-gradient(70% 60% at 50% 45%, rgba(130,120,90,.25), transparent 70%), #1b1d18; }
+.stage__controls { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 40; display: flex; gap: 8px; }
+.pill { padding: 8px 14px; border-radius: 999px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--hair-2); font: 500 13px var(--body); color: var(--ink-dim); }
+.pill.gold { background: linear-gradient(180deg, #e0c070, #c9a24a); color: #1c1712; font: 600 11px/1.6 var(--display); letter-spacing: .12em; text-transform: uppercase; box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+.pill[aria-pressed="true"] { color: var(--gold-light); box-shadow: inset 0 0 0 1px var(--gold-line); }
+
+.intro { position: fixed; inset: 0; z-index: 30; pointer-events: none; display: none; }
+.intro.play { display: block; pointer-events: auto; }
+.intro__dim { position: absolute; inset: 0; background: rgba(8,7,6,.68); opacity: 0; }
+.intro.play .intro__dim { animation: fadeIn .4s ease forwards; }
+.intro__band { position: absolute; left: 0; right: 0; top: 50%; height: 260px; margin-top: -130px; transform: scaleY(0); transform-origin: 50% 50%;
+    background: linear-gradient(90deg, rgba(12,10,9,.2), var(--glass) 25%, var(--glass) 75%, rgba(12,10,9,.2)); backdrop-filter: blur(12px); }
+.intro__band::before, .intro__band::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 5%, var(--gold-line) 30%, rgba(212,178,90,.7) 50%, var(--gold-line) 70%, transparent 95%); transform: scaleX(0); }
+.intro__band::before { top: 0; } .intro__band::after { bottom: 0; }
+.intro.play .intro__band { animation: bandOpen .5s var(--ease) .15s forwards; }
+.intro.play .intro__band::before, .intro.play .intro__band::after { animation: thread .9s var(--ease) .3s forwards; }
+.intro__inner { position: absolute; left: 50%; top: 50%; width: min(760px, 92vw); transform: translate(-50%, -50%); display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 36px; align-items: center; }
+.intro__portrait { position: relative; height: 300px; margin: -20px 0; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--gold-line), 0 20px 50px rgba(0,0,0,.6), 0 0 40px color-mix(in srgb, var(--c) 35%, transparent); opacity: 0; transform: translateX(-60px); }
+.intro__portrait img { width: 100%; height: 100%; object-fit: cover; }
+.intro__portrait::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255,240,200,.35) 45%, transparent 60%); transform: translateX(-120%); }
+.intro.play .intro__portrait { animation: slideIn .7s var(--ease) .45s forwards; }
+.intro.play .intro__portrait::after { animation: sheen 1.1s ease 1.1s forwards; }
+.intro__kicker { display: flex; align-items: center; gap: 10px; opacity: 0; }
+.intro__kicker .dot { width: 9px; height: 9px; }
+.intro.play .intro__kicker { animation: fadeUp .5s var(--ease) .75s forwards; }
+.intro__name { margin: 10px 0 6px; font: 600 clamp(28px, 4.2vw, 46px)/1.05 var(--display); letter-spacing: .06em; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
+.intro__name .w { display: inline-block; white-space: nowrap; }
+.intro__name .w span { display: inline-block; opacity: 0; transform: translateY(10px); filter: blur(4px); }
+.intro.play .intro__name .w span { animation: letter .45s var(--ease) forwards; animation-delay: calc(.9s + var(--i) * 35ms); }
+.intro__epi { margin: 0; font-size: 18px; font-style: italic; color: var(--ink-dim); opacity: 0; }
+.intro.play .intro__epi { animation: fadeUp .6s var(--ease) 1.6s forwards; }
+.intro__hint { margin-top: 22px; display: flex; gap: 10px; opacity: 0; }
+.intro.play .intro__hint { animation: fadeUp .5s var(--ease) 2.2s forwards; }
+.intro.out .intro__inner { animation: shrink .45s var(--ease) forwards; }
+.intro.out .intro__band { animation: bandClose .4s var(--ease) .1s forwards; transform: scaleY(1); }
+.intro.out .intro__dim { animation: fadeOut .4s ease .2s forwards; opacity: 1; }
+
+/* Smaller moment for a later layer ("you learned her story") */
+.learn { position: fixed; top: 76px; left: 50%; z-index: 30; display: none; align-items: center; gap: 12px; padding: 8px 18px 8px 8px; border-radius: 999px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--gold-line), 0 12px 30px rgba(0,0,0,.45); backdrop-filter: blur(10px); transform: translate(-50%, -20px); opacity: 0; }
+.learn.play { display: flex; animation: learnIn 4s var(--ease) forwards; }
+.learn .medal { width: 40px; height: 40px; }
+.learn b { display: block; font: 600 13px var(--display); letter-spacing: .04em; }
+.learn span { font-size: 13px; color: var(--ink-dim); }
+.learn .pips { margin-left: 8px; }
+
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes bandOpen { to { transform: scaleY(1); } }
+@keyframes bandClose { to { transform: scaleY(0); } }
+@keyframes thread { to { transform: scaleX(1); } }
+@keyframes slideIn { to { opacity: 1; transform: none; } }
+@keyframes sheen { to { transform: translateX(120%); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes letter { to { opacity: 1; transform: none; filter: none; } }
+@keyframes shrink { to { opacity: 0; transform: translate(-50%, -50%) scale(.92); } }
+@keyframes learnIn { 0% { opacity: 0; transform: translate(-50%, -20px); } 10%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .intro.play *, .intro.play .intro__band, .intro.play .intro__dim { animation-duration: .01s !important; animation-delay: 0s !important; }
+}
+@media (max-width: 900px) {
+    body { overflow: auto; }
+    .view { flex-direction: column; align-items: center; padding: 64px 12px 120px; position: static; min-height: 100%; }
+    .win, .page, .cine { width: 100%; max-width: 440px; height: auto; max-height: none; }
+    .win { height: 640px; }
+    .cine { grid-template-columns: 1fr; height: auto; }
+    .cine__art { height: 280px; }
+    .cine__body { padding: 0 20px 20px; }
+    .note { position: static; max-width: 440px; }
+    .intro__inner { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+    .intro__portrait { width: 160px; height: 210px; margin: 0 auto; }
+    .intro__band { height: 460px; margin-top: -230px; }
+    .intro__kicker { justify-content: center; }
+}
+</style>
+</head>
+<body>
+<nav class="tabs">
+    <button type="button" data-view="codex" aria-pressed="true">1 · Codex</button>
+    <button type="button" data-view="gallery" aria-pressed="false">2 · Gallery</button>
+    <button type="button" data-view="intro" aria-pressed="false">The handout moment</button>
+</nav>
+
+<section class="view" data-view="codex">
+    <div class="win">
+        <div class="win__head"><span class="eyebrow">People and places</span><h2>Persona</h2><div class="search"><i class="fa-solid fa-magnifying-glass"></i> Search by name</div></div>
+        <div class="chips" id="codex-chips"></div>
+        <div class="scroll" id="codex-list"></div>
+    </div>
+    <article class="page" id="codex-page"></article>
+    <p class="note"><b>Codex</b> — a dense list (round portrait in the faction's colour, epithet, and pips for how much you know) plus a codex page where what you haven't discovered shows as locked. Built for campaigns with a hundred NPCs.<span class="refs">Refs: Final Fantasy XVI's Active Time Lore, Hades's Codex, Mass Effect's codex.</span></p>
+</section>
+
+<section class="view" data-view="gallery" hidden>
+    <div class="win">
+        <div class="win__head"><span class="eyebrow">People and places</span><h2>Persona</h2><div class="search"><i class="fa-solid fa-magnifying-glass"></i> Search by name</div></div>
+        <div class="chips" id="gal-chips"></div>
+        <div class="scroll" id="gal-list"></div>
+    </div>
+    <article class="cine" id="gal-card"></article>
+    <p class="note"><b>Gallery</b> — portraits come first: big full-bleed tiles with the name over the art and the faction's colour along the bottom; the card opens as a wide portrait on one side and the text on the other. Best when the art is good.<span class="refs">Refs: Baldur's Gate 3 portraits, Persona 5 / Metaphor confidant cards, Dragon Age codex art.</span></p>
+</section>
+
+<section class="view" data-view="intro" hidden>
+    <div class="stage"><div class="stage__scene"></div></div>
+    <div class="stage__controls">
+        <button type="button" class="pill gold" id="play-intro">Play: first meeting</button>
+        <button type="button" class="pill" id="play-learn">Play: learned her story</button>
+    </div>
+    <div class="intro" id="intro">
+        <div class="intro__dim"></div>
+        <div class="intro__band"></div>
+        <div class="intro__inner">
+            <div class="intro__portrait"><img alt=""></div>
+            <div>
+                <div class="intro__kicker"><span class="dot"></span><span class="eyebrow" id="intro-faction"></span></div>
+                <h1 class="intro__name" id="intro-name"></h1>
+                <p class="intro__epi" id="intro-epi"></p>
+                <div class="intro__hint"><button type="button" class="pill gold" id="intro-open">Open card</button><button type="button" class="pill" id="intro-close">Later</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="learn" id="learn"></div>
+    <p class="note"><b>The handout moment</b> — when the GM shows someone for the first time, the scene dims, a glass band opens on a gold thread, the portrait slides in with a light sweep and the name writes itself. About 2 seconds, click to skip; it then becomes the card (or "Later" keeps it in the gallery). Smaller news — a story or secret learned later — gets a quiet pill at the top instead.<span class="refs">Refs: Persona 5 / Metaphor character introductions, Pentiment's name cards, Sekiro / Elden Ring boss title cards.</span></p>
+</section>
+
+<script>
+/* ---------- mock data ---------- */
+const COLORS = { emb: "#b4643e", veil: "#8a5a8f", kur: "#c8452f", elf: "#74864a" };
+const FACTIONS = { emb: "Embermark", veil: "Veiled Order", kur: "Champions of Kurdrax", elf: "Elves of Khaledin" };
+const hue = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+function portrait(name, { dark = false } = {}) {
+    const h = hue(name), h2 = (h + 40) % 360, r = n => (hue(name + n) % 100) / 100;
+    const hood = r("hood") > .5;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
+<defs><radialGradient id="bg" cx="${30 + r("x") * 40}%" cy="25%" r="85%"><stop offset="0" stop-color="hsl(${h},40%,${dark ? 22 : 38}%)"/><stop offset=".6" stop-color="hsl(${h2},35%,${dark ? 9 : 16}%)"/><stop offset="1" stop-color="hsl(${h2},30%,5%)"/></radialGradient>
+<linearGradient id="rim" x1="0" x2="1"><stop offset="0" stop-color="hsl(${h},60%,75%)" stop-opacity=".0"/><stop offset=".8" stop-color="hsl(${h},70%,80%)" stop-opacity=".55"/></linearGradient>
+<radialGradient id="skin" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="hsl(28,${30 + r("s") * 20}%,${dark ? 30 : 62}%)"/><stop offset="1" stop-color="hsl(20,30%,${dark ? 12 : 30}%)"/></radialGradient></defs>
+<rect width="300" height="400" fill="url(#bg)"/>
+<circle cx="${60 + r("m") * 180}" cy="80" r="120" fill="hsl(${h},60%,70%)" opacity=".07"/>
+<path d="M30 400 C40 300 90 270 150 268 C210 270 260 300 270 400Z" fill="hsl(${h2},30%,${dark ? 8 : 14}%)"/>
+<path d="M30 400 C40 300 90 270 150 268 C210 270 260 300 270 400" fill="none" stroke="url(#rim)" stroke-width="5"/>
+${hood ? `<path d="M85 250 C70 150 110 80 150 78 C190 80 230 150 215 250 C200 220 180 205 150 205 C120 205 100 220 85 250Z" fill="hsl(${h2},25%,${dark ? 7 : 12}%)"/>` : `<path d="M98 175 C95 115 120 92 150 92 C182 92 206 118 202 175 C200 150 185 128 150 128 C118 128 102 150 98 175Z" fill="hsl(${(h + 180) % 360},20%,${dark ? 8 : 18}%)"/>`}
+<ellipse cx="150" cy="185" rx="${42 + r("w") * 8}" ry="58" fill="url(#skin)"/>
+<rect x="132" y="232" width="36" height="42" fill="url(#skin)"/>
+<path d="M150 127 C183 127 196 160 193 200" fill="none" stroke="hsl(${h},70%,85%)" stroke-opacity=".35" stroke-width="3"/>
+<ellipse cx="133" cy="182" rx="5" ry="3" fill="#1a120c" opacity=".8"/><ellipse cx="167" cy="182" rx="5" ry="3" fill="#1a120c" opacity=".8"/>
+<rect width="300" height="400" fill="hsl(${h},50%,50%)" opacity=".05"/></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+const NPCS = [
+    { id: "ilsa", f: "emb", name: "Captain Ilsa Marrow", title: "Captain of the guard", known: 3, isNew: true,
+      story: ["Twenty years on the walls and never once late to a watch. Ilsa keeps the gate ledger herself and trusts no clerk with it.", "She owes Lord Venn her post, and everyone at the Copper Kettle knows she hates it."] },
+    { id: "venn", f: "emb", name: "Lord Aldric Venn", title: "Regent of Embermark", known: 4, secret: true },
+    { id: "hesper", f: "emb", name: "Sister Hesper", title: "Healer at the Ash Chapel", known: 2 },
+    { id: "bram", f: "emb", name: "Old Bram", title: "Innkeeper", known: 3, dead: true },
+    { id: "nyx", f: "veil", name: "Nyx", title: "Knife-for-hire", known: 2, isNew: true },
+    { id: "unknown", f: "veil", name: "", title: "", known: 1 },
+    { id: "king", f: "kur", name: "The Ashen King", title: "Lord of Kurdrax", known: 2, dark: true },
+    { id: "gorrik", f: "kur", name: "Gorrik Ironjaw", title: "Champion of Kurdrax", known: 3 },
+    { id: "aelis", f: "elf", name: "Aelis of Khaledin", title: "Warden of the Silver Wood", known: 2 }
+];
+NPCS.forEach(n => n.img = portrait(n.name || "unknown" + n.id, { dark: n.dark || !n.name }));
+const byFaction = f => NPCS.filter(n => n.f === f);
+const pips = n => `<span class="pips" aria-label="${n.known} of 4 known">${[1, 2, 3, 4].map(i => `<i class="${i <= n.known ? (i === 4 ? "s" : "k") : ""}"></i>`).join("")}</span>`;
+const chipRow = () => `<span class="chip on"><i class="fa-solid fa-users"></i> Everyone <small style="opacity:.6">${NPCS.length}</small></span>` +
+    Object.entries(FACTIONS).map(([k, label]) => `<span class="chip"><span class="dot" style="--c:${COLORS[k]}"></span>${label} <small style="opacity:.6">${byFaction(k).length}</small></span>`).join("");
+
+/* ---------- Concept 1 ---------- */
+function codexList(active) {
+    return Object.entries(FACTIONS).map(([k, label]) => `<div class="folder" style="--c:${COLORS[k]}"><span class="dot" style="--c:${COLORS[k]}"></span>${label} <small>${byFaction(k).length}</small></div>` +
+        byFaction(k).map(n => `<button type="button" class="codex-row ${n.id === active ? "on" : ""}" data-id="${n.id}">
+            <span class="medal ${n.name ? "" : "unknown"} ${n.dead ? "dead" : ""}" style="--c:${COLORS[n.f]}"><img class="portrait" src="${n.img}" alt=""></span>
+            <span class="codex-row__text"><span class="codex-row__name">${n.name || "???"} ${n.isNew ? '<span class="new" title="New"></span>' : ""}</span><span class="codex-row__title">${n.dead ? "Dead · " : ""}${n.title || "Someone you've seen"}</span></span>
+            ${pips(n)}</button>`).join("")).join("");
+}
+function codexPage(n) {
+    const pct = n.known * 25;
+    const story = n.known >= 3 ? `<div class="entry"><h4>Story</h4>${(n.story ?? ["What the party has learned about them goes here, as written by the GM."]).map(p => `<p>${p}</p>`).join("")}</div>` : `<div class="entry locked"><i class="fa-solid fa-lock"></i> Story — not discovered yet</div>`;
+    const secret = n.known >= 4 ? `<div class="entry"><h4 style="color:var(--ember-light)">Secret</h4><p>He signs the north-gate passes himself.</p></div>` : `<div class="entry locked"><i class="fa-solid fa-lock"></i> Secret — not discovered yet</div>`;
+    return `<div class="page__hero" style="--c:${COLORS[n.f]}"><img src="${n.img}" alt="" style="${n.name ? "" : "filter:brightness(.25) blur(2px)"}">
+        <div class="page__id"><span class="eyebrow">${FACTIONS[n.f]}</span><h3>${n.name || "???"}</h3><p>${n.title || "Someone you've seen"}</p></div></div>
+        <div class="page__body">
+            <div class="known"><span>Known</span><span class="bar" style="--p:${pct}%"><span></span></span>${pips(n)}</div>
+            <div class="tags"><span class="chip"><span class="dot" style="--c:${COLORS[n.f]}"></span>${FACTIONS[n.f]}</span><span class="chip"><i class="fa-solid fa-location-dot"></i> The Copper Kettle</span></div>
+            ${story}${secret}
+            <div class="entry"><h4>Notes</h4><p style="color:var(--ink-dim);font-size:14px">Ana: She recognised Kaelen's crest. Ask about the old war.</p></div>
+        </div>`;
+}
+const codexListEl = document.getElementById("codex-list"), codexPageEl = document.getElementById("codex-page");
+const showCodex = id => { codexListEl.innerHTML = codexList(id); codexPageEl.innerHTML = codexPage(NPCS.find(n => n.id === id)); };
+document.getElementById("codex-chips").innerHTML = chipRow();
+codexListEl.addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) showCodex(b.dataset.id); });
+showCodex("ilsa");
+
+/* ---------- Concept 2 ---------- */
+function galList() {
+    return Object.entries(FACTIONS).map(([k, label]) => `<div class="folder" style="--c:${COLORS[k]}"><span class="dot" style="--c:${COLORS[k]}"></span>${label} <small>${byFaction(k).length}</small></div>
+        <div class="grid">${byFaction(k).map(n => `<button type="button" class="tile ${n.name ? "" : "unknown"} ${n.dead ? "dead" : ""}" data-id="${n.id}" style="--c:${COLORS[n.f]}">
+            <img src="${n.img}" alt="">${n.isNew ? '<span class="tile__new">NEW</span>' : ""}
+            <span class="tile__text"><b>${n.name || "???"}</b><span>${n.dead ? "Dead" : n.title}</span></span><span class="tile__band"></span></button>`).join("")}</div>`).join("");
+}
+function galCard(n) {
+    return `<div class="cine__art" style="--c:${COLORS[n.f]}"><img src="${n.img}" alt=""></div>
+        <div class="cine__body"><span class="eyebrow">${FACTIONS[n.f]}</span><div><h3>${n.name || "???"}</h3><p class="epi">${n.title}</p></div>
+        <div class="tags"><span class="chip"><span class="dot" style="--c:${COLORS[n.f]}"></span>${FACTIONS[n.f]}</span><span class="chip"><i class="fa-solid fa-location-dot"></i> The Copper Kettle</span></div>
+        ${(n.story ?? ["What the party has learned about them goes here, as written by the GM."]).map(p => `<p>${p}</p>`).join("")}</div>`;
+}
+document.getElementById("gal-chips").innerHTML = chipRow();
+const galListEl = document.getElementById("gal-list"), galCardEl = document.getElementById("gal-card");
+galListEl.innerHTML = galList();
+galCardEl.innerHTML = galCard(NPCS[0]);
+galListEl.addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) galCardEl.innerHTML = galCard(NPCS.find(n => n.id === b.dataset.id)); });
+
+/* ---------- Handout moment ---------- */
+const intro = document.getElementById("intro");
+function playIntro(n) {
+    intro.classList.remove("play", "out"); void intro.offsetWidth;
+    intro.style.setProperty("--c", COLORS[n.f]);
+    intro.querySelector(".intro__portrait img").src = n.img;
+    intro.querySelector(".intro__kicker .dot").style.setProperty("--c", COLORS[n.f]);
+    document.getElementById("intro-faction").textContent = `${FACTIONS[n.f]} · You meet`;
+    let i = 0;
+    document.getElementById("intro-name").innerHTML = n.name.split(" ").map(word => `<span class="w">${[...word].map(ch => `<span style="--i:${i++}">${ch}</span>`).join("")}</span>`).join(" ");
+    document.getElementById("intro-epi").textContent = n.title;
+    intro.classList.add("play");
+}
+const closeIntro = () => { intro.classList.add("out"); setTimeout(() => intro.classList.remove("play", "out"), 650); };
+document.getElementById("play-intro").addEventListener("click", () => playIntro(NPCS[0]));
+document.getElementById("intro-close").addEventListener("click", closeIntro);
+document.getElementById("intro-open").addEventListener("click", closeIntro);
+intro.addEventListener("click", e => { if (e.target === intro.querySelector(".intro__dim")) closeIntro(); });
+document.getElementById("play-learn").addEventListener("click", () => {
+    const n = NPCS[0], el = document.getElementById("learn");
+    el.innerHTML = `<span class="medal" style="--c:${COLORS[n.f]}"><img class="portrait" src="${n.img}" alt=""></span><span><b>${n.name}</b><span>You learned her story</span></span>${pips(n)}`;
+    el.classList.remove("play"); void el.offsetWidth; el.classList.add("play");
+});
+
+/* ---------- tabs ---------- */
+const tabs = document.querySelectorAll(".tabs button");
+const show = v => { tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === v))); document.querySelectorAll(".view").forEach(s => s.hidden = s.dataset.view !== v); if (v === "intro") setTimeout(() => playIntro(NPCS[0]), 300); };
+tabs.forEach(b => b.addEventListener("click", () => show(b.dataset.view)));
+show(new URLSearchParams(location.search).get("view") || "codex");
+</script>
+</body>
+</html>
