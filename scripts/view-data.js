@@ -7,6 +7,7 @@ import {
     privateNote, sharedNotes, firstImageIn, withoutImages
 } from "./store.js";
 import { canWriteSharedNotes } from "./relay.js";
+import { getSetting } from "./settings.js";
 import { sealSvg, tornClip, tiltOf, TORN_EDGES, PAPERS } from "./documents.js";
 import { openedIds, plainToHtml } from "./store.js";
 
@@ -153,14 +154,35 @@ export function buildPanelContext({ filter = "all", search = "", expanded = new 
     };
     return isGM
         ? { ...context, ...buildDirector(list, { filter, search, expanded, collapsed, sharing }) }
-        : { ...context, ...buildGallery(list, user, { filter, search, collapsed }) };
+        : { ...context, ...buildGallery(list, user, { filter, search, collapsed }), layoutList: (getSetting("galleryLayout") ?? "list") !== "grid" };
+}
+
+/** The colour an entry wears: its first group's, else the gold thread. */
+export function accentOf(entry, groups = new Map(getGroups().map(g => [g.id, g]))) {
+    return entry.groups.map(id => groups.get(id)?.color).find(Boolean) ?? "#d4b25a";
+}
+
+/**
+ * How much this user knows of an entry, as four pips (face, name, story, secret).
+ * Layers with nothing written count as known once the layer before is, so a short entry can be "complete".
+ */
+export function knowledgeOf(entry, user = game.user) {
+    const has = { face: true, name: !!entry.name.trim(), summary: !!entry.summary.trim(), secret: !!entry.secret.trim() };
+    const pips = LAYERS.map(layer => ({ layer, known: canSee(entry, layer, user) && has[layer], exists: has[layer], secret: layer === "secret" }));
+    const exists = pips.filter(p => p.exists);
+    const known = exists.filter(p => p.known).length;
+    return { pips: pips.filter(p => p.exists), known, total: exists.length, pct: exists.length ? Math.round((known / exists.length) * 100) : 0 };
 }
 
 function buildGallery(list, user, options) {
     const seen = seenIds(user);
+    const groups = new Map(getGroups().map(g => [g.id, g]));
     const tile = entry => {
         const named = canSee(entry, "name", user);
         return {
+            color: accentOf(entry, groups),
+            knowledge: entry.kind === "document" ? null : knowledgeOf(entry, user),
+            paperLabel: entry.kind === "document" ? t(`PERSONA.Doc.Paper.${entry.paper}`) : "",
             id: entry.id,
             kind: entry.kind,
             isPlace: entry.kind === "place",
@@ -355,10 +377,18 @@ export async function buildCardContext(entry, { tab = "private" } = {}) {
         ? entry.places.map(id => getEntry(id)).filter(visible).map(linkTile)
         : [];
 
+    const firstGroup = entry.groups.map(id => groups.get(id)).find(Boolean);
+    const knowledge = knowledgeOf(entry, user);
     return {
         id: entry.id,
         isGM,
         kind: entry.kind,
+        accent: accentOf(entry, groups),
+        faction: firstGroup?.label ?? "",
+        knowledge: isGM ? null : knowledge,
+        // Written but not yet revealed: shown as locked, so players know there's more to find.
+        storyLocked: !isGM && !showSummary && !!story.trim(),
+        secretLocked: !isGM && !showSecret && !!entry.secret.trim() && named,
         kindLabel: t(entry.kind === "place" ? "PERSONA.Kind.place" : "PERSONA.Kind.npc"),
         img: imageOf(entry),
         frame: frameStyle(entry),

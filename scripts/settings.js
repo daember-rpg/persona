@@ -43,6 +43,13 @@ export function registerSettings() {
         default: 0.8,
         onChange: changed("videoVolume")
     });
+    // Players' gallery: "list" (codex rows) or "grid" (portrait tiles), per client.
+    game.settings.register(MODULE_ID, "galleryLayout", {
+        scope: "client",
+        config: false,
+        type: String,
+        default: "list"
+    });
     // Folders collapsed in the panel (per client).
     game.settings.register(MODULE_ID, "collapsed", {
         scope: "client",

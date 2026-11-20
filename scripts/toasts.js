@@ -29,6 +29,10 @@ export class Toasts {
         return box;
     }
 
+    dismiss(id) {
+        this.#box?.querySelector(`[data-id="${CSS.escape(id)}"]`)?.remove();
+    }
+
     show({ id, img, label, name }) {
         const box = this.#ensure();
         box.querySelector(`[data-id="${CSS.escape(id)}"]`)?.remove();

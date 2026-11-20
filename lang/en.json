@@ -423,6 +423,19 @@
         "feather-pointed": "Quill",
         "shield-halved": "Shield"
       }
+    },
+    "Codex": {
+      "Known": "Known",
+      "KnownHint": "How much of what's written about them you've discovered",
+      "Seen": "Someone you've seen",
+      "StoryLocked": "Their story — not discovered yet",
+      "SecretLocked": "A secret — not discovered yet",
+      "ShowGrid": "Show as portraits",
+      "ShowList": "Show as a list",
+      "YouMeet": "You meet",
+      "Shown": "Shown to you",
+      "OpenCard": "Open card",
+      "Later": "Later"
     }
   }
 }

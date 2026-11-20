@@ -7,6 +7,9 @@
             </div>
             <div class="persona-head__tools">
                 <button type="button" class="persona-icon-btn persona-bonds-btn" data-action="openBonds" data-tooltip="{{localize "PERSONA.Bonds.Open"}}" aria-label="{{localize "PERSONA.Bonds.Open"}}"><i class="fa-solid fa-circle-nodes" inert></i></button>
+            {{#unless isGM}}
+                    <button type="button" class="persona-icon-btn" data-action="toggleLayout" data-tooltip="{{#if layoutList}}{{localize "PERSONA.Codex.ShowGrid"}}{{else}}{{localize "PERSONA.Codex.ShowList"}}{{/if}}" aria-label="{{#if layoutList}}{{localize "PERSONA.Codex.ShowGrid"}}{{else}}{{localize "PERSONA.Codex.ShowList"}}{{/if}}"><i class="fa-solid {{#if layoutList}}fa-table-cells-large{{else}}fa-list{{/if}}" inert></i></button>
+            {{/unless}}
             {{#if isGM}}
                     <button type="button" class="persona-icon-btn" data-action="playFile" data-tooltip="{{localize "PERSONA.Video.PlayFile"}}" aria-label="{{localize "PERSONA.Video.PlayFile"}}"><i class="fa-solid fa-film" inert></i></button>
                     <button type="button" class="persona-icon-btn persona-icon-btn--accent" data-action="newEntry" data-tooltip="{{localize "PERSONA.Entry.New"}}" aria-label="{{localize "PERSONA.Entry.New"}}"><i class="fa-solid fa-plus" inert></i></button>

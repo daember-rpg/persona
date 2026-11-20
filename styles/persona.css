@@ -5293,3 +5293,373 @@
 /* GM on a card with a video: play it for the table, or peek at it alone first. */
 .persona .persona-card__play--gm { display: flex; align-items: center; gap: 8px; }
 .persona .persona-card__play--gm .persona-icon-btn { background: rgba(20, 17, 15, 0.75); backdrop-filter: blur(6px); }
+
+/* ==========================================================================
+   Codex (0.19): the players' list, the card as a codex page, and the
+   handout moment. Refs: FFXVI Active Time Lore, Hades's Codex, Persona intros.
+   ========================================================================== */
+
+/* ---------- Knowledge pips ---------- */
+
+.persona-pips { display: inline-flex; gap: 3px; flex: none; }
+.persona-pips i { width: 5px; height: 14px; border-radius: 3px; background: var(--dp-fill-3); }
+.persona-pips i.is-known { background: var(--dp-gold); box-shadow: 0 0 6px rgba(212, 178, 90, 0.5); }
+.persona-pips i.is-known.is-secret { background: var(--dp-ember); box-shadow: 0 0 6px rgba(200, 85, 61, 0.55); }
+
+/* ---------- Codex rows (players' list) ---------- */
+
+.persona-codex-list { display: flex; flex-direction: column; gap: 2px; }
+
+.persona .persona-codex {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 7px 8px;
+    border-radius: 12px;
+    transition: background-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.persona .persona-codex:hover { background: var(--dp-fill); }
+.persona .persona-codex:focus-visible { outline: 2px solid var(--dp-gold); outline-offset: 1px; }
+
+.persona-codex__thumb {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #15120f;
+    box-shadow: 0 0 0 2px #15120f, 0 0 0 3.5px var(--accent, var(--dp-gold)), 0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 0.2s ease, transform 0.2s var(--dp-ease);
+}
+
+.persona .persona-codex:hover .persona-codex__thumb {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px #15120f, 0 0 0 3.5px var(--accent, var(--dp-gold)), 0 0 14px color-mix(in srgb, var(--accent, #d4b25a) 50%, transparent);
+}
+
+.persona-codex__thumb img { width: 100%; height: 100%; border: 0; }
+.persona-codex--place .persona-codex__thumb { border-radius: 12px; }
+.persona-codex.is-unknown .persona-codex__thumb img { filter: brightness(0.3) blur(1px); }
+.persona-codex.is-dead .persona-codex__thumb img { filter: grayscale(1) brightness(0.7); }
+.persona-codex.is-missing .persona-codex__thumb img { filter: grayscale(0.6) brightness(0.8); }
+
+.persona-codex__thumb--doc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px var(--dp-hair-2);
+    background: linear-gradient(160deg, #241f1a, #15120f);
+}
+
+.persona-codex__thumb--doc .persona-paper-mini { width: 62%; }
+.persona-codex__thumb--doc .persona-paper-mini__seal { --seal-size: 16px; }
+.persona-codex__thumb--doc .persona-paper-mini__seal.is-broken { --seal-size: 10px; }
+.persona-codex__thumb--doc .persona-seal__mark { display: none; }
+
+.persona-codex__text { display: grid; gap: 1px; min-width: 0; text-align: left; }
+
+.persona-codex__name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--dp-parchment);
+}
+
+.persona-codex.is-unknown .persona-codex__name { letter-spacing: 0.2em; color: var(--dp-parchment-faint); }
+
+.persona-codex__new {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dp-ember);
+    box-shadow: 0 0 8px rgba(200, 85, 61, 0.8);
+}
+
+.persona-codex__private { flex: none; font-size: 10px; color: var(--dp-gold); opacity: 0.8; }
+
+.persona-codex__title {
+    overflow: hidden;
+    font-size: 13px;
+    font-style: italic;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--dp-parchment-faint);
+}
+
+.persona-codex__title i { font-size: 10px; font-style: normal; }
+
+/* ---------- The card as a codex page ---------- */
+
+.persona-card:not(.persona-docview) {
+    --card-h: auto;
+    width: min(500px, 100%);
+    height: auto;
+    max-height: calc(100vh - 48px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.persona-card__art,
+.persona-card--place .persona-card__art {
+    height: auto;
+    border-radius: 16px 16px 0 0;
+}
+
+.persona-card__frame { height: min(360px, 44vh); }
+.persona-card--place .persona-card__frame { height: auto; aspect-ratio: 16 / 9; max-height: 44vh; }
+
+/* The picture fades into the page; a wash of the faction's colour from the side. */
+.persona-card__art::after,
+.persona-card--place .persona-card__art::after {
+    background:
+        linear-gradient(180deg, transparent 38%, rgba(20, 17, 15, 0.55) 68%, rgba(20, 17, 15, 0.97)),
+        linear-gradient(90deg, color-mix(in srgb, var(--accent, #d4b25a) 28%, transparent), transparent 55%);
+}
+
+.persona-card__id {
+    position: absolute;
+    left: var(--dp-3);
+    right: var(--dp-3);
+    bottom: var(--dp-2);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.persona-card__id .persona-eyebrow { display: inline-flex; align-items: center; gap: 8px; }
+
+.persona-card__id h3 {
+    margin: 6px 0 2px;
+    padding-right: 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+.persona-card__id .persona-card__title { margin: 0; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7); }
+
+/* The video buttons move to the top of the picture, clear of the name. */
+.persona .persona-card__play { top: var(--dp-2); bottom: auto; }
+
+.persona-card__body { padding: 12px var(--dp-3) var(--dp-3); }
+
+.persona-known {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--dp-glass-deep);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+    font-size: 13px;
+    color: var(--dp-parchment-dim);
+}
+
+.persona-known__bar { flex: 1; height: 4px; overflow: hidden; border-radius: 4px; background: var(--dp-fill-3); }
+.persona-known__bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--dp-gold), var(--dp-gold-light)); box-shadow: 0 0 8px rgba(212, 178, 90, 0.6); transition: width 0.6s var(--dp-ease); }
+
+.persona-entry__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dp-gold);
+}
+
+.persona-entry__head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(212, 178, 90, 0.35), transparent); }
+
+/* Written but not discovered: a locked slot. */
+.persona-locked--slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0 8px, transparent 8px 16px), var(--dp-fill);
+    box-shadow: inset 0 0 0 1px var(--dp-hair);
+    font-style: normal;
+    color: var(--dp-parchment-faint);
+}
+
+/* ---------- The handout moment ---------- */
+
+.persona-intro { position: fixed; inset: 0; z-index: 1100; cursor: pointer; }
+
+.persona-intro__dim { position: absolute; inset: 0; background: rgba(8, 7, 6, 0.7); opacity: 0; transition: opacity 0.4s ease; }
+.persona-intro.is-in .persona-intro__dim { opacity: 1; }
+
+.persona-intro__band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 260px;
+    margin-top: -130px;
+    transform: scaleY(0);
+    background: linear-gradient(90deg, rgba(12, 10, 9, 0.2), var(--dp-glass) 25%, var(--dp-glass) 75%, rgba(12, 10, 9, 0.2));
+    backdrop-filter: blur(12px);
+    transition: transform 0.5s var(--dp-ease) 0.15s;
+}
+
+.persona-intro__band::before,
+.persona-intro__band::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, transparent 5%, var(--dp-gold-line) 30%, rgba(212, 178, 90, 0.75) 50%, var(--dp-gold-line) 70%, transparent 95%);
+    transition: transform 0.9s var(--dp-ease) 0.3s;
+}
+
+.persona-intro__band::before { top: 0; }
+.persona-intro__band::after { bottom: 0; }
+.persona-intro.is-in .persona-intro__band { transform: scaleY(1); }
+.persona-intro.is-in .persona-intro__band::before,
+.persona-intro.is-in .persona-intro__band::after { transform: scaleX(1); }
+
+.persona-intro__inner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(780px, 92vw);
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 36px;
+    align-items: center;
+    transform: translate(-50%, -50%);
+}
+
+.persona-intro__portrait {
+    position: relative;
+    height: 300px;
+    margin: -20px 0;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 0 0 1px var(--dp-gold-line), 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px color-mix(in srgb, var(--accent) 35%, transparent);
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.7s var(--dp-ease) 0.45s, transform 0.7s var(--dp-ease) 0.45s;
+}
+
+.persona-intro__portrait img { display: block; width: 100%; height: 100%; border: 0; }
+
+/* A light sweep across the portrait once it lands. */
+.persona-intro__portrait::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 240, 200, 0.35) 45%, transparent 60%);
+    transform: translateX(-120%);
+}
+
+.persona-intro.is-in .persona-intro__portrait { opacity: 1; transform: none; }
+.persona-intro.is-in .persona-intro__portrait::after { transition: transform 1.1s ease 1.1s; transform: translateX(120%); }
+
+.persona-intro__kicker { display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateY(8px); transition: opacity 0.5s var(--dp-ease) 0.75s, transform 0.5s var(--dp-ease) 0.75s; }
+.persona-intro.is-in .persona-intro__kicker { opacity: 1; transform: none; }
+
+.persona-intro__name {
+    margin: 10px 0 6px;
+    border: 0;
+    font-family: var(--dp-display);
+    font-size: clamp(28px, 4.2vw, 46px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.06em;
+    color: var(--dp-parchment);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+}
+
+.persona-intro__word { display: inline-block; white-space: nowrap; }
+
+.persona-intro__word span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+    transition: opacity 0.45s var(--dp-ease), transform 0.45s var(--dp-ease), filter 0.45s var(--dp-ease);
+    transition-delay: calc(0.9s + var(--i) * 35ms);
+}
+
+.persona-intro.is-in .persona-intro__word span { opacity: 1; transform: none; filter: none; }
+
+.persona-intro__title,
+.persona-intro__actions { opacity: 0; transform: translateY(8px); transition: opacity 0.6s var(--dp-ease) 1.6s, transform 0.6s var(--dp-ease) 1.6s; }
+.persona-intro__title { margin: 0; font-size: 18px; font-style: italic; color: var(--dp-parchment-dim); }
+.persona-intro__actions { display: flex; align-items: center; gap: 10px; margin-top: 22px; transition-delay: 2s; }
+.persona-intro.is-in :is(.persona-intro__title, .persona-intro__actions) { opacity: 1; transform: none; }
+
+.persona-intro.is-out { pointer-events: none; }
+.persona-intro.is-out .persona-intro__inner { opacity: 0; transform: translate(-50%, -50%) scale(0.94); transition: opacity 0.4s ease, transform 0.4s var(--dp-ease); }
+.persona-intro.is-out .persona-intro__band { transform: scaleY(0); transition: transform 0.4s var(--dp-ease) 0.05s; }
+.persona-intro.is-out .persona-intro__dim { opacity: 0; transition: opacity 0.4s ease 0.1s; }
+
+@media (max-width: 700px) {
+    .persona-intro__inner { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+    .persona-intro__portrait { width: 160px; height: 210px; margin: 0 auto; }
+    .persona-intro__band { height: 480px; margin-top: -240px; }
+    .persona-intro__kicker, .persona-intro__actions { justify-content: center; }
+}
+
+/* ---------- Reveal toasts: a quiet pill at the top ---------- */
+
+.persona-toasts {
+    top: 64px;
+    right: auto;
+    left: 50%;
+    align-items: center;
+    width: auto;
+    transform: translateX(-50%);
+}
+
+.persona .persona-toast {
+    gap: 12px;
+    padding: 6px 18px 6px 6px;
+    border-radius: 999px;
+    animation: persona-pill-in 0.4s var(--dp-ease);
+}
+
+.persona .persona-toast img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #15120f, 0 0 0 3.5px var(--dp-gold);
+}
+
+.persona-toast.is-leaving { opacity: 0; transform: translateY(-10px); }
+
+@keyframes persona-pill-in {
+    from { opacity: 0; transform: translateY(-14px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .persona-intro *,
+    .persona-intro *::before,
+    .persona-intro *::after,
+    .persona-intro__band,
+    .persona-intro__dim { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+    .persona .persona-toast { animation: none; }
+}
+.persona .persona-intro__actions .persona-mini { height: 34px; padding: 0 16px; font-size: 13px; }
+.persona .persona-intro__actions .persona-button:focus-visible { outline: 2px solid var(--dp-gold-light); outline-offset: 3px; }

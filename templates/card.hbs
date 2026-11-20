@@ -1,7 +1,16 @@
-<article class="persona-card persona-card--{{kind}} {{#if status}}is-{{status}}{{/if}}" role="dialog" aria-label="{{#if name}}{{name}}{{else}}???{{/if}}">
+<article class="persona-card persona-card--{{kind}} {{#if status}}is-{{status}}{{/if}}" role="dialog" aria-label="{{#if name}}{{name}}{{else}}???{{/if}}" style="--accent: {{accent}}">
     <button type="button" class="persona-card__close" data-action="closeCard" aria-label="{{localize "PERSONA.Close"}}"><i class="fa-solid fa-xmark" inert></i></button>
     <div class="persona-card__art" style="--art: url('{{img}}')">
         <div class="persona-card__frame"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false"></div>
+        <div class="persona-card__id">
+            <span class="persona-eyebrow">{{#if faction}}<span class="persona-dot" style="--dot: {{accent}}"></span> {{faction}}{{else}}{{kindLabel}}{{/if}}</span>
+            {{#if named}}
+                <h3>{{name}}</h3>
+                {{#if title}}<p class="persona-card__title">{{title}}</p>{{/if}}
+            {{else}}
+                <h3 class="is-unknown">???</h3>
+            {{/if}}
+        </div>
         {{#if hasVideo}}
             {{#if isGM}}
                 <div class="persona-card__play persona-card__play--gm">
@@ -14,13 +23,13 @@
         {{/if}}
     </div>
     <div class="persona-card__body">
-        <span class="persona-eyebrow">{{kindLabel}}</span>
-        {{#if named}}
-            <h3>{{name}}</h3>
-            {{#if title}}<p class="persona-card__title">{{title}}</p>{{/if}}
-            {{#if status}}<p class="persona-status-tag persona-status-tag--card is-{{status}}"><i class="{{statusIcon}}" inert></i> {{statusLabel}}</p>{{/if}}
-        {{else}}
-            <h3 class="is-unknown">???</h3>
+        {{#if named}}{{#if status}}<p class="persona-status-tag persona-status-tag--card is-{{status}}"><i class="{{statusIcon}}" inert></i> {{statusLabel}}</p>{{/if}}{{/if}}
+        {{#if knowledge}}
+            <div class="persona-known" data-tooltip="{{localize "PERSONA.Codex.KnownHint"}}">
+                <span>{{localize "PERSONA.Codex.Known"}}</span>
+                <span class="persona-known__bar"><span style="width: {{knowledge.pct}}%"></span></span>
+                <span class="persona-pips">{{#each knowledge.pips as |p|}}<i class="{{#if p.known}}is-known{{/if}} {{#if p.secret}}is-secret{{/if}}"></i>{{/each}}</span>
+            </div>
         {{/if}}
         {{#if groups.length}}
             <div class="persona-chips">
@@ -29,7 +38,12 @@
         {{/if}}
 
         {{#if summary}}
-            <div class="persona-card__summary">{{{summary}}}</div>
+            <section class="persona-entry">
+                <h4 class="persona-entry__head">{{localize "PERSONA.Layer.summary"}}</h4>
+                <div class="persona-card__summary">{{{summary}}}</div>
+            </section>
+        {{else if storyLocked}}
+            <p class="persona-locked persona-locked--slot"><i class="fa-solid fa-lock" inert></i> {{localize "PERSONA.Codex.StoryLocked"}}</p>
         {{else}}
             <p class="persona-locked"><i class="fa-solid fa-lock" inert></i> {{#if named}}{{localize "PERSONA.Card.LittleKnown"}}{{else}}{{localize "PERSONA.Card.Unknown"}}{{/if}}</p>
         {{/if}}
@@ -39,6 +53,8 @@
                 <span class="persona-eyebrow">{{localize "PERSONA.Card.Secret"}}</span>
                 <div>{{{secret}}}</div>
             </div>
+        {{else if secretLocked}}
+            <p class="persona-locked persona-locked--slot"><i class="fa-solid fa-lock" inert></i> {{localize "PERSONA.Codex.SecretLocked"}}</p>
         {{/if}}
 
         {{#if people.length}}

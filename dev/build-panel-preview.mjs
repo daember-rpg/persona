@@ -18,7 +18,7 @@ const Handlebars = require("handlebars");
 const lang = JSON.parse(read("lang/en.json"));
 const t = key => key.split(".").reduce((o, k) => o?.[k], lang) ?? key;
 Handlebars.registerHelper("localize", key => t(key));
-for (const [name, file] of Object.entries({ "persona-director": "director", "persona-gallery": "gallery", "persona-row": "row", "persona-tile": "tile", "persona-doc-mini": "doc-mini", "persona-seal": "seal", "persona-notes": "notes" })) {
+for (const [name, file] of Object.entries({ "persona-director": "director", "persona-gallery": "gallery", "persona-row": "row", "persona-tile": "tile", "persona-doc-mini": "doc-mini", "persona-seal": "seal", "persona-notes": "notes", "persona-codex-row": "codex-row" })) {
     Handlebars.registerPartial(name, read(`templates/partials/${file}.hbs`));
 }
 const panel = Handlebars.compile(read("templates/panel.hbs"));
@@ -142,9 +142,10 @@ const director = {
     ]
 };
 
-const tile = (id, name, title, extra = {}) => ({ id, name, title, kind: extra.kind ?? "npc", img: avatar(name ?? id, extra), frame: "", ...extra, statusLabel: extra.status ? t(`PERSONA.Status.${extra.status}`) : "", statusIcon: extra.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question" });
+const pipsOf = (known, total = 4) => ({ known, total, pct: Math.round(known / total * 100), pips: Array.from({ length: total }, (_, i) => ({ known: i < known, secret: i === 3 })) });
+const tile = (id, name, title, extra = {}) => ({ id, name, title, kind: extra.kind ?? "npc", img: avatar(name ?? id, extra), frame: "", color: extra.color ?? "#d4b25a", knowledge: pipsOf(extra.known ?? (name ? 3 : 1), extra.kind === "place" ? 3 : 4), ...extra, statusLabel: extra.status ? t(`PERSONA.Status.${extra.status}`) : "", statusIcon: extra.status === "dead" ? "fa-solid fa-skull" : "fa-solid fa-question" });
 const gallery = {
-    isGM: false, search: "", isEmpty: false, total: 11,
+    isGM: false, search: "", isEmpty: false, total: 11, layoutList: true,
     chips: [
         { id: "all", label: t("PERSONA.Filter.All"), icon: "fa-solid fa-users", count: 11, active: true },
         ...[["Resistência de Valtoria", 2], ["Elfos de Khaledin", 2], ["Heróis de Tarlan", 2], ["Figuras Históricas", 3], ["Os senhores dos Dragões", 3], ["Aliados", 2], ["Campeões de Kurdrax", 4]]
@@ -155,20 +156,19 @@ const gallery = {
         {
             id: "_docs", label: t("PERSONA.Doc.Folder"), icon: "fa-solid fa-scroll", count: 4, people: [], places: [],
             documents: [
-                { id: "d1", kind: "document", isDocument: true, name: DOCS.d1.name, isNew: true, doc: docLook("d1", DOCS.d1, true) },
-                { id: "d2", kind: "document", isDocument: true, name: DOCS.d2.name, doc: docLook("d2", DOCS.d2, false) },
-                { id: "d3", kind: "document", isDocument: true, name: DOCS.d3.name, isPrivate: true, doc: docLook("d3", DOCS.d3, false) },
-                { id: "d4", kind: "document", isDocument: true, name: DOCS.d4.name, doc: docLook("d4", DOCS.d4, true) }
+                { id: "d1", kind: "document", isDocument: true, name: DOCS.d1.name, isNew: true, paperLabel: "Letter", doc: docLook("d1", DOCS.d1, true) },
+                { id: "d2", kind: "document", isDocument: true, name: DOCS.d2.name, paperLabel: "Decree", doc: docLook("d2", DOCS.d2, false) },
+                { id: "d4", kind: "document", isDocument: true, name: DOCS.d4.name, paperLabel: "Torn map", doc: docLook("d4", DOCS.d4, true) }
             ]
         },
         {
             id: "g1", label: "Embermark", icon: "fa-solid fa-chess-rook", color: "#b4643e", count: 4,
-            people: [tile("e1", "Captain Ilsa Marrow", "Captain", { isNew: true }), tile("e2", "Lord Aldric Venn", "Regent"), tile("e3", "Sister Hesper", "Healer", { isPrivate: true }), tile("e4", "Old Bram", "Innkeeper", { status: "dead" })],
-            places: [tile("p1", "The Copper Kettle", "Inn", { kind: "place", wide: true }), tile("p2", "Ash Chapel", "Temple", { kind: "place", wide: true })]
+            people: [tile("e1", "Captain Ilsa Marrow", "Captain of the guard", { isNew: true, color: "#b4643e" }), tile("e2", "Lord Aldric Venn", "Regent of Embermark", { color: "#b4643e", known: 4 }), tile("e3", "Sister Hesper", "Healer at the Ash Chapel", { isPrivate: true, color: "#b4643e", known: 2 }), tile("e4", "Old Bram", "Innkeeper", { status: "dead", color: "#b4643e" })],
+            places: [tile("p1", "The Copper Kettle", "Inn", { kind: "place", wide: true, color: "#b4643e", known: 3 }), tile("p2", "Ash Chapel", "Temple", { kind: "place", wide: true, color: "#b4643e", known: 2 })]
         },
         {
             id: "g3", label: "Kurdrax", icon: "fa-solid fa-skull", color: "#c8452f", count: 3,
-            people: [tile("e8", "The Ashen King", "Lord of Kurdrax", { dark: true }), tile("e10", "Nyx", "Knife-for-hire"), tile("e13", null, "", { dark: true })], places: []
+            people: [tile("e8", "The Ashen King", "Lord of Kurdrax", { dark: true, color: "#c8452f", known: 2 }), tile("e10", "Nyx", "Knife-for-hire", { color: "#c8452f", isNew: true, known: 2 }), tile("e13", null, "", { dark: true, color: "#c8452f" })], places: []
         },
         { id: "g2", label: "Veiled Order", icon: "fa-solid fa-eye", color: "#8a5a8f", count: 3, collapsed: true, people: [], places: [] }
     ]
@@ -176,10 +176,11 @@ const gallery = {
 
 const cardData = {
     kind: "npc", kindLabel: t("PERSONA.Kind.npc"), named: true, name: "Captain Ilsa Marrow", title: "Captain of the Embermark guard",
+    accent: "#b4643e", faction: "Embermark", knowledge: pipsOf(3), secretLocked: true,
     img: avatar("Captain Ilsa Marrow"), frame: "", isGM: false, showPrivate: false, canWriteShared: true,
     groups: [{ color: "#b4643e", label: "Embermark" }, { color: "#4f7a8a", label: "City Watch" }],
     summary: "<p>Twenty years on the walls and never once late to a watch. Ilsa keeps the gate ledger herself and trusts no clerk with it.</p><p>She owes Lord Venn her post, and everyone at the Copper Kettle knows she hates it.</p>",
-    secret: "<p>She lets one cart through the north gate every new moon, unchecked.</p>",
+    secret: null,
     people: [], places: [{ id: "p1", name: "The Copper Kettle" }, { id: "p2", name: "North Gate" }],
     notes: [
         { id: "n1", initial: "A", color: "#d4b25a", text: "She recognised Kaelen's crest. Ask about the old war.", author: "Ana", canDelete: true },
@@ -249,6 +250,7 @@ body {
     <button type="button" data-view="window" aria-pressed="false">Player · window</button>
     <button type="button" data-view="card" aria-pressed="false">Card</button>
     <button type="button" data-view="docs" aria-pressed="false">Documents</button>
+    <button type="button" data-view="intro" aria-pressed="false">Handout</button>
 </nav>
 
 <section class="pv-view" data-view="docked">
@@ -267,6 +269,11 @@ body {
 
 <section class="pv-view pv-view--card" data-view="card" hidden>
     <div class="persona persona-card-layer">${card(cardData)}</div>
+</section>
+
+<section class="pv-view" data-view="intro" hidden>
+    <div class="pv-papers"><button type="button" id="pv-intro" aria-pressed="true">Play the handout moment</button><button type="button" id="pv-toast">Play a reveal toast</button></div>
+    <div class="persona persona-toasts" id="pv-toasts"></div>
 </section>
 
 <section class="pv-view pv-view--card pv-view--docs" data-view="docs" hidden>
@@ -319,10 +326,22 @@ document.querySelectorAll("[data-docview]").forEach(view => view.addEventListene
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     setTimeout(() => { view.querySelector('[data-state="sealed"]').hidden = true; view.querySelector('[data-state="open"]').hidden = false; }, still ? 120 : 1500);
 }));
+// The handout moment: scripts/intro.js, inlined with a stub for Foundry's i18n.
+const game = { i18n: { localize: k => ({ "PERSONA.Codex.OpenCard": "Open card", "PERSONA.Codex.Later": "Later" })[k] ?? k } };
+${read("scripts/intro.js").replace(/^export /m, "")}
+const ilsa = { img: ${JSON.stringify(avatar("Captain Ilsa Marrow"))}, name: "Captain Ilsa Marrow", title: "Captain of the Embermark guard", kicker: "Embermark · You meet", color: "#b4643e" };
+document.getElementById("pv-intro").addEventListener("click", () => playIntro(ilsa).then(choice => {
+    if (choice === "open") document.querySelector('.pv-tabs [data-view="card"]').click();
+}));
+document.getElementById("pv-toast").addEventListener("click", () => {
+    const box = document.getElementById("pv-toasts");
+    box.innerHTML = '<button type="button" class="persona-toast"><img alt="" src="' + ilsa.img + '"><span><b>You learned their story</b><span>Captain Ilsa Marrow</span></span></button>';
+});
 const tabs = document.querySelectorAll(".pv-tabs button");
 const show = view => {
     tabs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
     document.querySelectorAll(".pv-view").forEach(v => v.hidden = v.dataset.view !== view);
+    if (view === "intro") setTimeout(() => document.getElementById("pv-intro").click(), 250);
     try { localStorage.setItem("pv-view", view); } catch {}
 };
 tabs.forEach(b => b.addEventListener("click", () => show(b.dataset.view)));

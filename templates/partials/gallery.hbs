@@ -17,15 +17,15 @@
             {{#unless section.collapsed}}
                 {{#if section.people.length}}
                     {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.people"}}</span><span>{{section.people.length}}</span></div>{{/if}}
-                    <div class="persona-gallery">{{#each section.people as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                    {{#if @root.layoutList}}<div class="persona-codex-list">{{#each section.people as |tile|}}{{> persona-codex-row tile}}{{/each}}</div>{{else}}<div class="persona-gallery">{{#each section.people as |tile|}}{{> persona-tile tile}}{{/each}}</div>{{/if}}
                 {{/if}}
                 {{#if section.places.length}}
                     {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.places"}}</span><span>{{section.places.length}}</span></div>{{/if}}
-                    <div class="persona-gallery persona-gallery--places">{{#each section.places as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                    {{#if @root.layoutList}}<div class="persona-codex-list">{{#each section.places as |tile|}}{{> persona-codex-row tile}}{{/each}}</div>{{else}}<div class="persona-gallery persona-gallery--places">{{#each section.places as |tile|}}{{> persona-tile tile}}{{/each}}</div>{{/if}}
                 {{/if}}
                 {{#if section.documents.length}}
                     {{#if section.flat}}<div class="persona-section__label"><span class="persona-eyebrow">{{localize "PERSONA.Kind.documents"}}</span><span>{{section.documents.length}}</span></div>{{/if}}
-                    <div class="persona-gallery persona-gallery--documents">{{#each section.documents as |tile|}}{{> persona-tile tile}}{{/each}}</div>
+                    {{#if @root.layoutList}}<div class="persona-codex-list">{{#each section.documents as |tile|}}{{> persona-codex-row tile}}{{/each}}</div>{{else}}<div class="persona-gallery persona-gallery--documents">{{#each section.documents as |tile|}}{{> persona-tile tile}}{{/each}}</div>{{/if}}
                 {{/if}}
             {{/unless}}
         </section>

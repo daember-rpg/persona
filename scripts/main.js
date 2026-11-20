@@ -4,15 +4,16 @@
  */
 import { MODULE_ID, TEMPLATE_ROOT, LAYERS } from "./constants.js";
 import { registerSettings, getSetting } from "./settings.js";
-import { getEntries, getEntry, canSee, newlyVisible, seenIds } from "./store.js";
+import { getEntries, getEntry, canSee, newlyVisible, seenIds, getGroups } from "./store.js";
 import { ensureSocket } from "./relay.js";
 import { PanelView, PersonaWindow } from "./panel.js";
 import { CardOverlay } from "./card.js";
 import { EntryEditor } from "./editor.js";
+import { playIntro } from "./intro.js";
 import { VideoPlayer } from "./video.js";
 import { Toasts } from "./toasts.js";
 import { syncFromJournal } from "./entries.js";
-import { imageOf } from "./view-data.js";
+import { imageOf, frameStyle } from "./view-data.js";
 import { BondsWindow, autoMomentOnLogin, autoMomentAfterCombat } from "./bonds/app.js";
 
 const PARTIALS = {
@@ -22,7 +23,8 @@ const PARTIALS = {
     "persona-row": `${TEMPLATE_ROOT}/partials/row.hbs`,
     "persona-doc-mini": `${TEMPLATE_ROOT}/partials/doc-mini.hbs`,
     "persona-seal": `${TEMPLATE_ROOT}/partials/seal.hbs`,
-    "persona-notes": `${TEMPLATE_ROOT}/partials/notes.hbs`
+    "persona-notes": `${TEMPLATE_ROOT}/partials/notes.hbs`,
+    "persona-codex-row": `${TEMPLATE_ROOT}/partials/codex-row.hbs`
 };
 
 let view, windowApp, card, video, toasts, bonds;
@@ -237,7 +239,21 @@ function receiveHandout() {
     if (game.user.isGM) return;
     if (handout.who !== "all" && handout.who !== game.user.id) return;
     const entry = getEntry(handout.entryId);
-    if (entry && canSee(entry, "face")) card.open(entry.id);
+    if (!entry || !canSee(entry, "face")) return;
+    // A document opens sealed (its own moment); a person or place gets the introduction first.
+    if (entry.kind === "document") return card.open(entry.id);
+    toasts.dismiss(entry.id); // the introduction says it already
+    const firstTime = !seenIds().has(entry.id);
+    const named = canSee(entry, "name");
+    const group = getGroups().find(g => entry.groups.includes(g.id));
+    playIntro({
+        img: imageOf(entry),
+        frame: frameStyle(entry),
+        name: named ? entry.name : "???",
+        title: named ? entry.title : "",
+        kicker: [group?.label, game.i18n.localize(firstTime ? "PERSONA.Codex.YouMeet" : "PERSONA.Codex.Shown")].filter(Boolean).join(" · "),
+        color: group?.color ?? "#d4b25a"
+    }).then(choice => { if (choice === "open") card.open(entry.id); });
 }
 
 /** Triad tab dot: something new this player hasn't opened yet. */

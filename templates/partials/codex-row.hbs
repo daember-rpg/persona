@@ -1,0 +1,14 @@
+<button type="button" class="persona-codex persona-codex--{{kind}} {{#if status}}is-{{status}}{{/if}} {{#unless name}}is-unknown{{/unless}}" data-action="openCard" data-id="{{id}}" style="--accent: {{color}}">
+    {{#if isDocument}}
+        <span class="persona-codex__thumb persona-codex__thumb--doc">{{> persona-doc-mini doc}}</span>
+    {{else}}
+        <span class="persona-codex__thumb"><img class="persona-fit" src="{{img}}" style="{{frame}}" alt="" draggable="false" loading="lazy"></span>
+    {{/if}}
+    <span class="persona-codex__text">
+        <span class="persona-codex__name">{{#if name}}{{name}}{{else}}???{{/if}}{{#if isNew}}<span class="persona-codex__new" aria-label="{{localize "PERSONA.New"}}"></span>{{/if}}{{#if isPrivate}}<i class="fa-solid fa-eye persona-codex__private" data-tooltip="{{localize "PERSONA.OnlyYou"}}" inert></i>{{/if}}</span>
+        <span class="persona-codex__title">{{#if status}}<i class="{{statusIcon}}" inert></i> {{statusLabel}}{{#if title}} · {{/if}}{{/if}}{{#if isDocument}}{{paperLabel}}{{else if title}}{{title}}{{else unless name}}{{localize "PERSONA.Codex.Seen"}}{{/if}}</span>
+    </span>
+    {{#if knowledge}}
+        <span class="persona-pips" data-tooltip="{{localize "PERSONA.Codex.Known"}} {{knowledge.known}}/{{knowledge.total}}">{{#each knowledge.pips as |p|}}<i class="{{#if p.known}}is-known{{/if}} {{#if p.secret}}is-secret{{/if}}"></i>{{/each}}</span>
+    {{/if}}
+</button>

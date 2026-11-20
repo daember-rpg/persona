@@ -170,6 +170,11 @@ export class PanelView {
         playVideo: (_t, id) => this.playEntryVideo(id),
         playFile: () => this.playFile(),
         openBonds: () => this.openBonds?.(),
+        toggleLayout: async () => {
+            const next = (game.settings.get(MODULE_ID, "galleryLayout") ?? "list") === "grid" ? "list" : "grid";
+            await game.settings.set(MODULE_ID, "galleryLayout", next);
+            this.requestRender();
+        },
         newEntry: () => this.openEditor(null, { kind: this.filter === "documents" ? "document" : this.filter === "places" ? "place" : "npc" }),
         edit: (_t, id) => this.openEditor(id),
         openJournal: async (_t, id) => {

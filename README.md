@@ -27,6 +27,12 @@ Third module of the Triad suite (Triad · First Strike · Persona). Works on its
 - **Show (handout)**: *Show* on a row (or *Show to* on the card) opens that card on the screens of everyone or one player, like a handout. Their face and name are revealed to them first, so the card stays in their gallery.
 - **Video**: give an entry an mp4/webm (saved as soon as you pick it) and press *Play for everyone* on its card, or the film button on its row; the eye on the card watches it alone first. The film button at the top plays any file. Full screen, title card, synced for everyone from the server clock (late joiners land at the right moment). Pause, restart, stop for everyone.
 
+## Codex: how players see who they know
+- **The list**: players see one row per person — a round portrait ringed in the faction's colour, name, epithet, a red dot for anyone new, and four small pips for how much they know (face, name, story, secret; the last turns red once the secret is out). Places use a rounded square; documents show their little paper. A button in the header switches to the portrait grid instead (remembered per player).
+- **The card is a codex page**: the portrait across the top fading into the page, washed with the faction's colour, the name over it; a *Known* bar with the pips; then the story and secret. What's written but not yet revealed shows as a locked slot ("A secret — not discovered yet"), so players know there's more to find. The GM's card shows who knows what instead.
+- **The handout moment**: when you *Show* a person or place, players get an introduction — the scene dims, a glass band opens on a gold thread, the portrait slides in with a sweep of light and the name writes itself, with the faction and "You meet" (first time) or "Shown to you". *Open card* (or a click anywhere, or Enter) opens the card; *Later* (or Esc) keeps it in their list. Documents keep their own moment: the wax seal.
+- **Smaller news** (a story or secret revealed later) arrives as a quiet pill at the top of the screen; click it to open the card.
+
 ## Documents: letters, decrees, notes and torn maps
 In-world papers the party can hold, read and keep — drawn on aged paper in the Embermark look, not shown as a plain card.
 - **Create** one with **+** while the *Documents* filter is on (or pick *Document* in the editor), or drop a **Journal page** on the panel with the *Documents* filter on: its text becomes the document's text.
@@ -83,7 +89,7 @@ Inspired by the *People* screen of Final Fantasy XVI. Drawn as an engraved astro
 - A GM online for party notes.
 
 ## Data
-World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`, `characters` (same-person links and retired characters). Per user (flags, written by the player): `seen`, `opened` (documents whose seal they broke), `notes`, `wheels` (one per character key; `bonds` from before 0.12 is read as the assigned character's wheel), `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
+World settings (GM writes): `entries`, `groups`, `video`, `sharedNotes`, `handout`, `moments`, `officialLinks`, `characters` (same-person links and retired characters). Per client: `galleryLayout` (list or grid). Per user (flags, written by the player): `seen`, `opened` (documents whose seal they broke), `notes`, `wheels` (one per character key; `bonds` from before 0.12 is read as the assigned character's wheel), `bondsSeen`. Note that, as with any Foundry module, world settings reach every client, so a determined player could read hidden entries from the console.
 
 ## Structure
 ```
@@ -92,6 +98,7 @@ scripts/
   constants.js   MODULE_ID and defaults
   settings.js    settings registration (changes broadcast as "persona.changed")
   store.js       entries, groups, reveal rules (pure), handouts, per-user state
+  intro.js       the handout moment (introduction band)
   documents.js   papers, wax colours and marks, torn edges and the seal drawing (pure)
   relay.js       socketlib relay for party notes
   view-data.js   template contexts (read-only)
